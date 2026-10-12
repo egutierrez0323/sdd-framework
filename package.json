@@ -13,7 +13,8 @@
     "watch": "tsc -w",
     "test": "vitest run",
     "test:watch": "vitest",
-    "lint": "tsc --noEmit"
+    "lint": "tsc --noEmit",
+    "review": "node dist/cli.js review src"
   },
   "keywords": [
     "spec-driven-development",

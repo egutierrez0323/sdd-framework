@@ -32,10 +32,11 @@ El sistema soporta tres intensidades de auditoría configurables:
    - `spec.md` esté en estado `APPROVED`.
    - `plan.md` esté en estado `APPROVED`.
    - `tasks.md` contenga micro-tareas secuenciales, atómicas (estimadas en ≤ 30 min cada una) con un comando de validación ejecutable (`verify`).
-2. **Ciclo por Micro-Tarea:**
+2. **Ciclo por Micro-Tarea (Red -> Green -> Refactor):**
    - Cargar únicamente el contexto relevante a la tarea actual.
-   - Implementar el código y/o test correspondiente.
-   - Ejecutar la verificación automatizada.
+   - Implementar el test y el código correspondiente hasta que la verificación pase (*Green*).
+   - **Pase Obligatorio de Auto-Cuestionamiento (*Refactor*):** Antes de cerrar la tarea, el agente DEBE auto-cuestionar su propio diff bajo principios Clean Code y DRY (skill `clean-code`). Si hay duplicación o complejidad excesiva, refactoriza manteniendo los tests en verde.
+   - Ejecutar la verificación automatizada y `sdd review` para garantizar salud de código ≥ 85.
    - Si la verificación falla: Máximo **3 ciclos de auto-corrección**. Si persiste el fallo, la IA debe pausar y emitir un reporte de bloqueo con la causa raíz.
    - Si la verificación pasa: Marcar `[x]` en `tasks.md`, realizar commit semántico (`feat(REQ-X): descripcion`) y pasar a la siguiente tarea.
 
@@ -57,4 +58,5 @@ El sistema soporta tres intensidades de auditoría configurables:
 - **Tipado:** Estricto (`strict: true`), sin uso de `any` injustificado.
 - **Formato y Estilo:** Prettier y ESLint con estándares limpios y legibles.
 - **Testing:** Vitest / Node test runner para pruebas rápidas y deterministas.
+- **Higiene de Código:** Estándares Clean Code, cero duplicación innecesaria (DRY) y funciones con responsabilidad única auditadas por `sdd review`.
 - **Documentación:** Todo cambio estructural debe reflejarse en la carpeta `.sdd/` y en el `README.md`.

@@ -65,6 +65,25 @@
       "approxTokens": 774
     },
     {
+      "id": "src/core/code-reviewer.ts",
+      "name": "code-reviewer.ts",
+      "type": "module",
+      "exports": [
+        "DuplicateBlock",
+        "FunctionMetric",
+        "ReviewFinding",
+        "ProjectReviewReport",
+        "ReviewOptions",
+        "findDuplicateBlocks",
+        "analyzeFunctionMetrics",
+        "formatReviewReport"
+      ],
+      "imports": [
+        "src/utils/fs-helpers.js"
+      ],
+      "approxTokens": 3167
+    },
+    {
       "id": "src/core/config.ts",
       "name": "config.ts",
       "type": "module",
@@ -179,6 +198,21 @@
       "approxTokens": 339
     },
     {
+      "id": "tests/code-reviewer.test.ts",
+      "name": "code-reviewer.test.ts",
+      "type": "test",
+      "exports": [
+        "doAlpha",
+        "doBeta",
+        "funcA",
+        "funcB",
+        "shortFunc",
+        "longMonolithicFunc"
+      ],
+      "imports": [],
+      "approxTokens": 821
+    },
+    {
       "id": "tests/config.test.ts",
       "name": "config.test.ts",
       "type": "test",
@@ -286,6 +320,10 @@
       "to": "src/core/config.js"
     },
     {
+      "from": "src/core/code-reviewer.ts",
+      "to": "src/utils/fs-helpers.js"
+    },
+    {
       "from": "src/core/ears-validator.ts",
       "to": "src/core/config.js"
     },
@@ -327,10 +365,10 @@
     }
   ],
   "stats": {
-    "totalFiles": 19,
-    "totalExports": 30,
-    "rawTokensEstimate": 16086,
-    "graphTokensEstimate": 556,
+    "totalFiles": 21,
+    "totalExports": 44,
+    "rawTokensEstimate": 20074,
+    "graphTokensEstimate": 649,
     "tokenReductionPercent": 97
   }
 }

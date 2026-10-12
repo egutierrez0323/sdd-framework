@@ -1,10 +1,10 @@
 # Mapa Visual de Arquitectura y Grafo de Dependencias
 
 > **MÉTRICAS DE TOKENS:**
-> - Archivos analizados: **19**
-> - Símbolos exportados: **30**
-> - Tokens código fuente completo: ~**16086** tokens
-> - Tokens del grafo compacto: ~**556** tokens
+> - Archivos analizados: **21**
+> - Símbolos exportados: **44**
+> - Tokens código fuente completo: ~**20074** tokens
+> - Tokens del grafo compacto: ~**649** tokens
 > - **Ahorro de Tokens: 97%**
 
 ```mermaid
@@ -13,6 +13,7 @@ graph TD
   src_core_auto_runner_ts["auto-runner.ts<br/>(TaskStatus, MicroTask, AutoRunResult...)"]
   src_core_bridges_ts["bridges.ts<br/>(SupportedBridge, SyncReport)"]
   src_core_clarifier_ts["clarifier.ts<br/>(ClarificationQuestion, generateClarificationSession, formatClarificationMarkdown)"]
+  src_core_code_reviewer_ts["code-reviewer.ts<br/>(DuplicateBlock, FunctionMetric, ReviewFinding...)"]
   src_core_config_ts["config.ts<br/>(SeverityLevel, SddConfig, DEFAULT_CONFIG)"]
   src_core_ears_validator_ts["ears-validator.ts<br/>(EarsType, EarsRequirement, ValidationIssue...)"]
   src_core_project_graph_ts["project-graph.ts<br/>(GraphNode, ProjectGraph, formatMermaidGraph)"]
@@ -23,6 +24,7 @@ graph TD
   src_utils_logger_ts["logger.ts<br/>(ArbiterRole, Logger)"]
   tests_auto_runner_test_ts["auto-runner.test.ts<br/>()"]
   tests_bridges_test_ts["bridges.test.ts<br/>()"]
+  tests_code_reviewer_test_ts["code-reviewer.test.ts<br/>(doAlpha, doBeta, funcA...)"]
   tests_config_test_ts["config.test.ts<br/>()"]
   tests_ears_validator_test_ts["ears-validator.test.ts<br/>()"]
   tests_project_graph_test_ts["project-graph.test.ts<br/>()"]
@@ -38,6 +40,7 @@ graph TD
 | `src/core/auto-runner.ts` | `TaskStatus`, `MicroTask`, `AutoRunResult`, `parseTasksMarkdown`, `updateTaskStatusInMarkdown`, `RunnerOptions` | `git-client.js`, `logger.js` |
 | `src/core/bridges.ts` | `SupportedBridge`, `SyncReport` | `fs-helpers.js` |
 | `src/core/clarifier.ts` | `ClarificationQuestion`, `generateClarificationSession`, `formatClarificationMarkdown` | `ears-validator.js`, `config.js` |
+| `src/core/code-reviewer.ts` | `DuplicateBlock`, `FunctionMetric`, `ReviewFinding`, `ProjectReviewReport`, `ReviewOptions`, `findDuplicateBlocks`, `analyzeFunctionMetrics`, `formatReviewReport` | `fs-helpers.js` |
 | `src/core/config.ts` | `SeverityLevel`, `SddConfig`, `DEFAULT_CONFIG` | *(ninguna)* |
 | `src/core/ears-validator.ts` | `EarsType`, `EarsRequirement`, `ValidationIssue`, `ValidationReport`, `parseSpecMarkdown`, `validateSpec` | `config.js` |
 | `src/core/project-graph.ts` | `GraphNode`, `ProjectGraph`, `formatMermaidGraph` | `fs-helpers.js` |
@@ -48,6 +51,7 @@ graph TD
 | `src/utils/logger.ts` | `ArbiterRole`, `Logger` | *(ninguna)* |
 | `tests/auto-runner.test.ts` | *(interno)* | *(ninguna)* |
 | `tests/bridges.test.ts` | *(interno)* | `bridges.js`, `fs-helpers.js` |
+| `tests/code-reviewer.test.ts` | `doAlpha`, `doBeta`, `funcA`, `funcB`, `shortFunc`, `longMonolithicFunc` | *(ninguna)* |
 | `tests/config.test.ts` | *(interno)* | `config.js` |
 | `tests/ears-validator.test.ts` | *(interno)* | `ears-validator.js` |
 | `tests/project-graph.test.ts` | *(interno)* | `project-graph.js`, `fs-helpers.js` |

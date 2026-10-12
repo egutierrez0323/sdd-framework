@@ -4,6 +4,7 @@ export * from './core/reverse-engine.js';
 export * from './core/auto-runner.js';
 export * from './core/bridges.js';
 export * from './core/clarifier.js';
+export * from './core/project-graph.js';
 export * from './utils/logger.js';
 export * from './utils/fs-helpers.js';
 export * from './utils/git-client.js';

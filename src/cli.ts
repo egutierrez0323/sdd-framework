@@ -7,6 +7,7 @@ import { scanProject, generateReverseConstitution, generateReverseBaselineSpec }
 import { syncBridges, SupportedBridge } from './core/bridges.js';
 import { executeAutonomousPlan } from './core/auto-runner.js';
 import { generateClarificationSession, formatClarificationMarkdown } from './core/clarifier.js';
+import { generateProjectGraph, saveProjectGraphArtifacts } from './core/project-graph.js';
 import { ensureDir, fileExists, readFileUtf8, writeFileUtf8, listFilesRecursive } from './utils/fs-helpers.js';
 import { Logger } from './utils/logger.js';
 
@@ -26,6 +27,10 @@ Comandos disponibles:
   new-spec <nombre>        Crea una nueva especificación EARS desde la plantilla oficial
 
   clarify <archivo|id>     Lanza el Árbitro (Inquisidor) para formular preguntas de casos límite
+
+  grill <archivo|id>       Modo 'Grill-Me': Interrogatorio socrático intensivo antes de planificar
+
+  graph                    Genera el grafo de dependencias y arquitectura para reducir tokens
 
   audit [archivo|carpeta]  Audita especificaciones contra sintaxis EARS y nivel de severidad configurado
 
@@ -309,6 +314,61 @@ async function handleSync() {
   }
 }
 
+async function handleGraph() {
+  const root = process.cwd();
+  Logger.banner('GENERACIÓN DE GRAFO DE ARQUITECTURA Y REDUCCIÓN DE TOKENS');
+  Logger.info('Analizando AST, módulos, imports y exportaciones...');
+
+  const graph = await generateProjectGraph(root);
+  const artifacts = await saveProjectGraphArtifacts(graph, root);
+
+  Logger.success(`Archivos de código analizados: ${graph.stats.totalFiles}`);
+  Logger.success(`Símbolos y contratos exportados: ${graph.stats.totalExports}`);
+  Logger.info(`Tokens estimados en código completo: ~${graph.stats.rawTokensEstimate}`);
+  Logger.info(`Tokens estimados en grafo indexado: ~${graph.stats.graphTokensEstimate}`);
+  Logger.arbiter(
+    'AUDITOR',
+    `¡Reducción del consumo de tokens alcanzada: ${graph.stats.tokenReductionPercent}%!`
+  );
+
+  Logger.success(`Grafo visual Mermaid guardado en: ${artifacts.mermaidPath}`);
+  Logger.success(`Índice semántico JSON guardado en: ${artifacts.jsonPath}`);
+}
+
+async function handleGrill() {
+  const target = args[1];
+  if (!target) {
+    Logger.error('Debes indicar el archivo de la especificación a interrogar. Ej: sdd grill .sdd/specs/SPEC-001.md');
+    process.exit(1);
+  }
+
+  const root = process.cwd();
+  const config = await loadConfig(root);
+  const filePath = path.isAbsolute(target) ? target : path.join(root, target);
+
+  if (!(await fileExists(filePath))) {
+    Logger.error(`No se encontró el archivo: ${filePath}`);
+    process.exit(1);
+  }
+
+  const content = await readFileUtf8(filePath);
+  const questions = generateClarificationSession(content, config.severity);
+
+  Logger.banner('MODO GRILL-ME: INTERROGATORIO SOCRÁTICO DEL ÁRBITRO');
+  Logger.arbiter('INQUISITOR', 'Desafiando supuestos arquitectónicos y casos límite...');
+
+  for (let i = 0; i < questions.length; i++) {
+    const q = questions[i];
+    console.log(`\n🔥 [PREGUNTA ${i + 1}/${questions.length}] Categoría: ${q.category}`);
+    console.log(`   ${q.question}`);
+    console.log(`   👉 Respuesta Recomendada: ${q.recommendation}`);
+  }
+
+  const outPath = filePath.replace(/\.md$/, '-grill-session.md');
+  await writeFileUtf8(outPath, formatClarificationMarkdown(path.basename(filePath), questions));
+  Logger.success(`\nSesión Grill-Me documentada en: ${outPath}`);
+}
+
 async function main() {
   switch (command) {
     case 'init':
@@ -322,6 +382,12 @@ async function main() {
       break;
     case 'clarify':
       await handleClarify();
+      break;
+    case 'grill':
+      await handleGrill();
+      break;
+    case 'graph':
+      await handleGraph();
       break;
     case 'audit':
       await handleAudit();

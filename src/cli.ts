@@ -231,7 +231,9 @@ async function handleAudit() {
   if (await fileExists(target)) {
     const stat = await (await import('node:fs/promises')).stat(target);
     if (stat.isDirectory()) {
-      filesToAudit = await listFilesRecursive(target, '.md');
+      filesToAudit = (await listFilesRecursive(target, '.md')).filter(
+        (f) => !f.endsWith('-clarification.md') && !f.endsWith('-grill-session.md')
+      );
     } else {
       filesToAudit = [target];
     }

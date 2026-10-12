@@ -1,0 +1,28 @@
+{
+  "version": "1.0.0",
+  "projectName": "card-validator",
+  "severity": "L2",
+  "projectType": "greenfield",
+  "bridges": [
+    "antigravity",
+    "cursor",
+    "claude",
+    "copilot"
+  ],
+  "graph": {
+    "engine": "builtin",
+    "autoUpdateOnAudit": false
+  },
+  "paths": {
+    "sddDir": ".sdd",
+    "specsDir": ".sdd/specs",
+    "plansDir": ".sdd/plans",
+    "tasksDir": ".sdd/tasks",
+    "templatesDir": ".sdd/templates"
+  },
+  "autonomous": {
+    "maxRetries": 3,
+    "createFeatureBranch": true,
+    "branchPrefix": "sdd/"
+  }
+}

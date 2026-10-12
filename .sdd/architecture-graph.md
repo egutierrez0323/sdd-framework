@@ -1,14 +1,28 @@
 # Mapa Visual de Arquitectura y Grafo de Dependencias
 
 > **MÉTRICAS DE TOKENS:**
-> - Archivos analizados: **21**
-> - Símbolos exportados: **44**
-> - Tokens código fuente completo: ~**20454** tokens
-> - Tokens del grafo compacto: ~**656** tokens
-> - **Ahorro de Tokens: 97%**
+> - Archivos analizados: **35**
+> - Símbolos exportados: **53**
+> - Tokens código fuente completo: ~**24912** tokens
+> - Tokens del grafo compacto: ~**1037** tokens
+> - **Ahorro de Tokens: 96%**
 
 ```mermaid
 graph TD
+  card_validator_src_brands_ts["brands.ts<br/>(detectCardBrand)"]
+  card_validator_src_cvv_ts["cvv.ts<br/>(validateCvv)"]
+  card_validator_src_expiration_ts["expiration.ts<br/>(validateExpiration)"]
+  card_validator_src_index_ts["index.ts<br/>()"]
+  card_validator_src_luhn_ts["luhn.ts<br/>(validateLuhn)"]
+  card_validator_src_sanitizer_ts["sanitizer.ts<br/>(sanitizeCardNumber)"]
+  card_validator_src_types_ts["types.ts<br/>(CardBrand, CardInput, CardValidationResult)"]
+  card_validator_src_validator_ts["validator.ts<br/>(validateCreditCard)"]
+  card_validator_tests_brands_test_ts["brands.test.ts<br/>()"]
+  card_validator_tests_cvv_test_ts["cvv.test.ts<br/>()"]
+  card_validator_tests_expiration_test_ts["expiration.test.ts<br/>()"]
+  card_validator_tests_luhn_test_ts["luhn.test.ts<br/>()"]
+  card_validator_tests_sanitizer_test_ts["sanitizer.test.ts<br/>()"]
+  card_validator_tests_validator_test_ts["validator.test.ts<br/>()"]
   src_cli_ts["cli.ts<br/>()"]
   src_core_auto_runner_ts["auto-runner.ts<br/>(TaskStatus, MicroTask, AutoRunResult...)"]
   src_core_bridges_ts["bridges.ts<br/>(SupportedBridge, SyncReport)"]
@@ -36,6 +50,20 @@ graph TD
 
 | Módulo | Símbolos Exportados | Dependencias Clave |
 | :--- | :--- | :--- |
+| `card-validator/src/brands.ts` | `detectCardBrand` | `types.js` |
+| `card-validator/src/cvv.ts` | `validateCvv` | `types.js` |
+| `card-validator/src/expiration.ts` | `validateExpiration` | *(ninguna)* |
+| `card-validator/src/index.ts` | *(interno)* | *(ninguna)* |
+| `card-validator/src/luhn.ts` | `validateLuhn` | *(ninguna)* |
+| `card-validator/src/sanitizer.ts` | `sanitizeCardNumber` | *(ninguna)* |
+| `card-validator/src/types.ts` | `CardBrand`, `CardInput`, `CardValidationResult` | *(ninguna)* |
+| `card-validator/src/validator.ts` | `validateCreditCard` | `types.js`, `sanitizer.js`, `luhn.js`, `brands.js`, `expiration.js`, `cvv.js` |
+| `card-validator/tests/brands.test.ts` | *(interno)* | `brands.js` |
+| `card-validator/tests/cvv.test.ts` | *(interno)* | `cvv.js` |
+| `card-validator/tests/expiration.test.ts` | *(interno)* | `expiration.js` |
+| `card-validator/tests/luhn.test.ts` | *(interno)* | `luhn.js` |
+| `card-validator/tests/sanitizer.test.ts` | *(interno)* | `sanitizer.js` |
+| `card-validator/tests/validator.test.ts` | *(interno)* | `validator.js` |
 | `src/cli.ts` | *(interno)* | `config.js`, `ears-validator.js`, `reverse-engine.js`, `bridges.js`, `auto-runner.js`, `clarifier.js`, `project-graph.js`, `code-reviewer.js`, `fs-helpers.js`, `logger.js` |
 | `src/core/auto-runner.ts` | `TaskStatus`, `MicroTask`, `AutoRunResult`, `parseTasksMarkdown`, `updateTaskStatusInMarkdown`, `RunnerOptions` | `git-client.js`, `logger.js` |
 | `src/core/bridges.ts` | `SupportedBridge`, `SyncReport` | `fs-helpers.js` |

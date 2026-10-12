@@ -1,6 +1,157 @@
 {
   "nodes": [
     {
+      "id": "card-validator/src/brands.ts",
+      "name": "brands.ts",
+      "type": "module",
+      "exports": [
+        "detectCardBrand"
+      ],
+      "imports": [
+        "card-validator/src/types.js"
+      ],
+      "approxTokens": 417
+    },
+    {
+      "id": "card-validator/src/cvv.ts",
+      "name": "cvv.ts",
+      "type": "module",
+      "exports": [
+        "validateCvv"
+      ],
+      "imports": [
+        "card-validator/src/types.js"
+      ],
+      "approxTokens": 191
+    },
+    {
+      "id": "card-validator/src/expiration.ts",
+      "name": "expiration.ts",
+      "type": "module",
+      "exports": [
+        "validateExpiration"
+      ],
+      "imports": [],
+      "approxTokens": 279
+    },
+    {
+      "id": "card-validator/src/index.ts",
+      "name": "index.ts",
+      "type": "module",
+      "exports": [],
+      "imports": [],
+      "approxTokens": 52
+    },
+    {
+      "id": "card-validator/src/luhn.ts",
+      "name": "luhn.ts",
+      "type": "module",
+      "exports": [
+        "validateLuhn"
+      ],
+      "imports": [],
+      "approxTokens": 260
+    },
+    {
+      "id": "card-validator/src/sanitizer.ts",
+      "name": "sanitizer.ts",
+      "type": "module",
+      "exports": [
+        "sanitizeCardNumber"
+      ],
+      "imports": [],
+      "approxTokens": 107
+    },
+    {
+      "id": "card-validator/src/types.ts",
+      "name": "types.ts",
+      "type": "module",
+      "exports": [
+        "CardBrand",
+        "CardInput",
+        "CardValidationResult"
+      ],
+      "imports": [],
+      "approxTokens": 92
+    },
+    {
+      "id": "card-validator/src/validator.ts",
+      "name": "validator.ts",
+      "type": "module",
+      "exports": [
+        "validateCreditCard"
+      ],
+      "imports": [
+        "card-validator/src/types.js",
+        "card-validator/src/sanitizer.js",
+        "card-validator/src/luhn.js",
+        "card-validator/src/brands.js",
+        "card-validator/src/expiration.js",
+        "card-validator/src/cvv.js"
+      ],
+      "approxTokens": 716
+    },
+    {
+      "id": "card-validator/tests/brands.test.ts",
+      "name": "brands.test.ts",
+      "type": "test",
+      "exports": [],
+      "imports": [
+        "card-validator/src/brands.js"
+      ],
+      "approxTokens": 344
+    },
+    {
+      "id": "card-validator/tests/cvv.test.ts",
+      "name": "cvv.test.ts",
+      "type": "test",
+      "exports": [],
+      "imports": [
+        "card-validator/src/cvv.js"
+      ],
+      "approxTokens": 367
+    },
+    {
+      "id": "card-validator/tests/expiration.test.ts",
+      "name": "expiration.test.ts",
+      "type": "test",
+      "exports": [],
+      "imports": [
+        "card-validator/src/expiration.js"
+      ],
+      "approxTokens": 440
+    },
+    {
+      "id": "card-validator/tests/luhn.test.ts",
+      "name": "luhn.test.ts",
+      "type": "test",
+      "exports": [],
+      "imports": [
+        "card-validator/src/luhn.js"
+      ],
+      "approxTokens": 325
+    },
+    {
+      "id": "card-validator/tests/sanitizer.test.ts",
+      "name": "sanitizer.test.ts",
+      "type": "test",
+      "exports": [],
+      "imports": [
+        "card-validator/src/sanitizer.js"
+      ],
+      "approxTokens": 220
+    },
+    {
+      "id": "card-validator/tests/validator.test.ts",
+      "name": "validator.test.ts",
+      "type": "test",
+      "exports": [],
+      "imports": [
+        "card-validator/src/validator.js"
+      ],
+      "approxTokens": 648
+    },
+    {
       "id": "src/cli.ts",
       "name": "cli.ts",
       "type": "module",
@@ -265,6 +416,62 @@
   ],
   "edges": [
     {
+      "from": "card-validator/src/brands.ts",
+      "to": "card-validator/src/types.js"
+    },
+    {
+      "from": "card-validator/src/cvv.ts",
+      "to": "card-validator/src/types.js"
+    },
+    {
+      "from": "card-validator/src/validator.ts",
+      "to": "card-validator/src/types.js"
+    },
+    {
+      "from": "card-validator/src/validator.ts",
+      "to": "card-validator/src/sanitizer.js"
+    },
+    {
+      "from": "card-validator/src/validator.ts",
+      "to": "card-validator/src/luhn.js"
+    },
+    {
+      "from": "card-validator/src/validator.ts",
+      "to": "card-validator/src/brands.js"
+    },
+    {
+      "from": "card-validator/src/validator.ts",
+      "to": "card-validator/src/expiration.js"
+    },
+    {
+      "from": "card-validator/src/validator.ts",
+      "to": "card-validator/src/cvv.js"
+    },
+    {
+      "from": "card-validator/tests/brands.test.ts",
+      "to": "card-validator/src/brands.js"
+    },
+    {
+      "from": "card-validator/tests/cvv.test.ts",
+      "to": "card-validator/src/cvv.js"
+    },
+    {
+      "from": "card-validator/tests/expiration.test.ts",
+      "to": "card-validator/src/expiration.js"
+    },
+    {
+      "from": "card-validator/tests/luhn.test.ts",
+      "to": "card-validator/src/luhn.js"
+    },
+    {
+      "from": "card-validator/tests/sanitizer.test.ts",
+      "to": "card-validator/src/sanitizer.js"
+    },
+    {
+      "from": "card-validator/tests/validator.test.ts",
+      "to": "card-validator/src/validator.js"
+    },
+    {
       "from": "src/cli.ts",
       "to": "src/core/config.js"
     },
@@ -370,10 +577,10 @@
     }
   ],
   "stats": {
-    "totalFiles": 21,
-    "totalExports": 44,
-    "rawTokensEstimate": 20454,
-    "graphTokensEstimate": 656,
-    "tokenReductionPercent": 97
+    "totalFiles": 35,
+    "totalExports": 53,
+    "rawTokensEstimate": 24912,
+    "graphTokensEstimate": 1037,
+    "tokenReductionPercent": 96
   }
 }

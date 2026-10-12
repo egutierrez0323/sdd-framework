@@ -1,0 +1,21 @@
+{
+  "name": "card-validator",
+  "version": "1.0.0",
+  "description": "Validador universal y tipado estricto de tarjetas de crédito bajo metodología SDD",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "scripts": {
+    "build": "node ../node_modules/typescript/bin/tsc",
+    "test": "node ../node_modules/vitest/vitest.mjs run",
+    "lint": "node ../node_modules/typescript/bin/tsc --noEmit"
+  },
+  "keywords": [
+    "card-validator",
+    "luhn",
+    "credit-card",
+    "sdd"
+  ],
+  "author": "Antigravity & User",
+  "license": "MIT"
+}

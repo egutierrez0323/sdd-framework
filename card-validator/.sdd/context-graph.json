@@ -1,0 +1,220 @@
+{
+  "nodes": [
+    {
+      "id": "src/brands.ts",
+      "name": "brands.ts",
+      "type": "module",
+      "exports": [
+        "detectCardBrand"
+      ],
+      "imports": [
+        "src/types.js"
+      ],
+      "approxTokens": 417
+    },
+    {
+      "id": "src/cvv.ts",
+      "name": "cvv.ts",
+      "type": "module",
+      "exports": [
+        "validateCvv"
+      ],
+      "imports": [
+        "src/types.js"
+      ],
+      "approxTokens": 191
+    },
+    {
+      "id": "src/expiration.ts",
+      "name": "expiration.ts",
+      "type": "module",
+      "exports": [
+        "validateExpiration"
+      ],
+      "imports": [],
+      "approxTokens": 279
+    },
+    {
+      "id": "src/index.ts",
+      "name": "index.ts",
+      "type": "module",
+      "exports": [],
+      "imports": [],
+      "approxTokens": 52
+    },
+    {
+      "id": "src/luhn.ts",
+      "name": "luhn.ts",
+      "type": "module",
+      "exports": [
+        "validateLuhn"
+      ],
+      "imports": [],
+      "approxTokens": 260
+    },
+    {
+      "id": "src/sanitizer.ts",
+      "name": "sanitizer.ts",
+      "type": "module",
+      "exports": [
+        "sanitizeCardNumber"
+      ],
+      "imports": [],
+      "approxTokens": 107
+    },
+    {
+      "id": "src/types.ts",
+      "name": "types.ts",
+      "type": "module",
+      "exports": [
+        "CardBrand",
+        "CardInput",
+        "CardValidationResult"
+      ],
+      "imports": [],
+      "approxTokens": 92
+    },
+    {
+      "id": "src/validator.ts",
+      "name": "validator.ts",
+      "type": "module",
+      "exports": [
+        "validateCreditCard"
+      ],
+      "imports": [
+        "src/types.js",
+        "src/sanitizer.js",
+        "src/luhn.js",
+        "src/brands.js",
+        "src/expiration.js",
+        "src/cvv.js"
+      ],
+      "approxTokens": 716
+    },
+    {
+      "id": "tests/brands.test.ts",
+      "name": "brands.test.ts",
+      "type": "test",
+      "exports": [],
+      "imports": [
+        "src/brands.js"
+      ],
+      "approxTokens": 344
+    },
+    {
+      "id": "tests/cvv.test.ts",
+      "name": "cvv.test.ts",
+      "type": "test",
+      "exports": [],
+      "imports": [
+        "src/cvv.js"
+      ],
+      "approxTokens": 367
+    },
+    {
+      "id": "tests/expiration.test.ts",
+      "name": "expiration.test.ts",
+      "type": "test",
+      "exports": [],
+      "imports": [
+        "src/expiration.js"
+      ],
+      "approxTokens": 440
+    },
+    {
+      "id": "tests/luhn.test.ts",
+      "name": "luhn.test.ts",
+      "type": "test",
+      "exports": [],
+      "imports": [
+        "src/luhn.js"
+      ],
+      "approxTokens": 325
+    },
+    {
+      "id": "tests/sanitizer.test.ts",
+      "name": "sanitizer.test.ts",
+      "type": "test",
+      "exports": [],
+      "imports": [
+        "src/sanitizer.js"
+      ],
+      "approxTokens": 220
+    },
+    {
+      "id": "tests/validator.test.ts",
+      "name": "validator.test.ts",
+      "type": "test",
+      "exports": [],
+      "imports": [
+        "src/validator.js"
+      ],
+      "approxTokens": 648
+    }
+  ],
+  "edges": [
+    {
+      "from": "src/brands.ts",
+      "to": "src/types.js"
+    },
+    {
+      "from": "src/cvv.ts",
+      "to": "src/types.js"
+    },
+    {
+      "from": "src/validator.ts",
+      "to": "src/types.js"
+    },
+    {
+      "from": "src/validator.ts",
+      "to": "src/sanitizer.js"
+    },
+    {
+      "from": "src/validator.ts",
+      "to": "src/luhn.js"
+    },
+    {
+      "from": "src/validator.ts",
+      "to": "src/brands.js"
+    },
+    {
+      "from": "src/validator.ts",
+      "to": "src/expiration.js"
+    },
+    {
+      "from": "src/validator.ts",
+      "to": "src/cvv.js"
+    },
+    {
+      "from": "tests/brands.test.ts",
+      "to": "src/brands.js"
+    },
+    {
+      "from": "tests/cvv.test.ts",
+      "to": "src/cvv.js"
+    },
+    {
+      "from": "tests/expiration.test.ts",
+      "to": "src/expiration.js"
+    },
+    {
+      "from": "tests/luhn.test.ts",
+      "to": "src/luhn.js"
+    },
+    {
+      "from": "tests/sanitizer.test.ts",
+      "to": "src/sanitizer.js"
+    },
+    {
+      "from": "tests/validator.test.ts",
+      "to": "src/validator.js"
+    }
+  ],
+  "stats": {
+    "totalFiles": 14,
+    "totalExports": 9,
+    "rawTokensEstimate": 4458,
+    "graphTokensEstimate": 277,
+    "tokenReductionPercent": 94
+  }
+}

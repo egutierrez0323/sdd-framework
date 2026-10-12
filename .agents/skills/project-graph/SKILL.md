@@ -22,7 +22,7 @@ description: Generación y consulta de grafos de arquitectura y dependencias par
 
 ## 2. Comandos Disponibles
 
-- **Generar / Actualizar el Grafo:**
+- **Generar / Actualizar el Grafo Arquitectónico (Nativo):**
   ```bash
   node dist/cli.js graph
   ```
@@ -32,7 +32,20 @@ description: Generación y consulta de grafos de arquitectura y dependencias par
 
 ---
 
-## 3. Guía de Uso para el Agente
+## 3. Estrategia Híbrida: ¿Cuándo usar cada motor?
+
+1. **Uso Diario (95% del tiempo) -> `project-graph` (Nativo):**
+   - Para planificar, redactar especificaciones, entender relaciones entre módulos y mantener el consumo de tokens en mínimos (< 500 tokens).
+2. **Uso Forense Especializado (5% del tiempo) -> `Graphify`:**
+   - Si trabajas en un proyecto legado gigante y necesitas rastrear llamadas privadas función a función antes de un refactor crítico de bajo nivel:
+     ```bash
+     npx skills add graphify/codebase-graph
+     ```
+   - El motor de SDD detecta automáticamente si existe un archivo `graph.html` o `graph.json` generado por Graphify y lo vincula al mapa arquitectónico.
+
+---
+
+## 4. Guía de Uso para el Agente
 
 Cuando el usuario pida: *"¿Cómo está organizado el proyecto?"* o *"¿Qué dependencias tiene el módulo X?"*:
 1. Lee `.sdd/architecture-graph.md`.

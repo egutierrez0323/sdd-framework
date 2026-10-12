@@ -9,6 +9,10 @@ export interface SddConfig {
   severity: SeverityLevel;
   projectType: 'greenfield' | 'brownfield';
   bridges: Array<'cursor' | 'claude' | 'copilot' | 'antigravity'>;
+  graph: {
+    engine: 'builtin' | 'graphify' | 'hybrid';
+    autoUpdateOnAudit: boolean;
+  };
   paths: {
     sddDir: string;
     specsDir: string;
@@ -29,6 +33,10 @@ export const DEFAULT_CONFIG: SddConfig = {
   severity: 'L2',
   projectType: 'greenfield',
   bridges: ['antigravity', 'cursor', 'claude', 'copilot'],
+  graph: {
+    engine: 'builtin',
+    autoUpdateOnAudit: false,
+  },
   paths: {
     sddDir: '.sdd',
     specsDir: '.sdd/specs',
@@ -54,6 +62,10 @@ export async function loadConfig(projectRoot: string = process.cwd()): Promise<S
       paths: {
         ...DEFAULT_CONFIG.paths,
         ...(parsed.paths || {}),
+      },
+      graph: {
+        ...DEFAULT_CONFIG.graph,
+        ...(parsed.graph || {}),
       },
       autonomous: {
         ...DEFAULT_CONFIG.autonomous,

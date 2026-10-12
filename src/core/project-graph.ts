@@ -160,12 +160,36 @@ function sanitizeId(id: string): string {
 export async function saveProjectGraphArtifacts(
   graph: ProjectGraph,
   projectRoot: string = process.cwd()
-): Promise<{ jsonPath: string; mermaidPath: string }> {
+): Promise<{ jsonPath: string; mermaidPath: string; externalDeepGraph?: string }> {
   const jsonPath = path.join(projectRoot, '.sdd', 'context-graph.json');
   const mermaidPath = path.join(projectRoot, '.sdd', 'architecture-graph.md');
 
-  await writeFileUtf8(jsonPath, JSON.stringify(graph, null, 2));
-  await writeFileUtf8(mermaidPath, formatMermaidGraph(graph));
+  // Detectar si el proyecto tiene un grafo profundo externo (ej. Graphify)
+  let externalDeepGraph: string | undefined;
+  const graphifyCandidates = [
+    path.join(projectRoot, 'graph.html'),
+    path.join(projectRoot, 'graph.json'),
+    path.join(projectRoot, '.graphify', 'graph.json'),
+  ];
 
-  return { jsonPath, mermaidPath };
+  for (const candidate of graphifyCandidates) {
+    try {
+      const fs = await import('node:fs/promises');
+      await fs.access(candidate);
+      externalDeepGraph = path.relative(projectRoot, candidate).replace(/\\/g, '/');
+      break;
+    } catch {
+      // No existe, continuar
+    }
+  }
+
+  let mermaidContent = formatMermaidGraph(graph);
+  if (externalDeepGraph) {
+    mermaidContent = `> 🔍 **GRAFO FORENSE PROFUNDO DETECTADO (Graphify):** Existe un mapa intra-función detallado en \`${externalDeepGraph}\` para análisis de llamadas de bajo nivel.\n\n` + mermaidContent;
+  }
+
+  await writeFileUtf8(jsonPath, JSON.stringify(graph, null, 2));
+  await writeFileUtf8(mermaidPath, mermaidContent);
+
+  return { jsonPath, mermaidPath, externalDeepGraph };
 }

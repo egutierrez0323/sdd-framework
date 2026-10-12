@@ -3,9 +3,9 @@
 > **MÉTRICAS DE TOKENS:**
 > - Archivos analizados: **19**
 > - Símbolos exportados: **30**
-> - Tokens código fuente completo: ~**15792** tokens
+> - Tokens código fuente completo: ~**16086** tokens
 > - Tokens del grafo compacto: ~**556** tokens
-> - **Ahorro de Tokens: 96%**
+> - **Ahorro de Tokens: 97%**
 
 ```mermaid
 graph TD

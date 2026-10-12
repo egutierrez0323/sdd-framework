@@ -74,7 +74,7 @@
         "DEFAULT_CONFIG"
       ],
       "imports": [],
-      "approxTokens": 481
+      "approxTokens": 545
     },
     {
       "id": "src/core/ears-validator.ts",
@@ -105,7 +105,7 @@
       "imports": [
         "src/utils/fs-helpers.js"
       ],
-      "approxTokens": 1395
+      "approxTokens": 1625
     },
     {
       "id": "src/core/reverse-engine.ts",
@@ -329,8 +329,8 @@
   "stats": {
     "totalFiles": 19,
     "totalExports": 30,
-    "rawTokensEstimate": 15792,
+    "rawTokensEstimate": 16086,
     "graphTokensEstimate": 556,
-    "tokenReductionPercent": 96
+    "tokenReductionPercent": 97
   }
 }

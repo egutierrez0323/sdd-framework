@@ -8,6 +8,7 @@ import { syncBridges, SupportedBridge } from './core/bridges.js';
 import { executeAutonomousPlan } from './core/auto-runner.js';
 import { generateClarificationSession, formatClarificationMarkdown } from './core/clarifier.js';
 import { generateProjectGraph, saveProjectGraphArtifacts } from './core/project-graph.js';
+import { reviewProject, formatReviewReport } from './core/code-reviewer.js';
 import { ensureDir, fileExists, readFileUtf8, writeFileUtf8, listFilesRecursive } from './utils/fs-helpers.js';
 import { Logger } from './utils/logger.js';
 
@@ -33,6 +34,8 @@ Comandos disponibles:
   graph                    Genera el grafo de dependencias y arquitectura para reducir tokens
 
   audit [archivo|carpeta]  Audita especificaciones contra sintaxis EARS y nivel de severidad configurado
+
+  review [ruta]            Audita código limpio, detecta duplicación (DRY) y complejidad
 
   run <archivo-tasks>      Ejecuta el bucle autónomo verificable sobre una lista de micro-tareas
 
@@ -183,10 +186,12 @@ async function handleNewSpec() {
   Logger.success(`Especificación creada en: ${targetPath}`);
 }
 
-async function handleClarify() {
-  const target = args[1];
+async function resolveSpecFile(
+  target: string | undefined,
+  commandName: string
+): Promise<{ filePath: string; content: string; severity: SeverityLevel }> {
   if (!target) {
-    Logger.error('Debes especificar el archivo de la especificación. Ej: sdd clarify .sdd/specs/SPEC-001.md');
+    Logger.error(`Debes especificar el archivo de la especificación. Ej: sdd ${commandName} .sdd/specs/SPEC-001.md`);
     process.exit(1);
   }
 
@@ -200,7 +205,12 @@ async function handleClarify() {
   }
 
   const content = await readFileUtf8(filePath);
-  const questions = generateClarificationSession(content, config.severity);
+  return { filePath, content, severity: config.severity };
+}
+
+async function handleClarify() {
+  const { filePath, content, severity } = await resolveSpecFile(args[1], 'clarify');
+  const questions = generateClarificationSession(content, severity);
 
   Logger.arbiter('INQUISITOR', `Sesión de clarificación generada (${questions.length} preguntas de estrés):`);
   for (const q of questions) {
@@ -336,23 +346,8 @@ async function handleGraph() {
 }
 
 async function handleGrill() {
-  const target = args[1];
-  if (!target) {
-    Logger.error('Debes indicar el archivo de la especificación a interrogar. Ej: sdd grill .sdd/specs/SPEC-001.md');
-    process.exit(1);
-  }
-
-  const root = process.cwd();
-  const config = await loadConfig(root);
-  const filePath = path.isAbsolute(target) ? target : path.join(root, target);
-
-  if (!(await fileExists(filePath))) {
-    Logger.error(`No se encontró el archivo: ${filePath}`);
-    process.exit(1);
-  }
-
-  const content = await readFileUtf8(filePath);
-  const questions = generateClarificationSession(content, config.severity);
+  const { filePath, content, severity } = await resolveSpecFile(args[1], 'grill');
+  const questions = generateClarificationSession(content, severity);
 
   Logger.banner('MODO GRILL-ME: INTERROGATORIO SOCRÁTICO DEL ÁRBITRO');
   Logger.arbiter('INQUISITOR', 'Desafiando supuestos arquitectónicos y casos límite...');
@@ -367,6 +362,18 @@ async function handleGrill() {
   const outPath = filePath.replace(/\.md$/, '-grill-session.md');
   await writeFileUtf8(outPath, formatClarificationMarkdown(path.basename(filePath), questions));
   Logger.success(`\nSesión Grill-Me documentada en: ${outPath}`);
+}
+
+async function handleReview() {
+  const target = args[1] || 'src';
+  Logger.banner('AUDITORÍA DE CÓDIGO LIMPIO Y DRY (SDD REVIEW)');
+  Logger.info(`Analizando archivos en: ${target}`);
+  const report = await reviewProject(target, process.cwd());
+  console.log('\n' + formatReviewReport(report));
+  if (report.qualityScore < 60) {
+    Logger.error('Puntuación de calidad crítica. Se requiere refactorización antes de merge/commit.');
+    process.exit(1);
+  }
 }
 
 async function main() {
@@ -391,6 +398,9 @@ async function main() {
       break;
     case 'audit':
       await handleAudit();
+      break;
+    case 'review':
+      await handleReview();
       break;
     case 'run':
       await handleRun();

@@ -3,8 +3,8 @@
 > **MÉTRICAS DE TOKENS:**
 > - Archivos analizados: **21**
 > - Símbolos exportados: **44**
-> - Tokens código fuente completo: ~**20074** tokens
-> - Tokens del grafo compacto: ~**649** tokens
+> - Tokens código fuente completo: ~**20424** tokens
+> - Tokens del grafo compacto: ~**656** tokens
 > - **Ahorro de Tokens: 97%**
 
 ```mermaid
@@ -36,7 +36,7 @@ graph TD
 
 | Módulo | Símbolos Exportados | Dependencias Clave |
 | :--- | :--- | :--- |
-| `src/cli.ts` | *(interno)* | `config.js`, `ears-validator.js`, `reverse-engine.js`, `bridges.js`, `auto-runner.js`, `clarifier.js`, `project-graph.js`, `fs-helpers.js`, `logger.js` |
+| `src/cli.ts` | *(interno)* | `config.js`, `ears-validator.js`, `reverse-engine.js`, `bridges.js`, `auto-runner.js`, `clarifier.js`, `project-graph.js`, `code-reviewer.js`, `fs-helpers.js`, `logger.js` |
 | `src/core/auto-runner.ts` | `TaskStatus`, `MicroTask`, `AutoRunResult`, `parseTasksMarkdown`, `updateTaskStatusInMarkdown`, `RunnerOptions` | `git-client.js`, `logger.js` |
 | `src/core/bridges.ts` | `SupportedBridge`, `SyncReport` | `fs-helpers.js` |
 | `src/core/clarifier.ts` | `ClarificationQuestion`, `generateClarificationSession`, `formatClarificationMarkdown` | `ears-validator.js`, `config.js` |

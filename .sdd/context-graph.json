@@ -13,10 +13,11 @@
         "src/core/auto-runner.js",
         "src/core/clarifier.js",
         "src/core/project-graph.js",
+        "src/core/code-reviewer.js",
         "src/utils/fs-helpers.js",
         "src/utils/logger.js"
       ],
-      "approxTokens": 3529
+      "approxTokens": 3663
     },
     {
       "id": "src/core/auto-runner.ts",
@@ -81,7 +82,7 @@
       "imports": [
         "src/utils/fs-helpers.js"
       ],
-      "approxTokens": 3167
+      "approxTokens": 3383
     },
     {
       "id": "src/core/config.ts",
@@ -293,6 +294,10 @@
     },
     {
       "from": "src/cli.ts",
+      "to": "src/core/code-reviewer.js"
+    },
+    {
+      "from": "src/cli.ts",
       "to": "src/utils/fs-helpers.js"
     },
     {
@@ -367,8 +372,8 @@
   "stats": {
     "totalFiles": 21,
     "totalExports": 44,
-    "rawTokensEstimate": 20074,
-    "graphTokensEstimate": 649,
+    "rawTokensEstimate": 20424,
+    "graphTokensEstimate": 656,
     "tokenReductionPercent": 97
   }
 }

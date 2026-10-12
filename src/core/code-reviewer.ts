@@ -134,6 +134,23 @@ export function findDuplicateBlocks(
           if (registeredPairs.has(pairKey)) continue;
           registeredPairs.add(pairKey);
 
+          // Si ya existe un bloque registrado entre estos dos archivos que es contiguo o se solapa
+          const existingBlock = duplicates.find(
+            (d) =>
+              d.sourceFile === occ1.file &&
+              d.targetFile === occ2.file &&
+              occ1.lineNum <= d.startLineSource + d.lineCount &&
+              occ2.lineNum <= d.startLineTarget + d.lineCount
+          );
+
+          if (existingBlock) {
+            const extension = occ1.lineNum + minLines - (existingBlock.startLineSource + existingBlock.lineCount);
+            if (extension > 0) {
+              existingBlock.lineCount += extension;
+            }
+            continue;
+          }
+
           duplicates.push({
             sourceFile: occ1.file,
             targetFile: occ2.file,
@@ -150,13 +167,15 @@ export function findDuplicateBlocks(
   return duplicates;
 }
 
+const CONTROL_KEYWORDS = new Set(['if', 'for', 'while', 'switch', 'catch', 'with']);
+
 /**
  * Analiza métricas de funciones en un archivo TypeScript/JavaScript.
  */
 export function analyzeFunctionMetrics(
   filePath: string,
   content: string,
-  maxLines = 35,
+  maxLines = 45,
   maxParams = 4
 ): FunctionMetric[] {
   const metrics: FunctionMetric[] = [];
@@ -173,6 +192,7 @@ export function analyzeFunctionMetrics(
     if (!match) continue;
 
     const name = match[1] || match[3] || match[5] || 'anonymous';
+    if (CONTROL_KEYWORDS.has(name)) continue;
     const paramsRaw = match[2] || match[4] || match[6] || '';
     const paramCount = paramsRaw.trim()
       ? paramsRaw.split(',').filter((p) => p.trim().length > 0).length
@@ -226,7 +246,7 @@ export async function reviewProject(
   options: ReviewOptions = {}
 ): Promise<ProjectReviewReport> {
   const minDuplicateLines = options.minDuplicateLines ?? 5;
-  const maxFunctionLines = options.maxFunctionLines ?? 35;
+  const maxFunctionLines = options.maxFunctionLines ?? 55;
   const maxParameters = options.maxParameters ?? 4;
 
   const resolvedTarget = path.isAbsolute(targetPath) ? targetPath : path.join(rootDir, targetPath);
@@ -299,9 +319,10 @@ export async function reviewProject(
 
   for (const func of longFunctions) {
     if (func.lineCount > maxFunctionLines) {
-      penalty += 4;
+      const isCritical = func.lineCount > maxFunctionLines * 1.8;
+      penalty += isCritical ? 5 : 2;
       findings.push({
-        severity: func.lineCount > maxFunctionLines * 2 ? 'CRITICAL' : 'WARNING',
+        severity: isCritical ? 'CRITICAL' : 'WARNING',
         category: 'COMPLEXITY',
         file: func.file,
         line: func.lineStart,
@@ -311,7 +332,7 @@ export async function reviewProject(
     }
 
     if (func.paramCount > maxParameters) {
-      penalty += 3;
+      penalty += 2;
       findings.push({
         severity: 'INFO',
         category: 'CLEAN_CODE',

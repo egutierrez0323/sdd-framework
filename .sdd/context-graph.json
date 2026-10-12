@@ -211,7 +211,7 @@
         "longMonolithicFunc"
       ],
       "imports": [],
-      "approxTokens": 821
+      "approxTokens": 826
     },
     {
       "id": "tests/config.test.ts",
@@ -372,7 +372,7 @@
   "stats": {
     "totalFiles": 21,
     "totalExports": 44,
-    "rawTokensEstimate": 20424,
+    "rawTokensEstimate": 20429,
     "graphTokensEstimate": 656,
     "tokenReductionPercent": 97
   }

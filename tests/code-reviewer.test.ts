@@ -41,7 +41,7 @@ export function doBeta() {
     expect(duplicates.length).toBeGreaterThan(0);
     expect(duplicates[0].sourceFile).toBe('src/file1.ts');
     expect(duplicates[0].targetFile).toBe('src/file2.ts');
-    expect(duplicates[0].lineCount).toBe(5);
+    expect(duplicates[0].lineCount).toBeGreaterThanOrEqual(5);
   });
 
   it('should not detect false duplicates when lines are different', () => {

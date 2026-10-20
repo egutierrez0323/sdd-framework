@@ -247,10 +247,11 @@
         "src/core/auto-runner.js",
         "src/core/project-graph.js",
         "src/core/code-reviewer.js",
+        "src/core/scaffold.js",
         "src/utils/fs-helpers.js",
         "src/utils/logger.js"
       ],
-      "approxTokens": 4678
+      "approxTokens": 5604
     },
     {
       "id": "src/core/auto-runner.ts",
@@ -381,6 +382,26 @@
       "approxTokens": 1638
     },
     {
+      "id": "src/core/scaffold.ts",
+      "name": "scaffold.ts",
+      "type": "module",
+      "exports": [
+        "ScaffoldOptions",
+        "ScaffoldResult",
+        "BUILTIN_TEMPLATES",
+        "EjemploContrato",
+        "BUILTIN_SKILLS",
+        "generateStandardConstitution"
+      ],
+      "imports": [
+        "src/core/config.js",
+        "src/core/bridges.js",
+        "src/core/reverse-engine.js",
+        "src/utils/fs-helpers.js"
+      ],
+      "approxTokens": 4306
+    },
+    {
       "id": "src/index.ts",
       "name": "index.ts",
       "type": "module",
@@ -500,6 +521,17 @@
         "src/core/reverse-engine.js"
       ],
       "approxTokens": 311
+    },
+    {
+      "id": "tests/scaffold.test.ts",
+      "name": "scaffold.test.ts",
+      "type": "test",
+      "exports": [],
+      "imports": [
+        "src/core/scaffold.js",
+        "src/utils/fs-helpers.js"
+      ],
+      "approxTokens": 962
     },
     {
       "id": "vitest.config.ts",
@@ -645,6 +677,10 @@
     },
     {
       "from": "src/cli.ts",
+      "to": "src/core/scaffold.js"
+    },
+    {
+      "from": "src/cli.ts",
       "to": "src/utils/fs-helpers.js"
     },
     {
@@ -688,6 +724,22 @@
       "to": "src/utils/fs-helpers.js"
     },
     {
+      "from": "src/core/scaffold.ts",
+      "to": "src/core/config.js"
+    },
+    {
+      "from": "src/core/scaffold.ts",
+      "to": "src/core/bridges.js"
+    },
+    {
+      "from": "src/core/scaffold.ts",
+      "to": "src/core/reverse-engine.js"
+    },
+    {
+      "from": "src/core/scaffold.ts",
+      "to": "src/utils/fs-helpers.js"
+    },
+    {
       "from": "tests/bridges.test.ts",
       "to": "src/core/bridges.js"
     },
@@ -714,13 +766,21 @@
     {
       "from": "tests/reverse-engine.test.ts",
       "to": "src/core/reverse-engine.js"
+    },
+    {
+      "from": "tests/scaffold.test.ts",
+      "to": "src/core/scaffold.js"
+    },
+    {
+      "from": "tests/scaffold.test.ts",
+      "to": "src/utils/fs-helpers.js"
     }
   ],
   "stats": {
-    "totalFiles": 43,
-    "totalExports": 65,
-    "rawTokensEstimate": 31950,
-    "graphTokensEstimate": 1328,
+    "totalFiles": 45,
+    "totalExports": 71,
+    "rawTokensEstimate": 38144,
+    "graphTokensEstimate": 1428,
     "tokenReductionPercent": 96
   }
 }

@@ -16,6 +16,7 @@ import {
 } from './core/clarifier.js';
 import { generateProjectGraph, saveProjectGraphArtifacts } from './core/project-graph.js';
 import { reviewProject, formatReviewReport } from './core/code-reviewer.js';
+import { scaffoldProject, ScaffoldOptions } from './core/scaffold.js';
 import { ensureDir, fileExists, readFileUtf8, writeFileUtf8, listFilesRecursive } from './utils/fs-helpers.js';
 import { Logger } from './utils/logger.js';
 
@@ -27,8 +28,8 @@ async function printHelp() {
   console.log(`Uso: sdd <comando> [opciones]
 
 Comandos disponibles:
-  init                     Inicializa la estructura SDD (.sdd/, AGENTS.md, plantillas)
-                           Opciones: --severity L1|L2|L3
+  init                     Inicializa la estructura SDD (.sdd/, AGENTS.md, plantillas, skills)
+                           Opciones: --severity L1|L2|L3, --greenfield, --brownfield, --yes, --no-skills
 
   reverse                  Ingeniería inversa en proyecto brownfield (genera AGENTS.md y SPEC-000)
 
@@ -52,9 +53,73 @@ Comandos disponibles:
 `);
 }
 
+async function promptInitInteractively(root: string, defaultSeverity: SeverityLevel): Promise<ScaffoldOptions> {
+  const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
+  try {
+    const hasExistingCode =
+      (await fileExists(path.join(root, 'package.json'))) ||
+      (await fileExists(path.join(root, 'pyproject.toml'))) ||
+      (await fileExists(path.join(root, 'Cargo.toml'))) ||
+      (await fileExists(path.join(root, 'go.mod')));
+
+    console.log(`\n◇ [1/4] TIPO DE PROYECTO:`);
+    if (hasExistingCode) {
+      console.log(`  ℹ Se detectó código o configuración previa en el repositorio.`);
+      console.log(`  [1] Greenfield (Empezar como nuevo desde cero)`);
+      console.log(`  [2] (Recomendado) Brownfield (Proyecto existente: ingeniería inversa y línea base SPEC-000)`);
+    } else {
+      console.log(`  [1] (Recomendado) Greenfield (Proyecto nuevo desde cero)`);
+      console.log(`  [2] Brownfield (Proyecto existente: ingeniería inversa y línea base SPEC-000)`);
+    }
+    const defaultModeChoice = hasExistingCode ? '2' : '1';
+    const modeChoice = (await rl.question(`  👉 Selecciona una opción [1-2] (default: ${defaultModeChoice}): `)).trim();
+    const mode: 'greenfield' | 'brownfield' =
+      modeChoice === '2' ? 'brownfield' : modeChoice === '1' ? 'greenfield' : hasExistingCode ? 'brownfield' : 'greenfield';
+
+    console.log(`\n◇ [2/4] NIVEL DE SEVERIDAD DEL ÁRBITRO:`);
+    console.log(`  [1] L1 - Pragmatic (Velocity: alertas no bloqueantes, ideal para prototipos rápidos)`);
+    console.log(`  [2] (Recomendado) L2 - Standard (Producción: EARS estricto, 100% tareas verificables)`);
+    console.log(`  [3] L3 - Draconian (Misión Crítica: tolerancia cero a ambigüedad, modelado de fallos)`);
+    const sevChoice = (await rl.question(`  👉 Selecciona la severidad [1-3] (default: 2): `)).trim();
+    let severity: SeverityLevel = defaultSeverity;
+    if (sevChoice === '1') severity = 'L1';
+    else if (sevChoice === '3') severity = 'L3';
+    else severity = 'L2';
+
+    console.log(`\n◇ [3/4] ASISTENTES Y EDITORES DE IA (PUENTES):`);
+    console.log(`  [1] Cursor (.cursorrules)`);
+    console.log(`  [2] Claude Code (CLAUDE.md)`);
+    console.log(`  [3] Antigravity / Gemini CLI (AGENTS.md)`);
+    console.log(`  [4] (Recomendado) Todos los anteriores`);
+    const bridgeChoice = (await rl.question(`  👉 Selecciona puentes [1-4] (default: 4): `)).trim();
+    let bridges: SupportedBridge[] = ['cursor', 'claude', 'antigravity'];
+    if (bridgeChoice === '1') bridges = ['cursor'];
+    else if (bridgeChoice === '2') bridges = ['claude'];
+    else if (bridgeChoice === '3') bridges = ['antigravity'];
+
+    console.log(`\n◇ [4/4] ARSENAL DE SKILLS AVANZADAS (.agents/skills/):`);
+    console.log(`  Incluye: grill-me, clean-code, project-graph y sdd-methodology`);
+    console.log(`  [1] (Recomendado) Sí, instalar arsenal completo`);
+    console.log(`  [2] No, solo estructura mínima`);
+    const skillsChoice = (await rl.question(`  👉 Selecciona opción [1-2] (default: 1): `)).trim();
+    const includeSkills = skillsChoice !== '2';
+
+    return {
+      projectRoot: root,
+      projectName: path.basename(root),
+      mode,
+      severity,
+      bridges,
+      includeSkills,
+    };
+  } finally {
+    rl.close();
+  }
+}
+
 async function handleInit() {
   const root = process.cwd();
-  Logger.banner('INICIALIZACIÓN DEL ENTORNO SDD');
+  Logger.banner('SDD FRAMEWORK :: ASISTENTE DE INICIALIZACIÓN (INIT)');
 
   let severity: SeverityLevel = 'L2';
   const sevIndex = args.indexOf('--severity');
@@ -65,44 +130,47 @@ async function handleInit() {
     }
   }
 
-  Logger.info(`Configurando severidad del árbitro: ${severity}`);
-  await ensureDir(path.join(root, '.sdd', 'specs'));
-  await ensureDir(path.join(root, '.sdd', 'plans'));
-  await ensureDir(path.join(root, '.sdd', 'tasks'));
-  await ensureDir(path.join(root, '.sdd', 'templates'));
+  const isYes = args.includes('--yes') || args.includes('-y');
+  const isBrownfield = args.includes('--brownfield');
+  const isGreenfield = args.includes('--greenfield');
+  const isInteractive = Boolean(process.stdin.isTTY) && !isYes && !isBrownfield && !isGreenfield;
 
-  const config = {
-    ...DEFAULT_CONFIG,
-    projectName: path.basename(root),
-    severity,
-  };
-  await saveConfig(config, root);
+  let options: ScaffoldOptions;
 
-  // Si no existe AGENTS.md, crearlo
-  const agentsPath = path.join(root, 'AGENTS.md');
-  if (!(await fileExists(agentsPath))) {
-    const templateContent = `# Constitución del Proyecto: ${config.projectName}
-
-> **PRINCIPIO FUNDAMENTAL:** Ningún código de producción sin requisito EARS previo ni micro-tarea asociada en .sdd/tasks/.
-
-## 1. Severidad Configurada: ${severity}
-- **L1 (Velocity):** Sugerencias no bloqueantes.
-- **L2 (Standard):** EARS obligatorio, 100% tareas con tests y comandos de verificación.
-- **L3 (Draconian):** Cero tolerancia a ambigüedades, modelado de resiliencia y rollback formal.
-
-## 2. Flujo de Trabajo
-1. Redactar \`spec.md\` con \`sdd new-spec\`.
-2. Clarificar con el árbitro usando \`sdd clarify\`.
-3. Diseñar \`plan.md\` y micro-tareas en \`tasks.md\`.
-4. Ejecutar con verificación mediante \`sdd run\`.
-`;
-    await writeFileUtf8(agentsPath, templateContent);
-    Logger.success('Creado archivo de constitución AGENTS.md');
+  if (isInteractive) {
+    options = await promptInitInteractively(root, severity);
+  } else {
+    const mode = isBrownfield ? 'brownfield' : 'greenfield';
+    options = {
+      projectRoot: root,
+      projectName: path.basename(root),
+      mode,
+      severity,
+      bridges: ['cursor', 'claude', 'antigravity'],
+      includeSkills: !args.includes('--no-skills'),
+    };
   }
 
-  // Sincronizar puentes
-  await syncBridges(root, config.bridges as SupportedBridge[]);
-  Logger.success('Estructura SDD y puentes de IA inicializados correctamente.');
+  Logger.info(`Configurando entorno SDD en modo [${options.mode.toUpperCase()}] con severidad [${options.severity}]...`);
+  const result = await scaffoldProject(options);
+
+  Logger.success(`\n✔ ¡Proyecto inicializado con éxito en modo SDD (${result.mode})!`);
+  console.log(`\n📂 Estructura generada:`);
+  console.log(`   • .sdd/ (specs, plans, tasks, templates)`);
+  console.log(`   • .sdd/templates/ (spec, plan, tasks, ears-guide)`);
+  console.log(`   • Constitución en AGENTS.md`);
+  if (options.includeSkills) {
+    console.log(`   • .agents/skills/ (grill-me, clean-code, project-graph, sdd-methodology)`);
+  }
+  console.log(`   • Puentes sincronizados: ${result.syncedBridges.join(', ')}`);
+
+  console.log(`\n🚀 Siguientes pasos para empezar:`);
+  console.log(`   1. Crear tu primera especificación:`);
+  console.log(`      npx sdd new-spec mi-funcionalidad`);
+  console.log(`   2. Someter la especificación al interrogatorio del Árbitro:`);
+  console.log(`      npx sdd grill .sdd/specs/SPEC-MI-FUNCIONALIDAD.md`);
+  console.log(`   3. Auditar contratos EARS antes de planificar:`);
+  console.log(`      npx sdd audit\n`);
 }
 
 async function handleReverse() {

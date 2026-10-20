@@ -1,7 +1,7 @@
 /**
  * Generador de la interfaz web para el Dashboard y Visualizador SDD.
- * Implementa diseño Rich Aesthetics de alta precisión, navegación reactiva,
- * iconos SVG vectoriales sin emojis y soporte de impresión (@media print).
+ * Implementa renderizado visual de documentos Markdown (Constitución y Specs),
+ * navegación reactiva, iconos SVG vectoriales y soporte de impresión (@media print).
  */
 
 export const DASHBOARD_HTML = `<!DOCTYPE html>
@@ -105,6 +105,14 @@ export const DASHBOARD_HTML = `<!DOCTYPE html>
     .btn:hover { background: var(--bg-card-hover); border-color: #334155; }
     .btn-primary { background: #2563eb; border-color: #3b82f6; color: white; font-weight: 600; }
     .btn-primary:hover { background: #1d4ed8; }
+    .btn-sm { padding: 0.25rem 0.6rem; font-size: 0.78rem; }
+
+    .btn-group { display: inline-flex; border: 1px solid var(--border); border-radius: var(--radius-sm); overflow: hidden; }
+    .btn-group .btn { border-radius: 0; border: none; border-right: 1px solid var(--border); }
+    .btn-group .btn:last-child { border-right: none; }
+    .btn-group .btn.active { background: #2563eb; color: white; font-weight: 600; }
+
+    .doc-toolbar { display: flex; align-items: center; gap: 0.5rem; }
 
     .app-container { display: flex; flex: 1; }
     aside {
@@ -246,15 +254,141 @@ export const DASHBOARD_HTML = `<!DOCTYPE html>
     .task-id { font-family: 'JetBrains Mono', monospace; font-size: 0.82rem; font-weight: 600; color: var(--text-muted); }
     .task-title { font-size: 0.88rem; font-weight: 500; }
 
+    /* Estilos de Documento Markdown */
+    .markdown-body {
+      color: #cbd5e1;
+      line-height: 1.7;
+      font-size: 0.92rem;
+    }
+    .markdown-body .doc-h1 {
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: #f8fafc;
+      margin-bottom: 1.25rem;
+      letter-spacing: -0.02em;
+    }
+    .markdown-body .doc-h2 {
+      font-size: 1.12rem;
+      font-weight: 600;
+      color: #60a5fa;
+      margin-top: 1.75rem;
+      margin-bottom: 0.75rem;
+      padding-bottom: 0.4rem;
+      border-bottom: 1px solid var(--border);
+      letter-spacing: -0.01em;
+    }
+    .markdown-body .doc-h3 {
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: #e2e8f0;
+      margin-top: 1.25rem;
+      margin-bottom: 0.45rem;
+    }
+    .markdown-body .doc-p {
+      margin-bottom: 0.85rem;
+      color: #94a3b8;
+    }
+    .markdown-body .doc-quote {
+      background: rgba(59, 130, 246, 0.06);
+      border-left: 3px solid #3b82f6;
+      border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+      padding: 0.85rem 1.15rem;
+      margin: 1.25rem 0;
+      color: #e2e8f0;
+      font-size: 0.88rem;
+      line-height: 1.6;
+    }
+    .markdown-body .doc-quote strong {
+      color: #60a5fa;
+    }
+    .markdown-body .doc-hr {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 1.75rem 0;
+    }
+    .markdown-body .table-container {
+      width: 100%;
+      overflow-x: auto;
+      margin: 1.25rem 0;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      background: var(--bg-card);
+    }
+    .markdown-body table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+    }
+    .markdown-body th {
+      background: rgba(255, 255, 255, 0.04);
+      padding: 0.65rem 0.85rem;
+      font-size: 0.74rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--text-sub);
+      border-bottom: 1px solid var(--border);
+      font-weight: 600;
+    }
+    .markdown-body td {
+      padding: 0.75rem 0.85rem;
+      font-size: 0.84rem;
+      border-bottom: 1px solid var(--border);
+      color: #cbd5e1;
+    }
+    .markdown-body tr:last-child td {
+      border-bottom: none;
+    }
+    .markdown-body tr:hover td {
+      background: rgba(255, 255, 255, 0.02);
+    }
+    .markdown-body .doc-list {
+      padding-left: 1.4rem;
+      margin: 0.85rem 0;
+    }
+    .markdown-body .doc-list li {
+      margin-bottom: 0.5rem;
+      font-size: 0.88rem;
+      color: #94a3b8;
+    }
+    .markdown-body .doc-list li strong {
+      color: #f1f5f9;
+    }
+    .markdown-body .doc-code {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.8rem;
+      background: rgba(255, 255, 255, 0.06);
+      padding: 0.15rem 0.4rem;
+      border-radius: 3px;
+      border: 1px solid var(--border);
+      color: #38bdf8;
+    }
+    .markdown-body .doc-link {
+      color: #60a5fa;
+      text-decoration: none;
+      border-bottom: 1px dashed rgba(96, 165, 250, 0.5);
+    }
+    .markdown-body .doc-link:hover {
+      color: #93c5fd;
+      border-bottom-style: solid;
+    }
+
     @media print {
       body { background: white !important; color: black !important; font-size: 10pt; }
-      header, aside, .header-actions, .nav-section, .btn, .no-print { display: none !important; }
+      header, aside, .header-actions, .nav-section, .btn, .doc-toolbar, .no-print { display: none !important; }
       main { max-width: 100% !important; padding: 0 !important; margin: 0 !important; }
       .card { background: white !important; border: 1px solid #ddd !important; box-shadow: none !important; page-break-inside: avoid; }
       .req-item { background: #fafafa !important; border: 1px solid #e0e0e0 !important; page-break-inside: avoid; }
       .req-declaration { background: #f1f5f9 !important; color: #0f172a !important; border-left: 3px solid #0284c7 !important; }
       .criteria-box { background: #f8fafc !important; border: 1px solid #e2e8f0 !important; color: #334155 !important; }
       .badge { border: 1px solid #aaa !important; color: black !important; background: #f1f5f9 !important; }
+      .markdown-body { color: black !important; }
+      .markdown-body .doc-h1, .markdown-body .doc-h2, .markdown-body .doc-h3 { color: black !important; border-bottom: 1px solid #ddd !important; }
+      .markdown-body .doc-p, .markdown-body .doc-list li { color: #333 !important; }
+      .markdown-body .doc-quote { background: #f8fafc !important; color: #1e293b !important; border-left: 3px solid #0284c7 !important; }
+      .markdown-body table { border: 1px solid #ccc !important; }
+      .markdown-body th { background: #f1f5f9 !important; color: #000 !important; }
+      .markdown-body td { border-bottom: 1px solid #eee !important; color: #000 !important; }
+      .markdown-body .doc-code { background: #f1f5f9 !important; border: 1px solid #ddd !important; color: #0f172a !important; }
     }
   </style>
 </head>
@@ -387,10 +521,26 @@ export const DASHBOARD_HTML = `<!DOCTYPE html>
 
       <section id="view-constitution" class="view-panel">
         <div class="card">
-          <div class="card-title" style="margin-bottom: 0.35rem">Constitución del Proyecto (AGENTS.md)</div>
-          <div class="card-meta" style="margin-bottom: 1.25rem">Invariantes de ingeniería, anti-complacencia y compuertas de verificación</div>
-          <div style="background: var(--bg-base); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 1.25rem; overflow-x: auto;">
-            <pre id="constitutionContent" style="font-family: 'JetBrains Mono', monospace; font-size: 0.82rem; color: var(--text-muted); white-space: pre-wrap;"></pre>
+          <div class="card-header">
+            <div>
+              <div class="card-title">Constitución del Proyecto</div>
+              <div class="card-meta">
+                <span>Archivo: <strong class="badge badge-approved">AGENTS.md</strong></span>
+                <span>Invariantes arquitectónicas, anti-complacencia y compuertas de calidad</span>
+              </div>
+            </div>
+            <div class="doc-toolbar no-print">
+              <div class="btn-group">
+                <button id="btnModeRendered" class="btn btn-sm active" onclick="toggleConstitutionMode('rendered')">Documento</button>
+                <button id="btnModeRaw" class="btn btn-sm" onclick="toggleConstitutionMode('raw')">Markdown</button>
+              </div>
+              <button id="btnCopyConstitution" class="btn btn-sm" onclick="copyConstitution()">Copiar</button>
+              <button class="btn btn-sm btn-primary" onclick="window.print()">Imprimir</button>
+            </div>
+          </div>
+          <div id="constitutionRendered" class="markdown-body"></div>
+          <div id="constitutionRaw" style="display: none; background: var(--bg-base); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 1.25rem; overflow-x: auto;">
+            <pre id="constitutionRawPre" style="font-family: 'JetBrains Mono', monospace; font-size: 0.82rem; color: var(--text-muted); white-space: pre-wrap;"></pre>
           </div>
         </div>
       </section>
@@ -435,6 +585,110 @@ export const DASHBOARD_HTML = `<!DOCTYPE html>
       if (t.includes('unwanted')) return 'ears-unwanted';
       if (t.includes('optional')) return 'ears-optional';
       return 'badge-pending';
+    }
+
+    function renderInlineMarkdown(text) {
+      if (!text) return '';
+      return text
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/\\*\\*([^\\*]+)\\*\\*/g, '<strong>$1</strong>')
+        .replace(/\\*([^\\*]+)\\*/g, '<em>$1</em>')
+        .replace(/\`([^\`]+)\`/g, '<code class="doc-code">$1</code>')
+        .replace(/\\[([^\\]]+)\\]\\(([^\\)]+)\\)/g, '<a href="$2" target="_blank" class="doc-link">$1</a>');
+    }
+
+    function renderTableMarkdown(lines, startIndex) {
+      let i = startIndex;
+      const headerLine = lines[i];
+      i += 2;
+      const headers = headerLine.split('|').filter(c => c.trim().length > 0).map(c => c.trim());
+      let html = '<div class="table-container"><table><thead><tr>';
+      headers.forEach(h => { html += '<th>' + renderInlineMarkdown(h) + '</th>'; });
+      html += '</tr></thead><tbody>';
+      while (i < lines.length && lines[i].trim().startsWith('|')) {
+        const cols = lines[i].split('|').filter((_, idx, arr) => idx > 0 && idx < arr.length - 1);
+        html += '<tr>';
+        cols.forEach(c => { html += '<td>' + renderInlineMarkdown(c.trim()) + '</td>'; });
+        html += '</tr>';
+        i++;
+      }
+      html += '</tbody></table></div>';
+      return { html, nextIndex: i - 1 };
+    }
+
+    function renderListMarkdown(lines, startIndex, isOrdered) {
+      let i = startIndex;
+      const tag = isOrdered ? 'ol' : 'ul';
+      let html = '<' + tag + ' class="doc-list">';
+      const regex = isOrdered ? /^(\\s*)\\d+\\.\\s+(.*)/ : /^(\\s*)[-*]\\s+(.*)/;
+      while (i < lines.length) {
+        const match = regex.exec(lines[i]);
+        if (!match) break;
+        html += '<li>' + renderInlineMarkdown(match[2]) + '</li>';
+        i++;
+      }
+      html += '</' + tag + '>';
+      return { html, nextIndex: i - 1 };
+    }
+
+    function renderMarkdownToHtml(md) {
+      if (!md) return '<div class="doc-empty">Documento vacío.</div>';
+      const lines = md.split(/\\r?\\n/);
+      let html = '';
+      for (let i = 0; i < lines.length; i++) {
+        const line = lines[i].trim();
+        if (!line) continue;
+        if (line.startsWith('# ')) html += '<h1 class="doc-h1">' + renderInlineMarkdown(line.slice(2)) + '</h1>';
+        else if (line.startsWith('## ')) html += '<h2 class="doc-h2">' + renderInlineMarkdown(line.slice(3)) + '</h2>';
+        else if (line.startsWith('### ')) html += '<h3 class="doc-h3">' + renderInlineMarkdown(line.slice(4)) + '</h3>';
+        else if (line === '---' || line === '***') html += '<hr class="doc-hr">';
+        else if (line.startsWith('>')) html += '<blockquote class="doc-quote">' + renderInlineMarkdown(line.replace(/^>\\s*/, '')) + '</blockquote>';
+        else if (line.startsWith('|') && lines[i + 1]?.includes('---')) {
+          const res = renderTableMarkdown(lines, i);
+          html += res.html;
+          i = res.nextIndex;
+        } else if (/^\\d+\\.\\s+/.test(line)) {
+          const res = renderListMarkdown(lines, i, true);
+          html += res.html;
+          i = res.nextIndex;
+        } else if (/^[-*]\\s+/.test(line)) {
+          const res = renderListMarkdown(lines, i, false);
+          html += res.html;
+          i = res.nextIndex;
+        } else html += '<p class="doc-p">' + renderInlineMarkdown(line) + '</p>';
+      }
+      return html;
+    }
+
+    function toggleConstitutionMode(mode) {
+      const rendered = document.getElementById('constitutionRendered');
+      const raw = document.getElementById('constitutionRaw');
+      const btnRendered = document.getElementById('btnModeRendered');
+      const btnRaw = document.getElementById('btnModeRaw');
+      if (mode === 'raw') {
+        rendered.style.display = 'none';
+        raw.style.display = 'block';
+        btnRendered.classList.remove('active');
+        btnRaw.classList.add('active');
+      } else {
+        rendered.style.display = 'block';
+        raw.style.display = 'none';
+        btnRaw.classList.remove('active');
+        btnRendered.classList.add('active');
+      }
+    }
+
+    function copyConstitution() {
+      if (!appData?.constitution) return;
+      navigator.clipboard.writeText(appData.constitution);
+      const btn = document.getElementById('btnCopyConstitution');
+      if (btn) {
+        const oldText = btn.textContent;
+        btn.textContent = '¡Copiado!';
+        setTimeout(() => { btn.textContent = oldText; }, 2000);
+      }
     }
 
     function renderKpis(data) {
@@ -496,7 +750,9 @@ export const DASHBOARD_HTML = `<!DOCTYPE html>
       renderDashboardSpecs(data.specs);
       renderTasks(data.tasks);
       document.getElementById('graphContent').textContent = data.graphMermaid || "No se generó grafo aún. Ejecuta 'sdd graph' para crearlo.";
-      document.getElementById('constitutionContent').textContent = data.constitution || 'No se encontró AGENTS.md.';
+      const constMd = data.constitution || 'No se encontró AGENTS.md.';
+      document.getElementById('constitutionRendered').innerHTML = renderMarkdownToHtml(constMd);
+      document.getElementById('constitutionRawPre').textContent = constMd;
       if (!selectedSpecId && data.specs.length > 0) {
         selectedSpecId = data.specs[0].id;
       }
@@ -532,7 +788,9 @@ export const DASHBOARD_HTML = `<!DOCTYPE html>
       const stCls = spec.status === 'APPROVED' ? 'badge-approved' : 'badge-draft';
       const container = document.getElementById('specsDetailedContainer');
       const printBtn = '<button class="btn btn-primary no-print" onclick="window.print()"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg> Imprimir</button>';
-      container.innerHTML = '<div class="card"><div class="card-header"><div><div class="card-title">' + spec.id + ': ' + spec.title + '</div><div class="card-meta"><span>Estado: <strong class="badge ' + stCls + '">' + spec.status + '</strong></span><span>Severidad: <strong>' + (spec.severity || appData.severity) + '</strong></span></div></div>' + printBtn + '</div>' + (spec.context ? '<div style="margin-bottom: 1.25rem"><h4 style="font-size:0.75rem;text-transform:uppercase;color:var(--text-sub);margin-bottom:0.35rem;letter-spacing:0.05em">Contexto</h4><p style="background:var(--bg-card);padding:0.75rem;border-radius:var(--radius-sm);font-size:0.88rem;color:var(--text-muted)">' + spec.context + '</p></div>' : '') + '<div style="margin-bottom:1.25rem"><h4 style="font-size:0.75rem;text-transform:uppercase;color:var(--text-sub);margin-bottom:0.6rem;letter-spacing:0.05em">Requerimientos EARS</h4><div id="specReqsList"></div></div></div>';
+      const contextSection = spec.context ? '<div style="margin-bottom: 1.25rem"><h4 style="font-size:0.75rem;text-transform:uppercase;color:var(--text-sub);margin-bottom:0.45rem;letter-spacing:0.05em">Contexto</h4><div class="markdown-body" style="background:var(--bg-card);padding:0.9rem;border-radius:var(--radius-sm)">' + renderMarkdownToHtml(spec.context) + '</div></div>' : '';
+
+      container.innerHTML = '<div class="card"><div class="card-header"><div><div class="card-title">' + spec.id + ': ' + spec.title + '</div><div class="card-meta"><span>Estado: <strong class="badge ' + stCls + '">' + spec.status + '</strong></span><span>Severidad: <strong>' + (spec.severity || appData.severity) + '</strong></span></div></div>' + printBtn + '</div>' + contextSection + '<div style="margin-bottom:1.25rem"><h4 style="font-size:0.75rem;text-transform:uppercase;color:var(--text-sub);margin-bottom:0.6rem;letter-spacing:0.05em">Requerimientos EARS</h4><div id="specReqsList"></div></div></div>';
       renderSpecRequirements(spec.requirements);
     }
 

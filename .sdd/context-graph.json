@@ -411,7 +411,7 @@
         "generateDashboardHtml"
       ],
       "imports": [],
-      "approxTokens": 7262
+      "approxTokens": 9719
     },
     {
       "id": "src/core/ui-server.ts",
@@ -842,7 +842,7 @@
   "stats": {
     "totalFiles": 48,
     "totalExports": 77,
-    "rawTokensEstimate": 49046,
+    "rawTokensEstimate": 51503,
     "graphTokensEstimate": 1533,
     "tokenReductionPercent": 97
   }

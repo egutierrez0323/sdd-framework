@@ -354,6 +354,73 @@ async function handleGraph() {
   Logger.success(`Índice semántico JSON guardado en: ${artifacts.jsonPath}`);
 }
 
+interface GrillInterviewResult {
+  decisionsMap: Record<string, string>;
+  recordedDecisions: Array<{ questionId: string; category: string; decision: string }>;
+}
+
+async function promptGrillInteractively(
+  questions: Array<{ id: string; category: string; question: string; options: string[] }>
+): Promise<GrillInterviewResult> {
+  const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
+  const decisionsMap: Record<string, string> = {};
+  const recordedDecisions: Array<{ questionId: string; category: string; decision: string }> = [];
+
+  try {
+    for (let i = 0; i < questions.length; i++) {
+      const q = questions[i];
+      let answered = false;
+
+      while (!answered) {
+        console.log(`\n🔥 [PREGUNTA ${i + 1}/${questions.length}] Categoría: ${q.category}`);
+        console.log(`   ${q.question}`);
+        console.log('\n   Opciones:');
+        q.options.forEach((opt, idx) => {
+          console.log(`   [${idx + 1}] ${opt}`);
+        });
+        console.log(`   [0] Escribir decisión personalizada`);
+
+        const answer = (await rl.question(`\n   👉 Selecciona una opción (1-${q.options.length}) o escribe tu decisión: `)).trim();
+        let decisionText = '';
+        const num = parseInt(answer, 10);
+        if (!isNaN(num) && num >= 1 && num <= q.options.length) {
+          decisionText = q.options[num - 1];
+        } else if (num === 0) {
+          decisionText = (await rl.question('   ✍  Escribe tu decisión arquitectónica: ')).trim();
+        } else if (answer.length > 0) {
+          decisionText = answer;
+        } else {
+          decisionText = q.options[0];
+        }
+
+        const violations = auditArchitectDecision(decisionText);
+        if (violations.length > 0) {
+          console.log('\n⚖ [ÁRBITRO SDD :: ALERTA ANTI-COMPLACENCIA / DEVIL\'S ADVOCATE]');
+          for (const v of violations) {
+            Logger.warn(`[${v.severity}] ${v.issue}`);
+            console.log(`   Violación: ${v.violatedInvariant}`);
+            Logger.info(`   💡 Recomendación: ${v.recommendation}`);
+          }
+          const confirm = (await rl.question('\n   ¿Deseas mantener esta decisión a pesar de la advertencia o cambiarla? (m=mantener / C=cambiar): ')).trim().toLowerCase();
+          if (confirm !== 'm' && confirm !== 'mantener') {
+            console.log('   🔄 Rectificando respuesta...');
+            continue;
+          }
+        }
+
+        decisionsMap[q.id] = decisionText;
+        recordedDecisions.push({ questionId: q.id, category: q.category, decision: decisionText });
+        answered = true;
+        Logger.success(`Registrada decisión para [${q.id}]`);
+      }
+    }
+  } finally {
+    rl.close();
+  }
+
+  return { decisionsMap, recordedDecisions };
+}
+
 async function handleGrill() {
   const { filePath, content, severity } = await resolveSpecFile(args[1], 'grill');
 
@@ -371,72 +438,16 @@ async function handleGrill() {
   const questions = autoGrill.escalatedToHuman;
   Logger.arbiter('INQUISITOR', `Dilemas de arquitectura escalados al líder humano: ${questions.length}`);
 
-  const isInteractive = Boolean(process.stdin.isTTY);
-  const decisionsMap: Record<string, string> = {};
-  const recordedDecisions: Array<{ questionId: string; category: string; decision: string }> = [];
+  let decisionsMap: Record<string, string> = {};
 
-  if (isInteractive && questions.length > 0) {
-    const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
-    try {
-      for (let i = 0; i < questions.length; i++) {
-        const q = questions[i];
-        let answered = false;
+  if (Boolean(process.stdin.isTTY) && questions.length > 0) {
+    const interview = await promptGrillInteractively(questions);
+    decisionsMap = interview.decisionsMap;
 
-        while (!answered) {
-          console.log(`\n🔥 [PREGUNTA ${i + 1}/${questions.length}] Categoría: ${q.category}`);
-          console.log(`   ${q.question}`);
-          console.log('\n   Opciones:');
-          q.options.forEach((opt, idx) => {
-            console.log(`   [${idx + 1}] ${opt}`);
-          });
-          console.log(`   [0] Escribir decisión personalizada`);
-
-          const answer = (await rl.question(`\n   👉 Selecciona una opción (1-${q.options.length}) o escribe tu decisión: `)).trim();
-          let decisionText = '';
-          const num = parseInt(answer, 10);
-          if (!isNaN(num) && num >= 1 && num <= q.options.length) {
-            decisionText = q.options[num - 1];
-          } else if (num === 0) {
-            decisionText = (await rl.question('   ✍  Escribe tu decisión arquitectónica: ')).trim();
-          } else if (answer.length > 0) {
-            decisionText = answer;
-          } else {
-            // Default: recomendada
-            decisionText = q.options[0];
-          }
-
-          // Auditoría Anti-Complacencia (Devil's Advocate)
-          const violations = auditArchitectDecision(decisionText);
-          if (violations.length > 0) {
-            console.log('\n⚖ [ÁRBITRO SDD :: ALERTA ANTI-COMPLACENCIA / DEVIL\'S ADVOCATE]');
-            for (const v of violations) {
-              Logger.warn(`[${v.severity}] ${v.issue}`);
-              console.log(`   Violación: ${v.violatedInvariant}`);
-              Logger.info(`   💡 Recomendación: ${v.recommendation}`);
-            }
-            const confirm = (await rl.question('\n   ¿Deseas mantener esta decisión a pesar de la advertencia o cambiarla? (m=mantener / C=cambiar): ')).trim().toLowerCase();
-            if (confirm !== 'm' && confirm !== 'mantener') {
-              console.log('   🔄 Rectificando respuesta...');
-              continue;
-            }
-          }
-
-          decisionsMap[q.id] = decisionText;
-          recordedDecisions.push({ questionId: q.id, category: q.category, decision: decisionText });
-          answered = true;
-          Logger.success(`Registrada decisión para [${q.id}]`);
-        }
-      }
-    } finally {
-      rl.close();
-    }
-
-    // Aplicar decisiones al archivo de la spec
-    const updatedSpec = injectDecisionsIntoSpec(content, recordedDecisions);
+    const updatedSpec = injectDecisionsIntoSpec(content, interview.recordedDecisions);
     await writeFileUtf8(filePath, updatedSpec);
     Logger.success(`Especificación actualizada con decisiones vinculantes y aprobada: ${filePath}`);
   } else {
-    // Modo no interactivo (CI/pipes)
     for (let i = 0; i < questions.length; i++) {
       const q = questions[i];
       console.log(`\n🔥 [PREGUNTA ${i + 1}/${questions.length}] Categoría: ${q.category}`);

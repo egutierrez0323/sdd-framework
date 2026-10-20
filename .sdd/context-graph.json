@@ -250,7 +250,7 @@
         "src/utils/fs-helpers.js",
         "src/utils/logger.js"
       ],
-      "approxTokens": 4620
+      "approxTokens": 4678
     },
     {
       "id": "src/core/auto-runner.ts",
@@ -719,7 +719,7 @@
   "stats": {
     "totalFiles": 43,
     "totalExports": 65,
-    "rawTokensEstimate": 31892,
+    "rawTokensEstimate": 31950,
     "graphTokensEstimate": 1328,
     "tokenReductionPercent": 96
   }

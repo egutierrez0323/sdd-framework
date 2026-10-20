@@ -302,7 +302,7 @@
         "src/core/ears-validator.js",
         "src/core/config.js"
       ],
-      "approxTokens": 3083
+      "approxTokens": 3133
     },
     {
       "id": "src/core/code-reviewer.ts",
@@ -443,7 +443,7 @@
       "type": "test",
       "exports": [],
       "imports": [],
-      "approxTokens": 865
+      "approxTokens": 878
     },
     {
       "id": "tests/code-reviewer.test.ts",
@@ -719,7 +719,7 @@
   "stats": {
     "totalFiles": 43,
     "totalExports": 65,
-    "rawTokensEstimate": 31829,
+    "rawTokensEstimate": 31892,
     "graphTokensEstimate": 1328,
     "tokenReductionPercent": 96
   }

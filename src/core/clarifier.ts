@@ -167,10 +167,10 @@ export function auditArchitectDecision(
   const text = decisionText.toLowerCase();
 
   // 1. Fallo de autenticación devolviendo 200 OK
-  if (
-    /(200|ok).*auth.*(fall|error|inv[aá]lid)|devolver\s+200.*(auth|login|credencial|token)/i.test(text) ||
-    /200\s+ok\s+si\s+(falla|es\s+inv[aá]lido)/i.test(text)
-  ) {
+  const mentions200 = /(200|ok)/i.test(text);
+  const mentionsAuth = /(auth|autentic|login|credencial|token)/i.test(text);
+  const mentionsFail = /(fall|error|inv[aá]lid)/i.test(text);
+  if ((mentions200 && mentionsAuth && mentionsFail) || /devolver\s+200.*(auth|autentic|login|credencial|token)/i.test(text)) {
     violations.push({
       ruleId: 'DEVIL-01',
       severity: 'CRITICAL',
@@ -214,7 +214,8 @@ export function auditArchitectDecision(
 
   // 4. Omisión o deshabilitación de pruebas
   if (
-    /(sin\s*test|omitir\s*test|deshabilitar\s*test|no\s*hacer\s*test|sin\s*pruebas)/i.test(text)
+    /(sin|omitir|deshabilitar|no\s+(hacer|crear|ejecutar|escribir))\s+(los\s+|las\s+|el\s+|la\s+)?(tests?|pruebas?)/i.test(text) ||
+    /sin\s+pruebas/i.test(text)
   ) {
     violations.push({
       ruleId: 'DEVIL-04',

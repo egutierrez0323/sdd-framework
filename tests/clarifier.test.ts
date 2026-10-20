@@ -11,12 +11,13 @@ describe('Clarifier & Socratic Inquisitor Module', () => {
 - Estado: DRAFT
 
 ### REQ-001-01: Login con Credenciales
-- Tipo EARS: Event-driven
-- Declaración: CUANDO el usuario envía credenciales válidas, el sistema deberá emitir un token.
-- Criterio de Aceptación:
-  - DADO: Usuario registrado.
-  - CUANDO: Envía POST /login.
-  - ENTONCES: Recibe token.
+- **Tipo EARS:** Event-driven
+- **Declaración:**
+  > CUANDO el usuario envía credenciales de autenticación válidas, el sistema deberá emitir un token JWT.
+- **Criterio de Aceptación:**
+  - **DADO:** Usuario registrado.
+  - **CUANDO:** Envía POST /login.
+  - **ENTONCES:** Recibe token.
 `;
 
   it('should generate structured questions with recommended options', () => {

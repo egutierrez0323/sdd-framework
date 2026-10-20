@@ -252,7 +252,7 @@
         "src/utils/fs-helpers.js",
         "src/utils/logger.js"
       ],
-      "approxTokens": 5868
+      "approxTokens": 6209
     },
     {
       "id": "src/core/auto-runner.ts",
@@ -335,7 +335,7 @@
         "DEFAULT_CONFIG"
       ],
       "imports": [],
-      "approxTokens": 572
+      "approxTokens": 582
     },
     {
       "id": "src/core/ears-validator.ts",
@@ -400,7 +400,7 @@
         "src/core/reverse-engine.js",
         "src/utils/fs-helpers.js"
       ],
-      "approxTokens": 4366
+      "approxTokens": 4381
     },
     {
       "id": "src/core/ui-html.ts",
@@ -411,7 +411,7 @@
         "generateDashboardHtml"
       ],
       "imports": [],
-      "approxTokens": 9719
+      "approxTokens": 11163
     },
     {
       "id": "src/core/ui-server.ts",
@@ -430,7 +430,7 @@
         "src/utils/fs-helpers.js",
         "src/core/ui-html.js"
       ],
-      "approxTokens": 2584
+      "approxTokens": 2599
     },
     {
       "id": "src/index.ts",
@@ -520,7 +520,7 @@
       "imports": [
         "src/core/config.js"
       ],
-      "approxTokens": 152
+      "approxTokens": 161
     },
     {
       "id": "tests/ears-validator.test.ts",
@@ -570,7 +570,7 @@
       "type": "test",
       "exports": [],
       "imports": [],
-      "approxTokens": 668
+      "approxTokens": 690
     },
     {
       "id": "vitest.config.ts",
@@ -842,7 +842,7 @@
   "stats": {
     "totalFiles": 48,
     "totalExports": 77,
-    "rawTokensEstimate": 51503,
+    "rawTokensEstimate": 53359,
     "graphTokensEstimate": 1533,
     "tokenReductionPercent": 97
   }

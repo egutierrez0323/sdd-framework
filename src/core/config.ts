@@ -7,6 +7,7 @@ export interface SddConfig {
   version: string;
   projectName: string;
   severity: SeverityLevel;
+  locale: 'en' | 'es';
   projectType: 'greenfield' | 'brownfield';
   bridges: Array<'cursor' | 'claude' | 'copilot' | 'antigravity'>;
   graph: {
@@ -31,6 +32,7 @@ export const DEFAULT_CONFIG: SddConfig = {
   version: '1.0.0',
   projectName: 'my-project',
   severity: 'L2',
+  locale: 'en',
   projectType: 'greenfield',
   bridges: ['antigravity', 'cursor', 'claude', 'copilot'],
   graph: {

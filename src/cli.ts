@@ -57,8 +57,16 @@ Comandos disponibles:
 `);
 }
 
+async function askLanguage(rl: readline.Interface, defaultLocale: 'en' | 'es' = 'en'): Promise<'en' | 'es'> {
+  console.log(`\n◇ [1/5] IDIOMA PRINCIPAL / PRIMARY LANGUAGE:`);
+  console.log(`  [1] English (Default / Recommended for international teams)`);
+  console.log(`  [2] Español`);
+  const choice = (await rl.question(`  › Select / Selecciona [1-2] (default: ${defaultLocale === 'es' ? '2' : '1'}): `)).trim();
+  return choice === '2' ? 'es' : 'en';
+}
+
 async function askProjectMode(rl: readline.Interface, hasCode: boolean): Promise<'greenfield' | 'brownfield'> {
-  console.log(`\n◇ [1/4] TIPO DE PROYECTO:`);
+  console.log(`\n◇ [2/5] TIPO DE PROYECTO:`);
   if (hasCode) {
     console.log(`  ℹ Se detectó código previo en el repositorio.`);
     console.log(`  [1] Greenfield (Empezar como nuevo)`);
@@ -72,7 +80,7 @@ async function askProjectMode(rl: readline.Interface, hasCode: boolean): Promise
 }
 
 async function askSeverity(rl: readline.Interface, defaultSev: SeverityLevel): Promise<SeverityLevel> {
-  console.log(`\n◇ [2/4] NIVEL DE SEVERIDAD DEL ÁRBITRO:`);
+  console.log(`\n◇ [3/5] NIVEL DE SEVERIDAD DEL ÁRBITRO:`);
   console.log(`  [1] L1 - Pragmatic (Velocity: alertas no bloqueantes)`);
   console.log(`  [2] (Recomendado) L2 - Standard (Producción: EARS estricto)`);
   console.log(`  [3] L3 - Draconian (Misión Crítica: tolerancia cero)`);
@@ -83,7 +91,7 @@ async function askSeverity(rl: readline.Interface, defaultSev: SeverityLevel): P
 }
 
 async function askBridgesAndSkills(rl: readline.Interface): Promise<{ bridges: SupportedBridge[]; includeSkills: boolean }> {
-  console.log(`\n◇ [3/4] ASISTENTES Y EDITORES DE IA:`);
+  console.log(`\n◇ [4/5] ASISTENTES Y EDITORES DE IA:`);
   console.log(`  [1] Cursor (.cursorrules)`);
   console.log(`  [2] Claude Code (CLAUDE.md)`);
   console.log(`  [3] Antigravity / Gemini CLI (AGENTS.md)`);
@@ -94,14 +102,33 @@ async function askBridgesAndSkills(rl: readline.Interface): Promise<{ bridges: S
   else if (bChoice === '2') bridges = ['claude'];
   else if (bChoice === '3') bridges = ['antigravity'];
 
-  console.log(`\n◇ [4/4] ARSENAL DE SKILLS AVANZADAS (.agents/skills/):`);
+  console.log(`\n◇ [5/5] ARSENAL DE SKILLS AVANZADAS (.agents/skills/):`);
   console.log(`  [1] (Recomendado) Sí, instalar arsenal completo`);
   console.log(`  [2] No, solo estructura mínima`);
   const sChoice = (await rl.question(`  › Opción [1-2] (default: 1): `)).trim();
   return { bridges, includeSkills: sChoice !== '2' };
 }
 
-async function promptInitInteractively(root: string, defaultSeverity: SeverityLevel): Promise<ScaffoldOptions> {
+function createScaffoldOptions(
+  projectRoot: string,
+  mode: 'greenfield' | 'brownfield',
+  severity: SeverityLevel,
+  locale: 'en' | 'es',
+  bridges: SupportedBridge[],
+  includeSkills: boolean
+): ScaffoldOptions {
+  return {
+    projectRoot,
+    projectName: path.basename(projectRoot),
+    mode,
+    severity,
+    locale,
+    bridges,
+    includeSkills,
+  };
+}
+
+async function promptInitInteractively(root: string, defaultSeverity: SeverityLevel, defaultLocale: 'en' | 'es'): Promise<ScaffoldOptions> {
   const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
   try {
     const hasExistingCode =
@@ -110,77 +137,75 @@ async function promptInitInteractively(root: string, defaultSeverity: SeverityLe
       (await fileExists(path.join(root, 'Cargo.toml'))) ||
       (await fileExists(path.join(root, 'go.mod')));
 
+    const locale = await askLanguage(rl, defaultLocale);
     const mode = await askProjectMode(rl, hasExistingCode);
     const severity = await askSeverity(rl, defaultSeverity);
     const { bridges, includeSkills } = await askBridgesAndSkills(rl);
 
-    return {
-      projectRoot: root,
-      projectName: path.basename(root),
-      mode,
-      severity,
-      bridges,
-      includeSkills,
-    };
+    return createScaffoldOptions(root, mode, severity, locale, bridges, includeSkills);
   } finally {
     rl.close();
   }
+}
+
+function parseInitCliArgs(): { severity: SeverityLevel; locale: 'en' | 'es'; isNonInteractive: boolean; mode: 'greenfield' | 'brownfield' } {
+  let severity: SeverityLevel = 'L2';
+  const sevIndex = args.indexOf('--severity');
+  if (sevIndex !== -1 && args[sevIndex + 1]) {
+    const candidate = args[sevIndex + 1].toUpperCase();
+    if (['L1', 'L2', 'L3'].includes(candidate)) severity = candidate as SeverityLevel;
+  }
+
+  let locale: 'en' | 'es' = 'en';
+  const langIndex = args.indexOf('--lang') !== -1 ? args.indexOf('--lang') : args.indexOf('--locale');
+  if (langIndex !== -1 && args[langIndex + 1]) {
+    const candidate = args[langIndex + 1].toLowerCase();
+    if (['en', 'es'].includes(candidate)) locale = candidate as 'en' | 'es';
+  }
+
+  const isYes = args.includes('--yes') || args.includes('-y');
+  const isBrownfield = args.includes('--brownfield');
+  const isGreenfield = args.includes('--greenfield');
+  const isNonInteractive = !process.stdin.isTTY || isYes || isBrownfield || isGreenfield;
+
+  return { severity, locale, isNonInteractive, mode: isBrownfield ? 'brownfield' : 'greenfield' };
+}
+
+function printInitSuccess(result: any, includeSkills: boolean): void {
+  Logger.success(`\n✔ Proyecto inicializado con éxito en modo SDD (${result.mode})`);
+  console.log(`\nEstructura generada:`);
+  console.log(`   • .sdd/ (specs, plans, tasks, templates)`);
+  console.log(`   • .sdd/templates/ (spec, plan, tasks, ears-guide)`);
+  console.log(`   • Constitución en AGENTS.md`);
+  if (includeSkills) {
+    console.log(`   • .agents/skills/ (grill-me, clean-code, project-graph, sdd-methodology)`);
+  }
+  console.log(`   • Puentes sincronizados: ${result.syncedBridges.join(', ')}`);
+  console.log(`\nSiguientes pasos:`);
+  console.log(`   1. Crear tu primera especificación: npx sdd new-spec mi-funcionalidad`);
+  console.log(`   2. Someter la especificación al Árbitro: npx sdd grill .sdd/specs/SPEC-MI-FUNCIONALIDAD.md`);
+  console.log(`   3. Visualizar en interfaz web: npx sdd ui\n`);
 }
 
 async function handleInit() {
   const root = process.cwd();
   Logger.banner('SDD FRAMEWORK :: ASISTENTE DE INICIALIZACIÓN (INIT)');
 
-  let severity: SeverityLevel = 'L2';
-  const sevIndex = args.indexOf('--severity');
-  if (sevIndex !== -1 && args[sevIndex + 1]) {
-    const candidate = args[sevIndex + 1].toUpperCase();
-    if (['L1', 'L2', 'L3'].includes(candidate)) {
-      severity = candidate as SeverityLevel;
-    }
-  }
-
-  const isYes = args.includes('--yes') || args.includes('-y');
-  const isBrownfield = args.includes('--brownfield');
-  const isGreenfield = args.includes('--greenfield');
-  const isInteractive = Boolean(process.stdin.isTTY) && !isYes && !isBrownfield && !isGreenfield;
-
-  let options: ScaffoldOptions;
-
-  if (isInteractive) {
-    options = await promptInitInteractively(root, severity);
-  } else {
-    const mode = isBrownfield ? 'brownfield' : 'greenfield';
-    options = {
-      projectRoot: root,
-      projectName: path.basename(root),
-      mode,
-      severity,
-      bridges: ['cursor', 'claude', 'antigravity'],
-      includeSkills: !args.includes('--no-skills'),
-    };
-  }
+  const { severity, locale, isNonInteractive, mode } = parseInitCliArgs();
+  const options = !isNonInteractive
+    ? await promptInitInteractively(root, severity, locale)
+    : createScaffoldOptions(
+        root,
+        mode,
+        severity,
+        locale,
+        ['cursor', 'claude', 'antigravity'] as SupportedBridge[],
+        !args.includes('--no-skills')
+      );
 
   Logger.info(`Configurando entorno SDD en modo [${options.mode.toUpperCase()}] con severidad [${options.severity}]...`);
   const result = await scaffoldProject(options);
-
-  Logger.success(`\n✔ Proyecto inicializado con éxito en modo SDD (${result.mode})`);
-  console.log(`\nEstructura generada:`);
-  console.log(`   • .sdd/ (specs, plans, tasks, templates)`);
-  console.log(`   • .sdd/templates/ (spec, plan, tasks, ears-guide)`);
-  console.log(`   • Constitución en AGENTS.md`);
-  if (options.includeSkills) {
-    console.log(`   • .agents/skills/ (grill-me, clean-code, project-graph, sdd-methodology)`);
-  }
-  console.log(`   • Puentes sincronizados: ${result.syncedBridges.join(', ')}`);
-
-  console.log(`\nSiguientes pasos:`);
-  console.log(`   1. Crear tu primera especificación:`);
-  console.log(`      npx sdd new-spec mi-funcionalidad`);
-  console.log(`   2. Someter la especificación al interrogatorio del Árbitro:`);
-  console.log(`      npx sdd grill .sdd/specs/SPEC-MI-FUNCIONALIDAD.md`);
-  console.log(`   3. Auditar contratos EARS antes de planificar:`);
-  console.log(`      npx sdd audit\n`);
+  printInitSuccess(result, options.includeSkills);
 }
 
 async function handleReverse() {

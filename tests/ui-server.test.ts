@@ -27,6 +27,8 @@ describe('UI Server & Dashboard Module', () => {
     const data = await collectSddProjectData(cardValidatorDir);
 
     expect(data.projectName).toBeDefined();
+    expect(data.locale).toBeDefined();
+    expect(['en', 'es']).toContain(data.locale);
     expect(data.specs.length).toBeGreaterThan(0);
     expect(data.specs.some((s) => s.id === 'SPEC-CARD-VALIDATION')).toBe(true);
 

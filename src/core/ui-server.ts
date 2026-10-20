@@ -37,6 +37,7 @@ export interface TaskListData {
 export interface SddDashboardData {
   projectName: string;
   severity: SeverityLevel;
+  locale: 'en' | 'es';
   specs: SpecData[];
   plans: Array<{ id: string; filename: string; title: string; content: string }>;
   tasks: TaskListData[];
@@ -244,6 +245,7 @@ export async function collectSddProjectData(projectRoot: string): Promise<SddDas
   return {
     projectName: config.projectName || path.basename(projectRoot),
     severity: config.severity,
+    locale: config.locale || 'en',
     specs,
     plans,
     tasks,

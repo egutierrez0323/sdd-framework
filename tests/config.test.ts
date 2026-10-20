@@ -6,6 +6,7 @@ describe('Config Module', () => {
     const config = await loadConfig('non-existent-dir');
     expect(config.version).toBe('1.0.0');
     expect(config.severity).toBe('L2');
+    expect(config.locale).toBe('en');
     expect(config.autonomous.maxRetries).toBe(3);
   });
 

@@ -11,6 +11,7 @@ export interface ScaffoldOptions {
   severity: SeverityLevel;
   bridges: SupportedBridge[];
   includeSkills: boolean;
+  locale?: 'en' | 'es';
 }
 
 export interface ScaffoldResult {
@@ -360,6 +361,7 @@ export async function scaffoldProject(options: ScaffoldOptions): Promise<Scaffol
     ...DEFAULT_CONFIG,
     projectName,
     severity,
+    locale: options.locale || 'en',
     projectType: mode,
     bridges,
   };

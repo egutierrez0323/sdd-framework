@@ -248,10 +248,11 @@
         "src/core/project-graph.js",
         "src/core/code-reviewer.js",
         "src/core/scaffold.js",
+        "src/core/ui-server.js",
         "src/utils/fs-helpers.js",
         "src/utils/logger.js"
       ],
-      "approxTokens": 5604
+      "approxTokens": 5886
     },
     {
       "id": "src/core/auto-runner.ts",
@@ -402,6 +403,36 @@
       "approxTokens": 4366
     },
     {
+      "id": "src/core/ui-html.ts",
+      "name": "ui-html.ts",
+      "type": "module",
+      "exports": [
+        "generateDashboardHtml"
+      ],
+      "imports": [],
+      "approxTokens": 7785
+    },
+    {
+      "id": "src/core/ui-server.ts",
+      "name": "ui-server.ts",
+      "type": "module",
+      "exports": [
+        "SpecData",
+        "TaskListData",
+        "SddDashboardData",
+        "openInBrowser"
+      ],
+      "imports": [
+        "src/core/config.js",
+        "src/core/ears-validator.js",
+        "src/core/auto-runner.js",
+        "src/utils/fs-helpers.js",
+        "src/core/ui-html.js",
+        "src/utils/logger.js"
+      ],
+      "approxTokens": 2550
+    },
+    {
       "id": "src/index.ts",
       "name": "index.ts",
       "type": "module",
@@ -532,6 +563,14 @@
         "src/utils/fs-helpers.js"
       ],
       "approxTokens": 961
+    },
+    {
+      "id": "tests/ui-server.test.ts",
+      "name": "ui-server.test.ts",
+      "type": "test",
+      "exports": [],
+      "imports": [],
+      "approxTokens": 668
     },
     {
       "id": "vitest.config.ts",
@@ -681,6 +720,10 @@
     },
     {
       "from": "src/cli.ts",
+      "to": "src/core/ui-server.js"
+    },
+    {
+      "from": "src/cli.ts",
       "to": "src/utils/fs-helpers.js"
     },
     {
@@ -740,6 +783,30 @@
       "to": "src/utils/fs-helpers.js"
     },
     {
+      "from": "src/core/ui-server.ts",
+      "to": "src/core/config.js"
+    },
+    {
+      "from": "src/core/ui-server.ts",
+      "to": "src/core/ears-validator.js"
+    },
+    {
+      "from": "src/core/ui-server.ts",
+      "to": "src/core/auto-runner.js"
+    },
+    {
+      "from": "src/core/ui-server.ts",
+      "to": "src/utils/fs-helpers.js"
+    },
+    {
+      "from": "src/core/ui-server.ts",
+      "to": "src/core/ui-html.js"
+    },
+    {
+      "from": "src/core/ui-server.ts",
+      "to": "src/utils/logger.js"
+    },
+    {
       "from": "tests/bridges.test.ts",
       "to": "src/core/bridges.js"
     },
@@ -777,10 +844,10 @@
     }
   ],
   "stats": {
-    "totalFiles": 45,
-    "totalExports": 71,
-    "rawTokensEstimate": 38203,
-    "graphTokensEstimate": 1428,
-    "tokenReductionPercent": 96
+    "totalFiles": 48,
+    "totalExports": 76,
+    "rawTokensEstimate": 49488,
+    "graphTokensEstimate": 1534,
+    "tokenReductionPercent": 97
   }
 }

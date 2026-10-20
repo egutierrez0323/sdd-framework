@@ -1,11 +1,11 @@
 # Mapa Visual de Arquitectura y Grafo de Dependencias
 
 > **MÉTRICAS DE TOKENS:**
-> - Archivos analizados: **45**
-> - Símbolos exportados: **71**
-> - Tokens código fuente completo: ~**38203** tokens
-> - Tokens del grafo compacto: ~**1428** tokens
-> - **Ahorro de Tokens: 96%**
+> - Archivos analizados: **48**
+> - Símbolos exportados: **76**
+> - Tokens código fuente completo: ~**49488** tokens
+> - Tokens del grafo compacto: ~**1534** tokens
+> - **Ahorro de Tokens: 97%**
 
 ```mermaid
 graph TD
@@ -40,6 +40,8 @@ graph TD
   src_core_project_graph_ts["project-graph.ts<br/>(GraphNode, ProjectGraph, formatMermaidGraph)"]
   src_core_reverse_engine_ts["reverse-engine.ts<br/>(ProjectScanResult, generateReverseConstitution, generateReverseBaselineSpec)"]
   src_core_scaffold_ts["scaffold.ts<br/>(ScaffoldOptions, ScaffoldResult, BUILTIN_TEMPLATES...)"]
+  src_core_ui_html_ts["ui-html.ts<br/>(generateDashboardHtml)"]
+  src_core_ui_server_ts["ui-server.ts<br/>(SpecData, TaskListData, SddDashboardData...)"]
   src_index_ts["index.ts<br/>()"]
   src_utils_fs_helpers_ts["fs-helpers.ts<br/>()"]
   src_utils_git_client_ts["git-client.ts<br/>(GitStatus, GitClient)"]
@@ -53,6 +55,7 @@ graph TD
   tests_project_graph_test_ts["project-graph.test.ts<br/>()"]
   tests_reverse_engine_test_ts["reverse-engine.test.ts<br/>()"]
   tests_scaffold_test_ts["scaffold.test.ts<br/>()"]
+  tests_ui_server_test_ts["ui-server.test.ts<br/>()"]
   vitest_config_ts["vitest.config.ts<br/>()"]
 ```
 
@@ -81,7 +84,7 @@ graph TD
 | `card-validator/tests/luhn.test.ts` | *(interno)* | `luhn.js` |
 | `card-validator/tests/sanitizer.test.ts` | *(interno)* | `sanitizer.js` |
 | `card-validator/tests/validator.test.ts` | *(interno)* | `validator.js` |
-| `src/cli.ts` | *(interno)* | `config.js`, `ears-validator.js`, `reverse-engine.js`, `bridges.js`, `auto-runner.js`, `project-graph.js`, `code-reviewer.js`, `scaffold.js`, `fs-helpers.js`, `logger.js` |
+| `src/cli.ts` | *(interno)* | `config.js`, `ears-validator.js`, `reverse-engine.js`, `bridges.js`, `auto-runner.js`, `project-graph.js`, `code-reviewer.js`, `scaffold.js`, `ui-server.js`, `fs-helpers.js`, `logger.js` |
 | `src/core/auto-runner.ts` | `TaskStatus`, `MicroTask`, `AutoRunResult`, `parseTasksMarkdown`, `updateTaskStatusInMarkdown`, `RunnerOptions` | `git-client.js`, `logger.js` |
 | `src/core/bridges.ts` | `SupportedBridge`, `SyncReport` | `fs-helpers.js` |
 | `src/core/clarifier.ts` | `ClarificationQuestion`, `InvariantViolation`, `AutoGrillSession`, `CodebaseContext`, `generateClarificationSession`, `runAutoGrillSession`, `auditArchitectDecision`, `formatClarificationMarkdown`, `injectDecisionsIntoSpec` | `ears-validator.js`, `config.js` |
@@ -91,6 +94,8 @@ graph TD
 | `src/core/project-graph.ts` | `GraphNode`, `ProjectGraph`, `formatMermaidGraph` | `fs-helpers.js` |
 | `src/core/reverse-engine.ts` | `ProjectScanResult`, `generateReverseConstitution`, `generateReverseBaselineSpec` | `fs-helpers.js` |
 | `src/core/scaffold.ts` | `ScaffoldOptions`, `ScaffoldResult`, `BUILTIN_TEMPLATES`, `EjemploContrato`, `BUILTIN_SKILLS`, `generateStandardConstitution` | `config.js`, `bridges.js`, `reverse-engine.js`, `fs-helpers.js` |
+| `src/core/ui-html.ts` | `generateDashboardHtml` | *(ninguna)* |
+| `src/core/ui-server.ts` | `SpecData`, `TaskListData`, `SddDashboardData`, `openInBrowser` | `config.js`, `ears-validator.js`, `auto-runner.js`, `fs-helpers.js`, `ui-html.js`, `logger.js` |
 | `src/index.ts` | *(interno)* | *(ninguna)* |
 | `src/utils/fs-helpers.ts` | *(interno)* | *(ninguna)* |
 | `src/utils/git-client.ts` | `GitStatus`, `GitClient` | *(ninguna)* |
@@ -104,4 +109,5 @@ graph TD
 | `tests/project-graph.test.ts` | *(interno)* | `project-graph.js`, `fs-helpers.js` |
 | `tests/reverse-engine.test.ts` | *(interno)* | `reverse-engine.js` |
 | `tests/scaffold.test.ts` | *(interno)* | `scaffold.js`, `fs-helpers.js` |
+| `tests/ui-server.test.ts` | *(interno)* | *(ninguna)* |
 | `vitest.config.ts` | *(interno)* | *(ninguna)* |

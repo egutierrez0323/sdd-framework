@@ -780,7 +780,7 @@ export function generateDashboardHtml(): string {
       renderTasks(data.tasks);
 
       // Graph & Constitution
-      document.getElementById('graphContent').textContent = data.graphMermaid || 'No se generó grafo aún. Ejecuta `sdd graph` para crearlo.';
+      document.getElementById('graphContent').textContent = data.graphMermaid || "No se generó grafo aún. Ejecuta 'sdd graph' para crearlo.";
       document.getElementById('constitutionContent').textContent = data.constitution || 'No se encontró AGENTS.md.';
 
       // Seleccionar primera spec por defecto

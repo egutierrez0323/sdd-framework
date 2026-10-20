@@ -2,9 +2,9 @@
 
 > **MÉTRICAS DE TOKENS:**
 > - Archivos analizados: **48**
-> - Símbolos exportados: **76**
-> - Tokens código fuente completo: ~**49488** tokens
-> - Tokens del grafo compacto: ~**1534** tokens
+> - Símbolos exportados: **77**
+> - Tokens código fuente completo: ~**48057** tokens
+> - Tokens del grafo compacto: ~**1533** tokens
 > - **Ahorro de Tokens: 97%**
 
 ```mermaid
@@ -40,7 +40,7 @@ graph TD
   src_core_project_graph_ts["project-graph.ts<br/>(GraphNode, ProjectGraph, formatMermaidGraph)"]
   src_core_reverse_engine_ts["reverse-engine.ts<br/>(ProjectScanResult, generateReverseConstitution, generateReverseBaselineSpec)"]
   src_core_scaffold_ts["scaffold.ts<br/>(ScaffoldOptions, ScaffoldResult, BUILTIN_TEMPLATES...)"]
-  src_core_ui_html_ts["ui-html.ts<br/>(generateDashboardHtml)"]
+  src_core_ui_html_ts["ui-html.ts<br/>(DASHBOARD_HTML, generateDashboardHtml)"]
   src_core_ui_server_ts["ui-server.ts<br/>(SpecData, TaskListData, SddDashboardData...)"]
   src_index_ts["index.ts<br/>()"]
   src_utils_fs_helpers_ts["fs-helpers.ts<br/>()"]
@@ -94,8 +94,8 @@ graph TD
 | `src/core/project-graph.ts` | `GraphNode`, `ProjectGraph`, `formatMermaidGraph` | `fs-helpers.js` |
 | `src/core/reverse-engine.ts` | `ProjectScanResult`, `generateReverseConstitution`, `generateReverseBaselineSpec` | `fs-helpers.js` |
 | `src/core/scaffold.ts` | `ScaffoldOptions`, `ScaffoldResult`, `BUILTIN_TEMPLATES`, `EjemploContrato`, `BUILTIN_SKILLS`, `generateStandardConstitution` | `config.js`, `bridges.js`, `reverse-engine.js`, `fs-helpers.js` |
-| `src/core/ui-html.ts` | `generateDashboardHtml` | *(ninguna)* |
-| `src/core/ui-server.ts` | `SpecData`, `TaskListData`, `SddDashboardData`, `openInBrowser` | `config.js`, `ears-validator.js`, `auto-runner.js`, `fs-helpers.js`, `ui-html.js`, `logger.js` |
+| `src/core/ui-html.ts` | `DASHBOARD_HTML`, `generateDashboardHtml` | *(ninguna)* |
+| `src/core/ui-server.ts` | `SpecData`, `TaskListData`, `SddDashboardData`, `openInBrowser` | `config.js`, `ears-validator.js`, `auto-runner.js`, `fs-helpers.js`, `ui-html.js` |
 | `src/index.ts` | *(interno)* | *(ninguna)* |
 | `src/utils/fs-helpers.ts` | *(interno)* | *(ninguna)* |
 | `src/utils/git-client.ts` | `GitStatus`, `GitClient` | *(ninguna)* |

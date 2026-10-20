@@ -252,7 +252,7 @@
         "src/utils/fs-helpers.js",
         "src/utils/logger.js"
       ],
-      "approxTokens": 5886
+      "approxTokens": 5877
     },
     {
       "id": "src/core/auto-runner.ts",
@@ -407,10 +407,11 @@
       "name": "ui-html.ts",
       "type": "module",
       "exports": [
+        "DASHBOARD_HTML",
         "generateDashboardHtml"
       ],
       "imports": [],
-      "approxTokens": 7785
+      "approxTokens": 6329
     },
     {
       "id": "src/core/ui-server.ts",
@@ -427,10 +428,9 @@
         "src/core/ears-validator.js",
         "src/core/auto-runner.js",
         "src/utils/fs-helpers.js",
-        "src/core/ui-html.js",
-        "src/utils/logger.js"
+        "src/core/ui-html.js"
       ],
-      "approxTokens": 2550
+      "approxTokens": 2584
     },
     {
       "id": "src/index.ts",
@@ -803,10 +803,6 @@
       "to": "src/core/ui-html.js"
     },
     {
-      "from": "src/core/ui-server.ts",
-      "to": "src/utils/logger.js"
-    },
-    {
       "from": "tests/bridges.test.ts",
       "to": "src/core/bridges.js"
     },
@@ -845,9 +841,9 @@
   ],
   "stats": {
     "totalFiles": 48,
-    "totalExports": 76,
-    "rawTokensEstimate": 49488,
-    "graphTokensEstimate": 1534,
+    "totalExports": 77,
+    "rawTokensEstimate": 48057,
+    "graphTokensEstimate": 1533,
     "tokenReductionPercent": 97
   }
 }

@@ -113,6 +113,7 @@ export interface RunnerOptions {
   maxRetries?: number;
   featureBranch?: string;
   executor?: (cmd: string) => Promise<{ code: number; output: string }>;
+  skipCommit?: boolean;
 }
 
 export async function runTaskVerification(
@@ -175,12 +176,16 @@ export async function executeAutonomousPlan(
     if (success) {
       currentMarkdown = updateTaskStatusInMarkdown(currentMarkdown, task.id, 'DONE');
       completedTasks.push(task.id);
-      const commitMsg = `feat(${task.reqId || 'SDD'}): ${task.id} completada y verificada`;
-      await git.commit(commitMsg);
+      if (!options.skipCommit) {
+        const commitMsg = `feat(${task.reqId || 'SDD'}): ${task.id} completada y verificada`;
+        await git.commit(commitMsg);
+      }
     } else {
       Logger.error(`Tarea ${task.id} falló tras ${maxRetries} intentos consecutivos.`);
-      Logger.arbiter('AUDITOR', `Ejecutando rollback limpio (git reset/clean)...`);
-      await git.resetHardAndClean();
+      if (!options.skipCommit) {
+        Logger.arbiter('AUDITOR', `Ejecutando rollback limpio (git reset/clean)...`);
+        await git.resetHardAndClean();
+      }
 
       currentMarkdown = updateTaskStatusInMarkdown(currentMarkdown, task.id, 'BLOCKED');
 

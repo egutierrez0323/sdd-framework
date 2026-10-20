@@ -1,6 +1,7 @@
 /**
  * Generador de la interfaz web para el Dashboard y Visualizador SDD.
- * Implementa diseño Rich Aesthetics, navegación reactiva, tabs y soporte de impresión (@media print).
+ * Implementa diseño Rich Aesthetics de alta precisión, navegación reactiva,
+ * iconos SVG vectoriales sin emojis y soporte de impresión (@media print).
  */
 
 export const DASHBOARD_HTML = `<!DOCTYPE html>
@@ -14,27 +15,27 @@ export const DASHBOARD_HTML = `<!DOCTYPE html>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg-base: #090d16;
-      --bg-surface: #0f172a;
-      --bg-card: #182238;
-      --bg-card-hover: #1e2c48;
-      --border: #263554;
+      --bg-base: #090a0f;
+      --bg-surface: #0f121a;
+      --bg-card: #151926;
+      --bg-card-hover: #1c2233;
+      --border: #222838;
       --border-accent: #3b82f6;
-      --text-main: #f8fafc;
+      --text-main: #f1f5f9;
       --text-muted: #94a3b8;
       --text-sub: #64748b;
-      --primary: #6366f1;
-      --primary-hover: #4f46e5;
-      --primary-glow: rgba(99, 102, 241, 0.25);
+      --primary: #3b82f6;
+      --primary-hover: #2563eb;
+      --primary-glow: rgba(59, 130, 246, 0.15);
       --success: #10b981;
-      --success-glow: rgba(16, 185, 129, 0.2);
+      --success-glow: rgba(16, 185, 129, 0.15);
       --warning: #f59e0b;
-      --warning-glow: rgba(245, 158, 11, 0.2);
+      --warning-glow: rgba(245, 158, 11, 0.15);
       --danger: #ef4444;
       --info: #06b6d4;
-      --radius-sm: 6px;
-      --radius-md: 10px;
-      --radius-lg: 16px;
+      --radius-sm: 5px;
+      --radius-md: 8px;
+      --radius-lg: 12px;
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -46,129 +47,136 @@ export const DASHBOARD_HTML = `<!DOCTYPE html>
       min-height: 100vh;
       display: flex;
       flex-direction: column;
+      -webkit-font-smoothing: antialiased;
     }
 
     header {
-      background: rgba(15, 23, 42, 0.85);
+      background: rgba(15, 18, 26, 0.9);
       backdrop-filter: blur(12px);
       border-bottom: 1px solid var(--border);
       position: sticky;
       top: 0;
       z-index: 50;
-      padding: 0.85rem 1.75rem;
+      padding: 0.75rem 1.5rem;
       display: flex;
       align-items: center;
       justify-content: space-between;
     }
 
-    .brand { display: flex; align-items: center; gap: 0.85rem; }
+    .brand { display: flex; align-items: center; gap: 0.75rem; }
     .logo-badge {
-      background: linear-gradient(135deg, #6366f1, #06b6d4);
-      color: white;
-      font-weight: 800;
-      font-size: 0.95rem;
-      padding: 0.35rem 0.65rem;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      color: #fff;
+      font-weight: 700;
+      font-size: 0.75rem;
+      letter-spacing: 0.08em;
+      padding: 0.25rem 0.55rem;
       border-radius: var(--radius-sm);
-      box-shadow: 0 0 15px var(--primary-glow);
+      font-family: 'JetBrains Mono', monospace;
     }
 
-    .brand-title { font-size: 1.15rem; font-weight: 700; display: flex; align-items: center; gap: 0.5rem; }
+    .brand-title { font-size: 0.95rem; font-weight: 600; display: flex; align-items: center; gap: 0.6rem; color: #e2e8f0; }
     .project-name {
       color: var(--info);
       font-family: 'JetBrains Mono', monospace;
-      font-size: 0.9rem;
-      background: rgba(6, 182, 212, 0.12);
+      font-size: 0.8rem;
+      background: rgba(6, 182, 212, 0.08);
       padding: 0.2rem 0.5rem;
       border-radius: var(--radius-sm);
-      border: 1px solid rgba(6, 182, 212, 0.25);
+      border: 1px solid rgba(6, 182, 212, 0.2);
     }
 
-    .header-actions { display: flex; align-items: center; gap: 0.75rem; }
+    .header-actions { display: flex; align-items: center; gap: 0.6rem; }
     .btn {
       display: inline-flex;
       align-items: center;
-      gap: 0.4rem;
-      padding: 0.45rem 0.9rem;
+      gap: 0.45rem;
+      padding: 0.4rem 0.8rem;
       border-radius: var(--radius-sm);
-      font-size: 0.85rem;
-      font-weight: 600;
+      font-size: 0.82rem;
+      font-weight: 500;
       cursor: pointer;
       border: 1px solid var(--border);
       background: var(--bg-card);
       color: var(--text-main);
-      transition: all 0.2s ease;
+      transition: all 0.15s ease;
     }
-    .btn:hover { background: var(--bg-card-hover); border-color: var(--primary); }
-    .btn-primary { background: var(--primary); border-color: var(--primary); color: white; }
-    .btn-primary:hover { background: var(--primary-hover); }
+    .btn:hover { background: var(--bg-card-hover); border-color: #334155; }
+    .btn-primary { background: #2563eb; border-color: #3b82f6; color: white; font-weight: 600; }
+    .btn-primary:hover { background: #1d4ed8; }
 
     .app-container { display: flex; flex: 1; }
     aside {
-      width: 280px;
+      width: 270px;
       background: var(--bg-surface);
       border-right: 1px solid var(--border);
-      height: calc(100vh - 61px);
+      height: calc(100vh - 53px);
       position: sticky;
-      top: 61px;
+      top: 53px;
       overflow-y: auto;
     }
 
-    .nav-section { padding: 1.25rem 1rem 0.5rem; }
-    .nav-title { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1px; color: var(--text-sub); font-weight: 700; margin-bottom: 0.5rem; }
+    .nav-section { padding: 1.25rem 0.85rem 0.5rem; }
+    .nav-title { font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-sub); font-weight: 700; margin-bottom: 0.4rem; padding-left: 0.5rem; }
     .nav-item {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 0.6rem 0.75rem;
+      padding: 0.5rem 0.75rem;
       border-radius: var(--radius-sm);
       color: var(--text-muted);
       cursor: pointer;
-      font-size: 0.88rem;
+      font-size: 0.85rem;
       font-weight: 500;
-      margin-bottom: 0.25rem;
+      margin-bottom: 0.15rem;
+      transition: background 0.12s ease, color 0.12s ease;
     }
+    .nav-item-content { display: flex; align-items: center; gap: 0.6rem; }
     .nav-item:hover { background: rgba(255, 255, 255, 0.04); color: var(--text-main); }
-    .nav-item.active { background: var(--primary-glow); color: var(--primary); font-weight: 600; border-left: 3px solid var(--primary); }
-    .nav-badge { font-size: 0.7rem; padding: 0.15rem 0.45rem; border-radius: 999px; background: var(--bg-base); border: 1px solid var(--border); font-family: 'JetBrains Mono', monospace; }
+    .nav-item.active { background: rgba(59, 130, 246, 0.1); color: #60a5fa; font-weight: 600; }
+    .nav-badge { font-size: 0.7rem; padding: 0.1rem 0.4rem; border-radius: 999px; background: var(--bg-base); border: 1px solid var(--border); font-family: 'JetBrains Mono', monospace; }
 
-    main { flex: 1; padding: 2rem 2.5rem; max-width: 1200px; margin: 0 auto; width: 100%; }
+    main { flex: 1; padding: 1.75rem 2.25rem; max-width: 1200px; margin: 0 auto; width: 100%; }
 
-    .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1.25rem; margin-bottom: 2rem; }
+    .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; margin-bottom: 1.5rem; }
     .stat-card {
       background: var(--bg-surface);
       border: 1px solid var(--border);
       border-radius: var(--radius-md);
-      padding: 1.25rem 1.5rem;
-      transition: transform 0.2s ease, border-color 0.2s ease;
+      padding: 1.15rem 1.35rem;
+      transition: border-color 0.15s ease;
     }
-    .stat-card:hover { transform: translateY(-2px); border-color: var(--border-accent); }
-    .stat-label { font-size: 0.8rem; color: var(--text-muted); font-weight: 500; text-transform: uppercase; }
-    .stat-value { font-size: 2rem; font-weight: 800; margin-top: 0.25rem; display: flex; align-items: baseline; gap: 0.5rem; }
-    .stat-sub { font-size: 0.8rem; color: var(--text-sub); }
+    .stat-card:hover { border-color: #334155; }
+    .stat-label { font-size: 0.72rem; color: var(--text-sub); font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; }
+    .stat-value { font-size: 1.85rem; font-weight: 700; margin-top: 0.2rem; display: flex; align-items: baseline; gap: 0.4rem; font-variant-numeric: tabular-nums; }
+    .stat-sub { font-size: 0.78rem; color: var(--text-sub); margin-top: 0.15rem; }
 
-    .progress-bar-container { background: var(--bg-base); height: 8px; border-radius: 999px; overflow: hidden; margin-top: 0.75rem; border: 1px solid var(--border); }
+    .progress-bar-container { background: var(--bg-base); height: 6px; border-radius: 999px; overflow: hidden; margin-top: 0.6rem; border: 1px solid var(--border); }
     .progress-bar-fill { height: 100%; background: linear-gradient(90deg, #10b981, #06b6d4); border-radius: 999px; }
 
     .badge {
       display: inline-flex;
       align-items: center;
-      padding: 0.2rem 0.55rem;
+      gap: 0.35rem;
+      padding: 0.2rem 0.5rem;
       border-radius: var(--radius-sm);
-      font-size: 0.75rem;
+      font-size: 0.72rem;
       font-weight: 600;
       font-family: 'JetBrains Mono', monospace;
+      letter-spacing: 0.02em;
     }
-    .badge-approved { background: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.3); }
-    .badge-draft { background: rgba(245, 158, 11, 0.15); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.3); }
-    .badge-blocked { background: rgba(239, 68, 68, 0.15); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.3); }
-    .badge-done { background: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.3); }
-    .badge-pending { background: rgba(148, 163, 184, 0.15); color: #94a3b8; border: 1px solid rgba(148, 163, 184, 0.3); }
+    .badge-approved { background: rgba(16, 185, 129, 0.12); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.25); }
+    .badge-draft { background: rgba(245, 158, 11, 0.12); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.25); }
+    .badge-blocked { background: rgba(239, 68, 68, 0.12); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.25); }
+    .badge-done { background: rgba(16, 185, 129, 0.12); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.25); }
+    .badge-pending { background: rgba(148, 163, 184, 0.1); color: #94a3b8; border: 1px solid rgba(148, 163, 184, 0.2); }
 
-    .ears-ubiquitous { background: rgba(16, 185, 129, 0.15); color: #6ee7b7; border: 1px solid rgba(16, 185, 129, 0.3); }
-    .ears-event { background: rgba(59, 130, 246, 0.15); color: #93c5fd; border: 1px solid rgba(59, 130, 246, 0.3); }
-    .ears-state { background: rgba(245, 158, 11, 0.15); color: #fcd34d; border: 1px solid rgba(245, 158, 11, 0.3); }
-    .ears-unwanted { background: rgba(239, 68, 68, 0.15); color: #fca5a5; border: 1px solid rgba(239, 68, 68, 0.3); }
-    .ears-optional { background: rgba(6, 182, 212, 0.15); color: #67e8f9; border: 1px solid rgba(6, 182, 212, 0.3); }
+    .ears-ubiquitous { background: rgba(16, 185, 129, 0.1); color: #6ee7b7; border: 1px solid rgba(16, 185, 129, 0.25); }
+    .ears-event { background: rgba(59, 130, 246, 0.1); color: #93c5fd; border: 1px solid rgba(59, 130, 246, 0.25); }
+    .ears-state { background: rgba(245, 158, 11, 0.1); color: #fcd34d; border: 1px solid rgba(245, 158, 11, 0.25); }
+    .ears-unwanted { background: rgba(239, 68, 68, 0.1); color: #fca5a5; border: 1px solid rgba(239, 68, 68, 0.25); }
+    .ears-optional { background: rgba(6, 182, 212, 0.1); color: #67e8f9; border: 1px solid rgba(6, 182, 212, 0.25); }
 
     .view-panel { display: none; }
     .view-panel.active { display: block; }
@@ -176,86 +184,77 @@ export const DASHBOARD_HTML = `<!DOCTYPE html>
     .card {
       background: var(--bg-surface);
       border: 1px solid var(--border);
-      border-radius: var(--radius-lg);
-      padding: 1.75rem;
-      margin-bottom: 1.5rem;
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+      border-radius: var(--radius-md);
+      padding: 1.5rem;
+      margin-bottom: 1.25rem;
     }
 
     .card-header {
       display: flex;
       justify-content: space-between;
       align-items: flex-start;
-      margin-bottom: 1.25rem;
-      padding-bottom: 1rem;
+      margin-bottom: 1rem;
+      padding-bottom: 0.85rem;
       border-bottom: 1px solid var(--border);
     }
-    .card-title { font-size: 1.4rem; font-weight: 700; }
-    .card-meta { display: flex; flex-wrap: wrap; gap: 1.25rem; font-size: 0.85rem; color: var(--text-muted); margin-top: 0.4rem; }
+    .card-title { font-size: 1.2rem; font-weight: 700; color: #f8fafc; }
+    .card-meta { display: flex; flex-wrap: wrap; gap: 1rem; font-size: 0.82rem; color: var(--text-muted); margin-top: 0.35rem; }
 
     .req-item {
       background: var(--bg-card);
       border: 1px solid var(--border);
-      border-radius: var(--radius-md);
-      padding: 1.25rem;
-      margin-bottom: 1rem;
-    }
-    .req-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.75rem; }
-    .req-id { font-family: 'JetBrains Mono', monospace; font-weight: 700; font-size: 0.95rem; color: var(--primary); }
-    .req-declaration {
-      font-size: 1rem;
-      font-weight: 500;
+      border-radius: var(--radius-sm);
+      padding: 1.15rem;
       margin-bottom: 0.85rem;
-      border-left: 3px solid var(--primary);
-      background: rgba(99, 102, 241, 0.05);
-      padding: 0.6rem 0.85rem;
+    }
+    .req-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.65rem; }
+    .req-id { font-family: 'JetBrains Mono', monospace; font-weight: 700; font-size: 0.88rem; color: #60a5fa; }
+    .req-declaration {
+      font-size: 0.94rem;
+      font-weight: 500;
+      margin-bottom: 0.75rem;
+      border-left: 3px solid #3b82f6;
+      background: rgba(59, 130, 246, 0.05);
+      padding: 0.55rem 0.8rem;
       border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+      color: #e2e8f0;
     }
 
     .criteria-box {
       background: var(--bg-base);
       border: 1px solid var(--border);
       border-radius: var(--radius-sm);
-      padding: 0.85rem 1rem;
-      font-size: 0.85rem;
+      padding: 0.75rem 0.85rem;
+      font-size: 0.82rem;
       display: grid;
-      gap: 0.4rem;
+      gap: 0.35rem;
     }
-    .criteria-line { display: flex; gap: 0.75rem; }
-    .criteria-tag { font-family: 'JetBrains Mono', monospace; font-weight: 700; color: var(--info); min-width: 65px; }
+    .criteria-line { display: flex; gap: 0.65rem; }
+    .criteria-tag { font-family: 'JetBrains Mono', monospace; font-weight: 700; color: var(--info); min-width: 60px; font-size: 0.75rem; }
 
     .task-row {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 0.85rem 1rem;
+      padding: 0.75rem 0.9rem;
       background: var(--bg-card);
       border: 1px solid var(--border);
       border-radius: var(--radius-sm);
-      margin-bottom: 0.5rem;
+      margin-bottom: 0.45rem;
     }
-    .task-left { display: flex; align-items: center; gap: 0.85rem; flex: 1; }
-    .task-id { font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; font-weight: 700; color: var(--text-muted); }
-    .task-title { font-size: 0.92rem; font-weight: 500; }
-    .task-verify {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 0.78rem;
-      background: var(--bg-base);
-      padding: 0.25rem 0.5rem;
-      border-radius: var(--radius-sm);
-      border: 1px solid var(--border);
-      color: var(--text-sub);
-    }
+    .task-left { display: flex; align-items: center; gap: 0.75rem; flex: 1; }
+    .task-id { font-family: 'JetBrains Mono', monospace; font-size: 0.82rem; font-weight: 600; color: var(--text-muted); }
+    .task-title { font-size: 0.88rem; font-weight: 500; }
 
     @media print {
-      body { background: white !important; color: black !important; font-size: 11pt; }
+      body { background: white !important; color: black !important; font-size: 10pt; }
       header, aside, .header-actions, .nav-section, .btn, .no-print { display: none !important; }
       main { max-width: 100% !important; padding: 0 !important; margin: 0 !important; }
-      .card { background: white !important; border: 1px solid #ccc !important; box-shadow: none !important; page-break-inside: avoid; }
-      .req-item { background: #fbfbfb !important; border: 1px solid #ddd !important; page-break-inside: avoid; }
-      .req-declaration { background: #f0f4ff !important; color: #1e3a8a !important; border-left: 3px solid #3b82f6 !important; }
+      .card { background: white !important; border: 1px solid #ddd !important; box-shadow: none !important; page-break-inside: avoid; }
+      .req-item { background: #fafafa !important; border: 1px solid #e0e0e0 !important; page-break-inside: avoid; }
+      .req-declaration { background: #f1f5f9 !important; color: #0f172a !important; border-left: 3px solid #0284c7 !important; }
       .criteria-box { background: #f8fafc !important; border: 1px solid #e2e8f0 !important; color: #334155 !important; }
-      .badge { border: 1px solid #999 !important; color: black !important; background: #eee !important; }
+      .badge { border: 1px solid #aaa !important; color: black !important; background: #f1f5f9 !important; }
     }
   </style>
 </head>
@@ -269,8 +268,14 @@ export const DASHBOARD_HTML = `<!DOCTYPE html>
       </div>
     </div>
     <div class="header-actions">
-      <button class="btn" onclick="fetchProjectData(true)" title="Recargar datos"><span>↻</span> Actualizar</button>
-      <button class="btn btn-primary" onclick="window.print()" title="Imprimir o guardar como PDF"><span>🖨</span> Imprimir / PDF</button>
+      <button class="btn" onclick="fetchProjectData(true)" title="Recargar datos">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
+        Actualizar
+      </button>
+      <button class="btn btn-primary" onclick="window.print()" title="Imprimir o exportar PDF formal">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
+        Imprimir / PDF
+      </button>
     </div>
   </header>
 
@@ -278,14 +283,41 @@ export const DASHBOARD_HTML = `<!DOCTYPE html>
     <aside>
       <div class="nav-section">
         <div class="nav-title">Navegación</div>
-        <div class="nav-item active" onclick="switchView('dashboard')"><span>📊 Resumen General</span></div>
-        <div class="nav-item" onclick="switchView('specs')"><span>📄 Especificaciones</span><span class="nav-badge" id="navSpecsCount">0</span></div>
-        <div class="nav-item" onclick="switchView('tasks')"><span>📋 Micro-Tareas</span><span class="nav-badge" id="navTasksCount">0</span></div>
-        <div class="nav-item" onclick="switchView('graph')"><span>🗺 Grafo Arquitectura</span></div>
-        <div class="nav-item" onclick="switchView('constitution')"><span>⚖ Constitución</span></div>
+        <div class="nav-item active" onclick="switchView('dashboard')">
+          <div class="nav-item-content">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9"></rect><rect x="14" y="3" width="7" height="5"></rect><rect x="14" y="12" width="7" height="9"></rect><rect x="3" y="16" width="7" height="5"></rect></svg>
+            <span>Resumen</span>
+          </div>
+        </div>
+        <div class="nav-item" onclick="switchView('specs')">
+          <div class="nav-item-content">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
+            <span>Especificaciones</span>
+          </div>
+          <span class="nav-badge" id="navSpecsCount">0</span>
+        </div>
+        <div class="nav-item" onclick="switchView('tasks')">
+          <div class="nav-item-content">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 11 12 14 22 4"></polyline><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path></svg>
+            <span>Micro-Tareas</span>
+          </div>
+          <span class="nav-badge" id="navTasksCount">0</span>
+        </div>
+        <div class="nav-item" onclick="switchView('graph')">
+          <div class="nav-item-content">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg>
+            <span>Grafo Arquitectura</span>
+          </div>
+        </div>
+        <div class="nav-item" onclick="switchView('constitution')">
+          <div class="nav-item-content">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+            <span>Constitución</span>
+          </div>
+        </div>
       </div>
       <div class="nav-section">
-        <div class="nav-title">Especificaciones</div>
+        <div class="nav-title">Documentos</div>
         <div id="sidebarSpecsList"></div>
       </div>
     </aside>
@@ -304,25 +336,25 @@ export const DASHBOARD_HTML = `<!DOCTYPE html>
             <div class="stat-sub" id="kpiReqsSub">100% formalizados</div>
           </div>
           <div class="stat-card">
-            <div class="stat-label">Progreso Micro-Tareas</div>
+            <div class="stat-label">Progreso Tareas</div>
             <div class="stat-value" id="kpiTasksPercent">0%</div>
             <div class="progress-bar-container"><div class="progress-bar-fill" id="kpiTasksBar" style="width: 0%"></div></div>
             <div class="stat-sub" id="kpiTasksSub" style="margin-top: 0.5rem">0 de 0 completadas</div>
           </div>
           <div class="stat-card">
             <div class="stat-label">Severidad del Árbitro</div>
-            <div class="stat-value" id="kpiSeverity" style="color: var(--primary)">L2</div>
+            <div class="stat-value" id="kpiSeverity" style="color: #60a5fa">L2</div>
             <div class="stat-sub">Standard / Producción</div>
           </div>
         </div>
 
         <div class="card">
-          <div class="card-title" style="margin-bottom: 1rem">Desglose EARS</div>
-          <div id="earsBreakdownContainer" style="display: flex; gap: 1rem; flex-wrap: wrap;"></div>
+          <div class="card-title" style="margin-bottom: 0.75rem; font-size: 1.05rem;">Desglose de Requerimientos EARS</div>
+          <div id="earsBreakdownContainer" style="display: flex; gap: 0.65rem; flex-wrap: wrap;"></div>
         </div>
 
         <div class="card">
-          <div class="card-title" style="margin-bottom: 1rem">Especificaciones del Proyecto</div>
+          <div class="card-title" style="margin-bottom: 0.75rem; font-size: 1.05rem;">Especificaciones del Proyecto</div>
           <div id="dashboardSpecsCards"></div>
         </div>
       </section>
@@ -336,7 +368,7 @@ export const DASHBOARD_HTML = `<!DOCTYPE html>
           <div class="card-header">
             <div>
               <div class="card-title">Micro-Tareas de Implementación</div>
-              <div class="card-meta">Ejecución verificable y determinista para agentes</div>
+              <div class="card-meta">Ejecución secuencial verificable (≤ 30 min por tarea)</div>
             </div>
           </div>
           <div id="tasksListContainer"></div>
@@ -345,20 +377,20 @@ export const DASHBOARD_HTML = `<!DOCTYPE html>
 
       <section id="view-graph" class="view-panel">
         <div class="card">
-          <div class="card-title" style="margin-bottom: 0.5rem">Grafo de Arquitectura</div>
-          <div class="card-meta" style="margin-bottom: 1.5rem">Ahorro de tokens y navegación indexada</div>
-          <div style="background: var(--bg-base); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 1.5rem; overflow-x: auto;">
-            <pre id="graphContent" style="font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; color: var(--text-muted); white-space: pre-wrap;"></pre>
+          <div class="card-title" style="margin-bottom: 0.35rem">Grafo de Arquitectura</div>
+          <div class="card-meta" style="margin-bottom: 1.25rem">Estructura indexada para optimización de contexto y ahorro de tokens</div>
+          <div style="background: var(--bg-base); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 1.25rem; overflow-x: auto;">
+            <pre id="graphContent" style="font-family: 'JetBrains Mono', monospace; font-size: 0.82rem; color: var(--text-muted); white-space: pre-wrap;"></pre>
           </div>
         </div>
       </section>
 
       <section id="view-constitution" class="view-panel">
         <div class="card">
-          <div class="card-title" style="margin-bottom: 0.5rem">Constitución del Proyecto (AGENTS.md)</div>
-          <div class="card-meta" style="margin-bottom: 1.5rem">Anti-Vibe Coding, Anti-Sycophancy y Auto-Grill</div>
-          <div style="background: var(--bg-base); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 1.5rem; overflow-x: auto;">
-            <pre id="constitutionContent" style="font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; color: var(--text-muted); white-space: pre-wrap;"></pre>
+          <div class="card-title" style="margin-bottom: 0.35rem">Constitución del Proyecto (AGENTS.md)</div>
+          <div class="card-meta" style="margin-bottom: 1.25rem">Invariantes de ingeniería, anti-complacencia y compuertas de verificación</div>
+          <div style="background: var(--bg-base); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 1.25rem; overflow-x: auto;">
+            <pre id="constitutionContent" style="font-family: 'JetBrains Mono', monospace; font-size: 0.82rem; color: var(--text-muted); white-space: pre-wrap;"></pre>
           </div>
         </div>
       </section>
@@ -424,7 +456,7 @@ export const DASHBOARD_HTML = `<!DOCTYPE html>
       for (const [type, count] of Object.entries(breakdown)) {
         const badge = document.createElement('div');
         badge.className = 'badge ' + getEarsClass(type);
-        badge.style.padding = '0.5rem 0.85rem';
+        badge.style.padding = '0.35rem 0.65rem';
         badge.textContent = type + ': ' + count;
         container.appendChild(badge);
       }
@@ -443,7 +475,7 @@ export const DASHBOARD_HTML = `<!DOCTYPE html>
       });
     }
 
-    function renderDashboardSpecs(specs, defaultSeverity) {
+    function renderDashboardSpecs(specs) {
       const dashList = document.getElementById('dashboardSpecsCards');
       dashList.innerHTML = '';
       specs.forEach(spec => {
@@ -452,7 +484,7 @@ export const DASHBOARD_HTML = `<!DOCTYPE html>
         div.style.cursor = 'pointer';
         div.onclick = () => selectSpec(spec.id);
         const stCls = spec.status === 'APPROVED' ? 'badge-approved' : 'badge-draft';
-        div.innerHTML = '<div class="req-header"><div><span class="req-id">' + spec.id + '</span>: <strong>' + spec.title + '</strong></div><span class="badge ' + stCls + '">' + spec.status + '</span></div><div style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.5rem">' + (spec.context ? spec.context.substring(0, 160) + '...' : 'Sin descripción') + '</div><div style="display:flex;gap:0.75rem;font-size:0.8rem;color:var(--text-sub)"><span>📌 Reqs: ' + spec.requirementsCount + '</span><span>📅 ' + (spec.date || 'Reciente') + '</span></div>';
+        div.innerHTML = '<div class="req-header"><div><span class="req-id">' + spec.id + '</span>: <strong>' + spec.title + '</strong></div><span class="badge ' + stCls + '">' + spec.status + '</span></div><div style="font-size: 0.83rem; color: var(--text-muted); margin-bottom: 0.45rem">' + (spec.context ? spec.context.substring(0, 160) + '...' : 'Sin descripción') + '</div><div style="display:flex;gap:0.85rem;font-size:0.78rem;color:var(--text-sub)"><span>Reqs: ' + spec.requirementsCount + '</span><span>' + (spec.date || 'Reciente') + '</span></div>';
         dashList.appendChild(div);
       });
     }
@@ -461,7 +493,7 @@ export const DASHBOARD_HTML = `<!DOCTYPE html>
       renderKpis(data);
       renderEarsBreakdown(data.stats.earsBreakdown);
       renderSidebarSpecs(data.specs);
-      renderDashboardSpecs(data.specs, data.severity);
+      renderDashboardSpecs(data.specs);
       renderTasks(data.tasks);
       document.getElementById('graphContent').textContent = data.graphMermaid || "No se generó grafo aún. Ejecuta 'sdd graph' para crearlo.";
       document.getElementById('constitutionContent').textContent = data.constitution || 'No se encontró AGENTS.md.';
@@ -499,7 +531,8 @@ export const DASHBOARD_HTML = `<!DOCTYPE html>
 
       const stCls = spec.status === 'APPROVED' ? 'badge-approved' : 'badge-draft';
       const container = document.getElementById('specsDetailedContainer');
-      container.innerHTML = '<div class="card"><div class="card-header"><div><div class="card-title">' + spec.id + ': ' + spec.title + '</div><div class="card-meta"><span>Estado: <strong class="badge ' + stCls + '">' + spec.status + '</strong></span><span>Severidad: <strong>' + (spec.severity || appData.severity) + '</strong></span></div></div><button class="btn btn-primary no-print" onclick="window.print()"><span>🖨</span> Imprimir</button></div>' + (spec.context ? '<div style="margin-bottom: 1.5rem"><h4 style="font-size:0.85rem;text-transform:uppercase;color:var(--text-sub);margin-bottom:0.4rem">Contexto</h4><p style="background:var(--bg-card);padding:0.85rem;border-radius:var(--radius-sm)">' + spec.context + '</p></div>' : '') + '<div style="margin-bottom:1.5rem"><h4 style="font-size:0.85rem;text-transform:uppercase;color:var(--text-sub);margin-bottom:0.75rem">Requerimientos EARS</h4><div id="specReqsList"></div></div></div>';
+      const printBtn = '<button class="btn btn-primary no-print" onclick="window.print()"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg> Imprimir</button>';
+      container.innerHTML = '<div class="card"><div class="card-header"><div><div class="card-title">' + spec.id + ': ' + spec.title + '</div><div class="card-meta"><span>Estado: <strong class="badge ' + stCls + '">' + spec.status + '</strong></span><span>Severidad: <strong>' + (spec.severity || appData.severity) + '</strong></span></div></div>' + printBtn + '</div>' + (spec.context ? '<div style="margin-bottom: 1.25rem"><h4 style="font-size:0.75rem;text-transform:uppercase;color:var(--text-sub);margin-bottom:0.35rem;letter-spacing:0.05em">Contexto</h4><p style="background:var(--bg-card);padding:0.75rem;border-radius:var(--radius-sm);font-size:0.88rem;color:var(--text-muted)">' + spec.context + '</p></div>' : '') + '<div style="margin-bottom:1.25rem"><h4 style="font-size:0.75rem;text-transform:uppercase;color:var(--text-sub);margin-bottom:0.6rem;letter-spacing:0.05em">Requerimientos EARS</h4><div id="specReqsList"></div></div></div>';
       renderSpecRequirements(spec.requirements);
     }
 
@@ -507,20 +540,23 @@ export const DASHBOARD_HTML = `<!DOCTYPE html>
       const container = document.getElementById('tasksListContainer');
       container.innerHTML = '';
       if (!taskLists || taskLists.length === 0) {
-        container.innerHTML = '<div style="color:var(--text-muted)">No hay tareas en .sdd/tasks/.</div>';
+        container.innerHTML = '<div style="color:var(--text-muted); font-size:0.88rem;">No hay tareas registradas en .sdd/tasks/.</div>';
         return;
       }
 
+      const checkSvg = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>';
+      const emptySvg = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle></svg>';
+
       taskLists.forEach(tl => {
         const sec = document.createElement('div');
-        sec.style.marginBottom = '2rem';
-        sec.innerHTML = '<div style="display:flex;justify-content:space-between;margin-bottom:0.5rem"><h3 style="font-size:1.1rem">' + tl.id + ': ' + tl.title + '</h3><span class="badge badge-approved">' + tl.completedTasks + '/' + tl.totalTasks + ' (' + tl.progressPercent + '%)</span></div><div class="progress-bar-container" style="margin-bottom:1rem"><div class="progress-bar-fill" style="width:' + tl.progressPercent + '%"></div></div><div class="t-rows"></div>';
+        sec.style.marginBottom = '1.75rem';
+        sec.innerHTML = '<div style="display:flex;justify-content:space-between;margin-bottom:0.4rem"><h3 style="font-size:1rem;font-weight:600">' + tl.id + ': ' + tl.title + '</h3><span class="badge badge-approved">' + tl.completedTasks + '/' + tl.totalTasks + ' (' + tl.progressPercent + '%)</span></div><div class="progress-bar-container" style="margin-bottom:0.85rem"><div class="progress-bar-fill" style="width:' + tl.progressPercent + '%"></div></div><div class="t-rows"></div>';
         const tRows = sec.querySelector('.t-rows');
         tl.tasks.forEach(t => {
           const row = document.createElement('div');
           row.className = 'task-row';
           const isDone = t.status === 'DONE';
-          row.innerHTML = '<div class="task-left"><span>' + (isDone ? '✔' : '○') + '</span><span class="task-id">' + t.id + '</span><span class="task-title" style="' + (isDone ? 'text-decoration:line-through;opacity:0.7;' : '') + '">' + t.title + '</span></div><div><span class="badge badge-' + t.status.toLowerCase() + '">' + t.status + '</span></div>';
+          row.innerHTML = '<div class="task-left">' + (isDone ? checkSvg : emptySvg) + '<span class="task-id">' + t.id + '</span><span class="task-title" style="' + (isDone ? 'text-decoration:line-through;color:var(--text-sub);' : '') + '">' + t.title + '</span></div><div><span class="badge badge-' + t.status.toLowerCase() + '">' + t.status + '</span></div>';
           tRows.appendChild(row);
         });
         container.appendChild(sec);

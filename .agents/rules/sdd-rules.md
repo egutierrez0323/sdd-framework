@@ -1,64 +1,53 @@
 <!-- REGLAS DE DESARROLLO SDD PARA ANTIGRAVITY -->
 
-# Constitución del Proyecto: SDD Framework (Spec-Driven Development)
+# SDD Framework Constitution: Engineering Principles and Agent Constraints
 
-> **PROPÓSITO:** Esta constitución establece las directrices innegociables y principios arquitectónicos para el desarrollo y mantenimiento del marco de trabajo SDD. Cualquier agente de Inteligencia Artificial que opere en este repositorio DEBE acatar estrictamente estas reglas.
-
----
-
-## 1. Principio Fundamental: La Especificación es la Fuente de Verdad
-
-1. **Prohibido el Vibe Coding:** Ninguna línea de código de producción será generada sin un requisito previo (`REQ-ID`) documentado en una especificación aprobada y una micro-tarea asignada en `tasks.md`.
-2. **Determinismo sobre Intuición:** Ante la duda entre dos enfoques técnicos, siempre se preferirá aquel que sea medible, testeable y alineado con los requerimientos EARS.
-3. **Inmutabilidad del Alcance en Ejecución:** Una vez que una especificación y un plan son aprobados, el agente de IA **NO TIENE PERMITIDO** modificar el alcance, agregar librerías no planificadas o alterar firmas de contratos públicos sin intervención humana explícita.
-4. **Prohibición de Complacencia Artificial (Anti-Sycophancy / Devil's Advocate):** La IA tiene terminantemente prohibido actuar como un complaciente ("yes-man"). Si el líder técnico, desarrollador o usuario formula una instrucción o decisión que contradice las reglas del proyecto, rompe contratos de APIs/datos previos (`SPEC-000-BASELINE.md`), viola invariantes de negocio o introduce riesgos de seguridad (OWASP), el Árbitro/Agente DEBE emitir una advertencia explícita sobre el conflicto, explicar los trade-offs y solicitar confirmación consciente antes de avanzar.
-5. **Auto-Grill Mandatorio de la IA (Filtro Previo de Ruido):** Antes de interrogar al líder técnico humano, la IA DEBE auto-cuestionar su propio diseño inspeccionando el repositorio y el grafo de arquitectura. Todo lo que pueda deducirse del código existente debe auto-resolverse; solo los dilemas genuinos de negocio, seguridad o arquitectura deben escalarse al humano, acompañados siempre de una solución sugerida con `(Recomendado)`.
+> **SCOPE & AUTHORITY:** This constitution establishes non-negotiable architectural principles, quality constraints, and execution boundaries for the SDD Framework. Any AI coding assistant or autonomous harness operating within this repository MUST strictly comply with these directives.
 
 ---
 
-## 2. Los 3 Niveles de Severidad del Árbitro / Supervisor
+## 1. Core Principle: Specification as Single Source of Truth
 
-El sistema soporta tres intensidades de auditoría configurables:
+1. **Zero Unspecified Production Code:** No production code shall be introduced or modified without a prior requirement identifier (`REQ-ID`) documented in an approved specification and an associated micro-task in `.sdd/tasks/`.
+2. **Deterministic Engineering Over Heuristic Intuition:** When evaluating architectural or implementation alternatives, the agent must prioritize options that are measurable, strictly typed, verifiable via automated tests, and formulated in standard EARS syntax.
+3. **Execution Scope Immutability:** Once a specification and technical plan are marked as `APPROVED`, the agent MUST NOT unilaterally expand scope, introduce unplanned third-party dependencies, or alter public API signatures without explicit human approval.
+4. **Anti-Sycophancy Guard (Architectural Devil's Advocate):** The agent is explicitly prohibited from acting as a passive "yes-man". If the technical lead, developer, or user provides an instruction that violates constitutional constraints, introduces security vulnerabilities (OWASP Top 10), or causes undocumented breaking changes against baseline contracts (`SPEC-000-BASELINE.md`), the agent MUST issue a structured conflict alert, detail the trade-offs, and require conscious confirmation before proceeding.
+5. **Pre-Flight Codebase Verification:** Before querying the human technical lead, the agent MUST inspect the repository and project dependency graph (`.sdd/architecture-graph.md`). Any question whose answer is already established by existing codebase patterns, configurations, or interfaces must be resolved autonomously. Only genuine business trade-offs, infrastructure costs, or irreversible decisions shall be escalated to the human lead, accompanied by a recommended resolution prefixed with `(Recomendado)`.
 
-| Nivel | Nombre | Criterio de Aprobación | Exigencia de Tests | Intervención Humana |
+---
+
+## 2. Verification Severity Levels
+
+The framework defines three configurable audit levels:
+
+| Level | Identifier | Specification Criteria | Testing Enforcement | Human Intervention Points |
 | :--- | :--- | :--- | :--- | :--- |
-| **L1** | **Pragmatic (Velocity)** | Revisión de coherencia general y sintaxis básica. Sugerencias no bloqueantes. | Tests mínimos de humo / verificación funcional básica. | Al inicio (Spec) y al final de la entrega. |
-| **L2** | **Standard (Production)** | Notación EARS estricta, trazabilidad 1:1 de Requisito ↔ Tarea, contratos de datos definidos. | Cobertura de tests unitarios/integración por cada micro-tarea. | Al aprobar Plan y en cambios arquitectónicos. |
-| **L3** | **Draconian (Mission-Critical)** | Cero ambigüedad tolerable, análisis de casos borde exhaustivo, modelado de amenazas de seguridad (OWASP/CWE), invariantes formales. | Cobertura estricta con casos límite (edge cases) y tests de regresión antes de cada commit. | En cada compuerta de fase (Gatekeeper). |
+| **L1** | **Pragmatic (Velocity)** | Syntactic consistency, basic EARS structures, non-blocking warnings. | Smoke tests and core functional validation. | Spec drafting and final delivery. |
+| **L2** | **Standard (Production)** | Strict EARS notation, Given-When-Then acceptance criteria, 1:1 Requirement ↔ Task mapping. | Unit and integration coverage per micro-task (≤ 30 min each). | Plan approval and architectural revisions. |
+| **L3** | **Draconian (Mission-Critical)** | Zero tolerance for ambiguous terms, mandatory failure recovery modeling (`Unwanted Behavior`), formal threat modeling. | Strict edge-case coverage and regression validation prior to state transitions. | At every phase gatekeeper. |
 
 ---
 
-## 3. Protocolo de Ejecución Autónoma Desatendida
+## 3. Autonomous Execution Protocol
 
-1. **Compuerta de Arranque:** La IA solo puede entrar en modo autónomo desatendido (ej. vía `/goal` o loop continuo) **DESPUÉS** de que:
-   - `spec.md` esté en estado `APPROVED`.
-   - `plan.md` esté en estado `APPROVED`.
-   - `tasks.md` contenga micro-tareas secuenciales, atómicas (estimadas en ≤ 30 min cada una) con un comando de validación ejecutable (`verify`).
-2. **Ciclo por Micro-Tarea (Red -> Green -> Refactor):**
-   - Cargar únicamente el contexto relevante a la tarea actual.
-   - Implementar el test y el código correspondiente hasta que la verificación pase (*Green*).
-   - **Pase Obligatorio de Auto-Cuestionamiento (*Refactor*):** Antes de cerrar la tarea, el agente DEBE auto-cuestionar su propio diff bajo principios Clean Code y DRY (skill `clean-code`). Si hay duplicación o complejidad excesiva, refactoriza manteniendo los tests en verde.
-   - Ejecutar la verificación automatizada y `sdd review` para garantizar salud de código ≥ 85.
-   - Si la verificación falla: Máximo **3 ciclos de auto-corrección**. Si persiste el fallo, la IA debe pausar y emitir un reporte de bloqueo con la causa raíz.
-   - Si la verificación pasa: Marcar `[x]` en `tasks.md`, realizar commit semántico (`feat(REQ-X): descripcion`) y pasar a la siguiente tarea.
-
----
-
-## 4. Filosofía de Diseño de la Herramienta
-
-1. **Agnosticismo de Modelos y Proveedores:** El formato de especificación debe basarse en **Markdown estándar (GFM)** y esquemas JSON legibles por humanos y por cualquier LLM (Gemini, Claude, GPT, DeepSeek, etc.).
-2. **Cero Fricción en Adopción:**
-   - La herramienta debe poder utilizarse simplemente copiando la carpeta `.sdd/` a cualquier repositorio.
-   - El CLI oficial (`sdd`) actuará como asistente, linter y orquestador multiplataforma (Windows, Linux, macOS).
-3. **Soporte Greenfield y Brownfield:** El marco debe contemplar tanto la creación de software desde cero como la adopción en proyectos heredados mediante ingeniería inversa de especificaciones (*Reverse-SDD*).
+1. **Pre-Conditions for Autonomous Execution:** The agent may only execute automated loops (e.g. via `sdd run` or continuous execution harnesses) after:
+   - `spec.md` is in state `APPROVED`.
+   - `plan.md` is in state `APPROVED`.
+   - `tasks.md` contains discrete, atomic tasks (estimated at ≤ 30 minutes each) with an executable verification command.
+2. **Task Execution Lifecycle (Red → Green → Refactor):**
+   - Load only the context required for the active micro-task.
+   - Implement the test and minimal production code until the verification command passes (*Green*).
+   - **Mandatory Clean Code Review Pass:** Before closing the task, the agent must evaluate the diff against Single Responsibility (SRP) and DRY principles. Any unnecessary duplication or cyclomatic complexity must be refactored while maintaining green tests.
+   - Run automated validation and ensure code health score ≥ 85 (`sdd review`).
+   - If verification fails: Maximum of **3 automated correction cycles**. If failure persists, the agent must pause, execute a clean rollback, and output a blocking report detailing the root cause.
+   - If verification passes: Mark `[x]` in `tasks.md`, execute a semantic commit (`feat(REQ-X): description`), and advance to the subsequent task.
 
 ---
 
-## 5. Convenciones de Código y Calidad para Este Repositorio
+## 4. Technical Conventions and Standards
 
-- **Lenguaje:** TypeScript (Node.js LTS, ESM).
-- **Tipado:** Estricto (`strict: true`), sin uso de `any` injustificado.
-- **Formato y Estilo:** Prettier y ESLint con estándares limpios y legibles.
-- **Testing:** Vitest / Node test runner para pruebas rápidas y deterministas.
-- **Higiene de Código:** Estándares Clean Code, cero duplicación innecesaria (DRY) y funciones con responsabilidad única auditadas por `sdd review`.
-- **Documentación:** Todo cambio estructural debe reflejarse en la carpeta `.sdd/` y en el `README.md`.
+- **Runtime:** Node.js (Active LTS), ESM modules (`"type": "module"`).
+- **Language:** TypeScript with strict configuration (`"strict": true`, no unjustified `any`).
+- **Testing:** Vitest for deterministic, fast unit and integration tests.
+- **Code Hygiene:** Clean Code standards, functions under 55 lines, Guard Clauses over nested conditionals, single responsibility per module.
+- **Documentation:** All architectural updates must be reflected in `.sdd/` and tracked in `README.md`.

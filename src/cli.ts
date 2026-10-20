@@ -67,7 +67,7 @@ async function askProjectMode(rl: readline.Interface, hasCode: boolean): Promise
     console.log(`  [1] (Recomendado) Greenfield (Proyecto nuevo)`);
     console.log(`  [2] Brownfield (Proyecto existente)`);
   }
-  const choice = (await rl.question(`  👉 Selecciona [1-2] (default: ${hasCode ? '2' : '1'}): `)).trim();
+  const choice = (await rl.question(`  › Selecciona [1-2] (default: ${hasCode ? '2' : '1'}): `)).trim();
   return choice === '2' ? 'brownfield' : choice === '1' ? 'greenfield' : hasCode ? 'brownfield' : 'greenfield';
 }
 
@@ -76,7 +76,7 @@ async function askSeverity(rl: readline.Interface, defaultSev: SeverityLevel): P
   console.log(`  [1] L1 - Pragmatic (Velocity: alertas no bloqueantes)`);
   console.log(`  [2] (Recomendado) L2 - Standard (Producción: EARS estricto)`);
   console.log(`  [3] L3 - Draconian (Misión Crítica: tolerancia cero)`);
-  const choice = (await rl.question(`  👉 Selecciona la severidad [1-3] (default: 2): `)).trim();
+  const choice = (await rl.question(`  › Selecciona la severidad [1-3] (default: 2): `)).trim();
   if (choice === '1') return 'L1';
   if (choice === '3') return 'L3';
   return defaultSev || 'L2';
@@ -88,7 +88,7 @@ async function askBridgesAndSkills(rl: readline.Interface): Promise<{ bridges: S
   console.log(`  [2] Claude Code (CLAUDE.md)`);
   console.log(`  [3] Antigravity / Gemini CLI (AGENTS.md)`);
   console.log(`  [4] (Recomendado) Todos los anteriores`);
-  const bChoice = (await rl.question(`  👉 Selecciona puentes [1-4] (default: 4): `)).trim();
+  const bChoice = (await rl.question(`  › Selecciona puentes [1-4] (default: 4): `)).trim();
   let bridges: SupportedBridge[] = ['cursor', 'claude', 'antigravity'];
   if (bChoice === '1') bridges = ['cursor'];
   else if (bChoice === '2') bridges = ['claude'];
@@ -97,7 +97,7 @@ async function askBridgesAndSkills(rl: readline.Interface): Promise<{ bridges: S
   console.log(`\n◇ [4/4] ARSENAL DE SKILLS AVANZADAS (.agents/skills/):`);
   console.log(`  [1] (Recomendado) Sí, instalar arsenal completo`);
   console.log(`  [2] No, solo estructura mínima`);
-  const sChoice = (await rl.question(`  👉 Opción [1-2] (default: 1): `)).trim();
+  const sChoice = (await rl.question(`  › Opción [1-2] (default: 1): `)).trim();
   return { bridges, includeSkills: sChoice !== '2' };
 }
 
@@ -164,8 +164,8 @@ async function handleInit() {
   Logger.info(`Configurando entorno SDD en modo [${options.mode.toUpperCase()}] con severidad [${options.severity}]...`);
   const result = await scaffoldProject(options);
 
-  Logger.success(`\n✔ ¡Proyecto inicializado con éxito en modo SDD (${result.mode})!`);
-  console.log(`\n📂 Estructura generada:`);
+  Logger.success(`\n✔ Proyecto inicializado con éxito en modo SDD (${result.mode})`);
+  console.log(`\nEstructura generada:`);
   console.log(`   • .sdd/ (specs, plans, tasks, templates)`);
   console.log(`   • .sdd/templates/ (spec, plan, tasks, ears-guide)`);
   console.log(`   • Constitución en AGENTS.md`);
@@ -174,7 +174,7 @@ async function handleInit() {
   }
   console.log(`   • Puentes sincronizados: ${result.syncedBridges.join(', ')}`);
 
-  console.log(`\n🚀 Siguientes pasos para empezar:`);
+  console.log(`\nSiguientes pasos:`);
   console.log(`   1. Crear tu primera especificación:`);
   console.log(`      npx sdd new-spec mi-funcionalidad`);
   console.log(`   2. Someter la especificación al interrogatorio del Árbitro:`);
@@ -450,7 +450,7 @@ async function promptGrillInteractively(
       let answered = false;
 
       while (!answered) {
-        console.log(`\n🔥 [PREGUNTA ${i + 1}/${questions.length}] Categoría: ${q.category}`);
+        console.log(`\n• [PREGUNTA ${i + 1}/${questions.length}] Categoría: ${q.category}`);
         console.log(`   ${q.question}`);
         console.log('\n   Opciones:');
         q.options.forEach((opt, idx) => {
@@ -458,13 +458,13 @@ async function promptGrillInteractively(
         });
         console.log(`   [0] Escribir decisión personalizada`);
 
-        const answer = (await rl.question(`\n   👉 Selecciona una opción (1-${q.options.length}) o escribe tu decisión: `)).trim();
+        const answer = (await rl.question(`\n   › Selecciona una opción (1-${q.options.length}) o escribe tu decisión: `)).trim();
         let decisionText = '';
         const num = parseInt(answer, 10);
         if (!isNaN(num) && num >= 1 && num <= q.options.length) {
           decisionText = q.options[num - 1];
         } else if (num === 0) {
-          decisionText = (await rl.question('   ✍  Escribe tu decisión arquitectónica: ')).trim();
+          decisionText = (await rl.question('   › Escribe tu decisión arquitectónica: ')).trim();
         } else if (answer.length > 0) {
           decisionText = answer;
         } else {
@@ -473,15 +473,15 @@ async function promptGrillInteractively(
 
         const violations = auditArchitectDecision(decisionText);
         if (violations.length > 0) {
-          console.log('\n⚖ [ÁRBITRO SDD :: ALERTA ANTI-COMPLACENCIA / DEVIL\'S ADVOCATE]');
+          console.log('\n› [ÁRBITRO SDD :: ALERTA ANTI-COMPLACENCIA / DEVIL\'S ADVOCATE]');
           for (const v of violations) {
             Logger.warn(`[${v.severity}] ${v.issue}`);
             console.log(`   Violación: ${v.violatedInvariant}`);
-            Logger.info(`   💡 Recomendación: ${v.recommendation}`);
+            Logger.info(`   Recomendación: ${v.recommendation}`);
           }
           const confirm = (await rl.question('\n   ¿Deseas mantener esta decisión a pesar de la advertencia o cambiarla? (m=mantener / C=cambiar): ')).trim().toLowerCase();
           if (confirm !== 'm' && confirm !== 'mantener') {
-            console.log('   🔄 Rectificando respuesta...');
+            console.log('   › Rectificando respuesta...');
             continue;
           }
         }
@@ -528,9 +528,9 @@ async function handleGrill() {
   } else {
     for (let i = 0; i < questions.length; i++) {
       const q = questions[i];
-      console.log(`\n🔥 [PREGUNTA ${i + 1}/${questions.length}] Categoría: ${q.category}`);
+      console.log(`\n• [PREGUNTA ${i + 1}/${questions.length}] Categoría: ${q.category}`);
       console.log(`   ${q.question}`);
-      console.log(`   👉 Respuesta Recomendada: ${q.recommendation}`);
+      console.log(`   › Respuesta Recomendada: ${q.recommendation}`);
       if (q.options) {
         q.options.forEach((opt, idx) => console.log(`      [${idx + 1}] ${opt}`));
       }

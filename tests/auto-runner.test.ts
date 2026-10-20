@@ -39,6 +39,7 @@ describe('Autonomous Runner Module', () => {
     const { updatedMarkdown, result } = await executeAutonomousPlan(sampleTasksMarkdown, {
       maxRetries: 2,
       executor: mockExecutor,
+      skipCommit: true,
     });
 
     expect(result.success).toBe(true);
@@ -57,6 +58,7 @@ describe('Autonomous Runner Module', () => {
     const { updatedMarkdown, result } = await executeAutonomousPlan(sampleTasksMarkdown, {
       maxRetries: 3,
       executor: mockFailExecutor,
+      skipCommit: true,
     });
 
     expect(result.success).toBe(false);

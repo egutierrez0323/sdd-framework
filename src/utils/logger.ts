@@ -38,7 +38,7 @@ export class Logger {
     };
     const color = roleColors[role] || this.colors.cyan;
     console.log(
-      `\n${color}${this.colors.bright}⚖ [ÁRBITRO SDD :: ${role}]${this.colors.reset} ${message}`
+      `\n${color}${this.colors.bright}› [ÁRBITRO SDD :: ${role}]${this.colors.reset} ${message}`
     );
   }
 

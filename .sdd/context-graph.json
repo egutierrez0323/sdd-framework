@@ -252,7 +252,7 @@
         "src/utils/fs-helpers.js",
         "src/utils/logger.js"
       ],
-      "approxTokens": 5877
+      "approxTokens": 5868
     },
     {
       "id": "src/core/auto-runner.ts",
@@ -270,7 +270,7 @@
         "src/utils/git-client.js",
         "src/utils/logger.js"
       ],
-      "approxTokens": 1485
+      "approxTokens": 1514
     },
     {
       "id": "src/core/bridges.ts",
@@ -411,7 +411,7 @@
         "generateDashboardHtml"
       ],
       "imports": [],
-      "approxTokens": 6329
+      "approxTokens": 7262
     },
     {
       "id": "src/core/ui-server.ts",
@@ -476,7 +476,7 @@
       "type": "test",
       "exports": [],
       "imports": [],
-      "approxTokens": 600
+      "approxTokens": 612
     },
     {
       "id": "tests/bridges.test.ts",
@@ -487,7 +487,7 @@
         "src/core/bridges.js",
         "src/utils/fs-helpers.js"
       ],
-      "approxTokens": 339
+      "approxTokens": 336
     },
     {
       "id": "tests/clarifier.test.ts",
@@ -842,7 +842,7 @@
   "stats": {
     "totalFiles": 48,
     "totalExports": 77,
-    "rawTokensEstimate": 48057,
+    "rawTokensEstimate": 49019,
     "graphTokensEstimate": 1533,
     "tokenReductionPercent": 97
   }

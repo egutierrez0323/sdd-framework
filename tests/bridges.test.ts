@@ -22,6 +22,6 @@ describe('Bridges Synchronization Module', () => {
     expect(agRulesExists).toBe(true);
 
     const claudeContent = await readFileUtf8(path.join(process.cwd(), 'CLAUDE.md'));
-    expect(claudeContent).toContain('Constitución del Proyecto');
+    expect(claudeContent).toContain('Constitution');
   });
 });

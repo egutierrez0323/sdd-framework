@@ -1,6 +1,57 @@
 {
   "nodes": [
     {
+      "id": "src/api/handlers.ts",
+      "name": "handlers.ts",
+      "type": "module",
+      "exports": [
+        "handleHealth"
+      ],
+      "imports": [
+        "src/api/http-utils.js",
+        "src/validator.js",
+        "src/luhn.js",
+        "src/sanitizer.js",
+        "src/brands.js",
+        "src/types.js"
+      ],
+      "approxTokens": 396
+    },
+    {
+      "id": "src/api/http-utils.ts",
+      "name": "http-utils.ts",
+      "type": "utility",
+      "exports": [
+        "DEFAULT_MAX_BODY_BYTES",
+        "ApiErrorResponse",
+        "sendJson",
+        "createErrorResponse"
+      ],
+      "imports": [],
+      "approxTokens": 505
+    },
+    {
+      "id": "src/api/router.ts",
+      "name": "router.ts",
+      "type": "module",
+      "exports": [],
+      "imports": [
+        "src/api/handlers.js",
+        "src/api/http-utils.js"
+      ],
+      "approxTokens": 475
+    },
+    {
+      "id": "src/bin/server.ts",
+      "name": "server.ts",
+      "type": "module",
+      "exports": [],
+      "imports": [
+        "src/server.js"
+      ],
+      "approxTokens": 128
+    },
+    {
       "id": "src/brands.ts",
       "name": "brands.ts",
       "type": "module",
@@ -40,7 +91,7 @@
       "type": "module",
       "exports": [],
       "imports": [],
-      "approxTokens": 52
+      "approxTokens": 59
     },
     {
       "id": "src/luhn.ts",
@@ -61,6 +112,18 @@
       ],
       "imports": [],
       "approxTokens": 107
+    },
+    {
+      "id": "src/server.ts",
+      "name": "server.ts",
+      "type": "module",
+      "exports": [
+        "createCardServer"
+      ],
+      "imports": [
+        "src/api/router.js"
+      ],
+      "approxTokens": 96
     },
     {
       "id": "src/types.ts",
@@ -92,6 +155,16 @@
       "approxTokens": 716
     },
     {
+      "id": "tests/api.test.ts",
+      "name": "api.test.ts",
+      "type": "test",
+      "exports": [],
+      "imports": [
+        "src/server.js"
+      ],
+      "approxTokens": 873
+    },
+    {
       "id": "tests/brands.test.ts",
       "name": "brands.test.ts",
       "type": "test",
@@ -120,6 +193,16 @@
         "src/expiration.js"
       ],
       "approxTokens": 440
+    },
+    {
+      "id": "tests/http-utils.test.ts",
+      "name": "http-utils.test.ts",
+      "type": "test",
+      "exports": [],
+      "imports": [
+        "src/api/http-utils.js"
+      ],
+      "approxTokens": 331
     },
     {
       "id": "tests/luhn.test.ts",
@@ -154,12 +237,52 @@
   ],
   "edges": [
     {
+      "from": "src/api/handlers.ts",
+      "to": "src/api/http-utils.js"
+    },
+    {
+      "from": "src/api/handlers.ts",
+      "to": "src/validator.js"
+    },
+    {
+      "from": "src/api/handlers.ts",
+      "to": "src/luhn.js"
+    },
+    {
+      "from": "src/api/handlers.ts",
+      "to": "src/sanitizer.js"
+    },
+    {
+      "from": "src/api/handlers.ts",
+      "to": "src/brands.js"
+    },
+    {
+      "from": "src/api/handlers.ts",
+      "to": "src/types.js"
+    },
+    {
+      "from": "src/api/router.ts",
+      "to": "src/api/handlers.js"
+    },
+    {
+      "from": "src/api/router.ts",
+      "to": "src/api/http-utils.js"
+    },
+    {
+      "from": "src/bin/server.ts",
+      "to": "src/server.js"
+    },
+    {
       "from": "src/brands.ts",
       "to": "src/types.js"
     },
     {
       "from": "src/cvv.ts",
       "to": "src/types.js"
+    },
+    {
+      "from": "src/server.ts",
+      "to": "src/api/router.js"
     },
     {
       "from": "src/validator.ts",
@@ -186,6 +309,10 @@
       "to": "src/cvv.js"
     },
     {
+      "from": "tests/api.test.ts",
+      "to": "src/server.js"
+    },
+    {
       "from": "tests/brands.test.ts",
       "to": "src/brands.js"
     },
@@ -196,6 +323,10 @@
     {
       "from": "tests/expiration.test.ts",
       "to": "src/expiration.js"
+    },
+    {
+      "from": "tests/http-utils.test.ts",
+      "to": "src/api/http-utils.js"
     },
     {
       "from": "tests/luhn.test.ts",
@@ -211,10 +342,10 @@
     }
   ],
   "stats": {
-    "totalFiles": 14,
-    "totalExports": 9,
-    "rawTokensEstimate": 4458,
-    "graphTokensEstimate": 277,
+    "totalFiles": 21,
+    "totalExports": 15,
+    "rawTokensEstimate": 7269,
+    "graphTokensEstimate": 455,
     "tokenReductionPercent": 94
   }
 }

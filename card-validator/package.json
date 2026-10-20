@@ -7,6 +7,7 @@
   "types": "./dist/index.d.ts",
   "scripts": {
     "build": "node ../node_modules/typescript/bin/tsc",
+    "start": "node dist/bin/server.js",
     "test": "node ../node_modules/vitest/vitest.mjs run",
     "lint": "node ../node_modules/typescript/bin/tsc --noEmit"
   },

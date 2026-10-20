@@ -1,25 +1,32 @@
 # Mapa Visual de Arquitectura y Grafo de Dependencias
 
 > **MÉTRICAS DE TOKENS:**
-> - Archivos analizados: **35**
-> - Símbolos exportados: **53**
-> - Tokens código fuente completo: ~**24912** tokens
-> - Tokens del grafo compacto: ~**1037** tokens
-> - **Ahorro de Tokens: 96%**
+> - Archivos analizados: **42**
+> - Símbolos exportados: **59**
+> - Tokens código fuente completo: ~**27723** tokens
+> - Tokens del grafo compacto: ~**1286** tokens
+> - **Ahorro de Tokens: 95%**
 
 ```mermaid
 graph TD
+  card_validator_src_api_handlers_ts["handlers.ts<br/>(handleHealth)"]
+  card_validator_src_api_http_utils_ts["http-utils.ts<br/>(DEFAULT_MAX_BODY_BYTES, ApiErrorResponse, sendJson...)"]
+  card_validator_src_api_router_ts["router.ts<br/>()"]
+  card_validator_src_bin_server_ts["server.ts<br/>()"]
   card_validator_src_brands_ts["brands.ts<br/>(detectCardBrand)"]
   card_validator_src_cvv_ts["cvv.ts<br/>(validateCvv)"]
   card_validator_src_expiration_ts["expiration.ts<br/>(validateExpiration)"]
   card_validator_src_index_ts["index.ts<br/>()"]
   card_validator_src_luhn_ts["luhn.ts<br/>(validateLuhn)"]
   card_validator_src_sanitizer_ts["sanitizer.ts<br/>(sanitizeCardNumber)"]
+  card_validator_src_server_ts["server.ts<br/>(createCardServer)"]
   card_validator_src_types_ts["types.ts<br/>(CardBrand, CardInput, CardValidationResult)"]
   card_validator_src_validator_ts["validator.ts<br/>(validateCreditCard)"]
+  card_validator_tests_api_test_ts["api.test.ts<br/>()"]
   card_validator_tests_brands_test_ts["brands.test.ts<br/>()"]
   card_validator_tests_cvv_test_ts["cvv.test.ts<br/>()"]
   card_validator_tests_expiration_test_ts["expiration.test.ts<br/>()"]
+  card_validator_tests_http_utils_test_ts["http-utils.test.ts<br/>()"]
   card_validator_tests_luhn_test_ts["luhn.test.ts<br/>()"]
   card_validator_tests_sanitizer_test_ts["sanitizer.test.ts<br/>()"]
   card_validator_tests_validator_test_ts["validator.test.ts<br/>()"]
@@ -50,17 +57,24 @@ graph TD
 
 | Módulo | Símbolos Exportados | Dependencias Clave |
 | :--- | :--- | :--- |
+| `card-validator/src/api/handlers.ts` | `handleHealth` | `http-utils.js`, `validator.js`, `luhn.js`, `sanitizer.js`, `brands.js`, `types.js` |
+| `card-validator/src/api/http-utils.ts` | `DEFAULT_MAX_BODY_BYTES`, `ApiErrorResponse`, `sendJson`, `createErrorResponse` | *(ninguna)* |
+| `card-validator/src/api/router.ts` | *(interno)* | `handlers.js`, `http-utils.js` |
+| `card-validator/src/bin/server.ts` | *(interno)* | `server.js` |
 | `card-validator/src/brands.ts` | `detectCardBrand` | `types.js` |
 | `card-validator/src/cvv.ts` | `validateCvv` | `types.js` |
 | `card-validator/src/expiration.ts` | `validateExpiration` | *(ninguna)* |
 | `card-validator/src/index.ts` | *(interno)* | *(ninguna)* |
 | `card-validator/src/luhn.ts` | `validateLuhn` | *(ninguna)* |
 | `card-validator/src/sanitizer.ts` | `sanitizeCardNumber` | *(ninguna)* |
+| `card-validator/src/server.ts` | `createCardServer` | `router.js` |
 | `card-validator/src/types.ts` | `CardBrand`, `CardInput`, `CardValidationResult` | *(ninguna)* |
 | `card-validator/src/validator.ts` | `validateCreditCard` | `types.js`, `sanitizer.js`, `luhn.js`, `brands.js`, `expiration.js`, `cvv.js` |
+| `card-validator/tests/api.test.ts` | *(interno)* | `server.js` |
 | `card-validator/tests/brands.test.ts` | *(interno)* | `brands.js` |
 | `card-validator/tests/cvv.test.ts` | *(interno)* | `cvv.js` |
 | `card-validator/tests/expiration.test.ts` | *(interno)* | `expiration.js` |
+| `card-validator/tests/http-utils.test.ts` | *(interno)* | `http-utils.js` |
 | `card-validator/tests/luhn.test.ts` | *(interno)* | `luhn.js` |
 | `card-validator/tests/sanitizer.test.ts` | *(interno)* | `sanitizer.js` |
 | `card-validator/tests/validator.test.ts` | *(interno)* | `validator.js` |

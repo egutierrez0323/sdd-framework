@@ -1,0 +1,717 @@
+{
+  "nodes": [
+    {
+      "id": "card-validator/src/api/handlers.ts",
+      "name": "handlers.ts",
+      "type": "module",
+      "exports": [
+        "handleHealth"
+      ],
+      "imports": [
+        "card-validator/src/api/http-utils.js",
+        "card-validator/src/validator.js",
+        "card-validator/src/luhn.js",
+        "card-validator/src/sanitizer.js",
+        "card-validator/src/brands.js",
+        "card-validator/src/types.js"
+      ],
+      "approxTokens": 396
+    },
+    {
+      "id": "card-validator/src/api/http-utils.ts",
+      "name": "http-utils.ts",
+      "type": "utility",
+      "exports": [
+        "DEFAULT_MAX_BODY_BYTES",
+        "ApiErrorResponse",
+        "sendJson",
+        "createErrorResponse"
+      ],
+      "imports": [],
+      "approxTokens": 505
+    },
+    {
+      "id": "card-validator/src/api/router.ts",
+      "name": "router.ts",
+      "type": "module",
+      "exports": [],
+      "imports": [
+        "card-validator/src/api/handlers.js",
+        "card-validator/src/api/http-utils.js"
+      ],
+      "approxTokens": 475
+    },
+    {
+      "id": "card-validator/src/bin/server.ts",
+      "name": "server.ts",
+      "type": "module",
+      "exports": [],
+      "imports": [
+        "card-validator/src/server.js"
+      ],
+      "approxTokens": 128
+    },
+    {
+      "id": "card-validator/src/brands.ts",
+      "name": "brands.ts",
+      "type": "module",
+      "exports": [
+        "detectCardBrand"
+      ],
+      "imports": [
+        "card-validator/src/types.js"
+      ],
+      "approxTokens": 417
+    },
+    {
+      "id": "card-validator/src/cvv.ts",
+      "name": "cvv.ts",
+      "type": "module",
+      "exports": [
+        "validateCvv"
+      ],
+      "imports": [
+        "card-validator/src/types.js"
+      ],
+      "approxTokens": 191
+    },
+    {
+      "id": "card-validator/src/expiration.ts",
+      "name": "expiration.ts",
+      "type": "module",
+      "exports": [
+        "validateExpiration"
+      ],
+      "imports": [],
+      "approxTokens": 279
+    },
+    {
+      "id": "card-validator/src/index.ts",
+      "name": "index.ts",
+      "type": "module",
+      "exports": [],
+      "imports": [],
+      "approxTokens": 59
+    },
+    {
+      "id": "card-validator/src/luhn.ts",
+      "name": "luhn.ts",
+      "type": "module",
+      "exports": [
+        "validateLuhn"
+      ],
+      "imports": [],
+      "approxTokens": 260
+    },
+    {
+      "id": "card-validator/src/sanitizer.ts",
+      "name": "sanitizer.ts",
+      "type": "module",
+      "exports": [
+        "sanitizeCardNumber"
+      ],
+      "imports": [],
+      "approxTokens": 107
+    },
+    {
+      "id": "card-validator/src/server.ts",
+      "name": "server.ts",
+      "type": "module",
+      "exports": [
+        "createCardServer"
+      ],
+      "imports": [
+        "card-validator/src/api/router.js"
+      ],
+      "approxTokens": 96
+    },
+    {
+      "id": "card-validator/src/types.ts",
+      "name": "types.ts",
+      "type": "module",
+      "exports": [
+        "CardBrand",
+        "CardInput",
+        "CardValidationResult"
+      ],
+      "imports": [],
+      "approxTokens": 92
+    },
+    {
+      "id": "card-validator/src/validator.ts",
+      "name": "validator.ts",
+      "type": "module",
+      "exports": [
+        "validateCreditCard"
+      ],
+      "imports": [
+        "card-validator/src/types.js",
+        "card-validator/src/sanitizer.js",
+        "card-validator/src/luhn.js",
+        "card-validator/src/brands.js",
+        "card-validator/src/expiration.js",
+        "card-validator/src/cvv.js"
+      ],
+      "approxTokens": 716
+    },
+    {
+      "id": "card-validator/tests/api.test.ts",
+      "name": "api.test.ts",
+      "type": "test",
+      "exports": [],
+      "imports": [
+        "card-validator/src/server.js"
+      ],
+      "approxTokens": 873
+    },
+    {
+      "id": "card-validator/tests/brands.test.ts",
+      "name": "brands.test.ts",
+      "type": "test",
+      "exports": [],
+      "imports": [
+        "card-validator/src/brands.js"
+      ],
+      "approxTokens": 344
+    },
+    {
+      "id": "card-validator/tests/cvv.test.ts",
+      "name": "cvv.test.ts",
+      "type": "test",
+      "exports": [],
+      "imports": [
+        "card-validator/src/cvv.js"
+      ],
+      "approxTokens": 367
+    },
+    {
+      "id": "card-validator/tests/expiration.test.ts",
+      "name": "expiration.test.ts",
+      "type": "test",
+      "exports": [],
+      "imports": [
+        "card-validator/src/expiration.js"
+      ],
+      "approxTokens": 440
+    },
+    {
+      "id": "card-validator/tests/http-utils.test.ts",
+      "name": "http-utils.test.ts",
+      "type": "test",
+      "exports": [],
+      "imports": [
+        "card-validator/src/api/http-utils.js"
+      ],
+      "approxTokens": 331
+    },
+    {
+      "id": "card-validator/tests/luhn.test.ts",
+      "name": "luhn.test.ts",
+      "type": "test",
+      "exports": [],
+      "imports": [
+        "card-validator/src/luhn.js"
+      ],
+      "approxTokens": 325
+    },
+    {
+      "id": "card-validator/tests/sanitizer.test.ts",
+      "name": "sanitizer.test.ts",
+      "type": "test",
+      "exports": [],
+      "imports": [
+        "card-validator/src/sanitizer.js"
+      ],
+      "approxTokens": 220
+    },
+    {
+      "id": "card-validator/tests/validator.test.ts",
+      "name": "validator.test.ts",
+      "type": "test",
+      "exports": [],
+      "imports": [
+        "card-validator/src/validator.js"
+      ],
+      "approxTokens": 648
+    },
+    {
+      "id": "src/cli.ts",
+      "name": "cli.ts",
+      "type": "module",
+      "exports": [],
+      "imports": [
+        "src/core/config.js",
+        "src/core/ears-validator.js",
+        "src/core/reverse-engine.js",
+        "src/core/bridges.js",
+        "src/core/auto-runner.js",
+        "src/core/clarifier.js",
+        "src/core/project-graph.js",
+        "src/core/code-reviewer.js",
+        "src/utils/fs-helpers.js",
+        "src/utils/logger.js"
+      ],
+      "approxTokens": 3688
+    },
+    {
+      "id": "src/core/auto-runner.ts",
+      "name": "auto-runner.ts",
+      "type": "module",
+      "exports": [
+        "TaskStatus",
+        "MicroTask",
+        "AutoRunResult",
+        "parseTasksMarkdown",
+        "updateTaskStatusInMarkdown",
+        "RunnerOptions"
+      ],
+      "imports": [
+        "src/utils/git-client.js",
+        "src/utils/logger.js"
+      ],
+      "approxTokens": 1485
+    },
+    {
+      "id": "src/core/bridges.ts",
+      "name": "bridges.ts",
+      "type": "module",
+      "exports": [
+        "SupportedBridge",
+        "SyncReport"
+      ],
+      "imports": [
+        "src/utils/fs-helpers.js"
+      ],
+      "approxTokens": 680
+    },
+    {
+      "id": "src/core/clarifier.ts",
+      "name": "clarifier.ts",
+      "type": "module",
+      "exports": [
+        "ClarificationQuestion",
+        "generateClarificationSession",
+        "formatClarificationMarkdown"
+      ],
+      "imports": [
+        "src/core/ears-validator.js",
+        "src/core/config.js"
+      ],
+      "approxTokens": 774
+    },
+    {
+      "id": "src/core/code-reviewer.ts",
+      "name": "code-reviewer.ts",
+      "type": "module",
+      "exports": [
+        "DuplicateBlock",
+        "FunctionMetric",
+        "ReviewFinding",
+        "ProjectReviewReport",
+        "ReviewOptions",
+        "findDuplicateBlocks",
+        "analyzeFunctionMetrics",
+        "formatReviewReport"
+      ],
+      "imports": [
+        "src/utils/fs-helpers.js"
+      ],
+      "approxTokens": 3383
+    },
+    {
+      "id": "src/core/config.ts",
+      "name": "config.ts",
+      "type": "module",
+      "exports": [
+        "SeverityLevel",
+        "SddConfig",
+        "DEFAULT_CONFIG"
+      ],
+      "imports": [],
+      "approxTokens": 545
+    },
+    {
+      "id": "src/core/ears-validator.ts",
+      "name": "ears-validator.ts",
+      "type": "module",
+      "exports": [
+        "EarsType",
+        "EarsRequirement",
+        "ValidationIssue",
+        "ValidationReport",
+        "parseSpecMarkdown",
+        "validateSpec"
+      ],
+      "imports": [
+        "src/core/config.js"
+      ],
+      "approxTokens": 2073
+    },
+    {
+      "id": "src/core/project-graph.ts",
+      "name": "project-graph.ts",
+      "type": "module",
+      "exports": [
+        "GraphNode",
+        "ProjectGraph",
+        "formatMermaidGraph"
+      ],
+      "imports": [
+        "src/utils/fs-helpers.js"
+      ],
+      "approxTokens": 1625
+    },
+    {
+      "id": "src/core/reverse-engine.ts",
+      "name": "reverse-engine.ts",
+      "type": "module",
+      "exports": [
+        "ProjectScanResult",
+        "generateReverseConstitution",
+        "generateReverseBaselineSpec"
+      ],
+      "imports": [
+        "src/utils/fs-helpers.js"
+      ],
+      "approxTokens": 1638
+    },
+    {
+      "id": "src/index.ts",
+      "name": "index.ts",
+      "type": "module",
+      "exports": [],
+      "imports": [],
+      "approxTokens": 96
+    },
+    {
+      "id": "src/utils/fs-helpers.ts",
+      "name": "fs-helpers.ts",
+      "type": "utility",
+      "exports": [],
+      "imports": [],
+      "approxTokens": 352
+    },
+    {
+      "id": "src/utils/git-client.ts",
+      "name": "git-client.ts",
+      "type": "utility",
+      "exports": [
+        "GitStatus",
+        "GitClient"
+      ],
+      "imports": [],
+      "approxTokens": 393
+    },
+    {
+      "id": "src/utils/logger.ts",
+      "name": "logger.ts",
+      "type": "utility",
+      "exports": [
+        "ArbiterRole",
+        "Logger"
+      ],
+      "imports": [],
+      "approxTokens": 400
+    },
+    {
+      "id": "tests/auto-runner.test.ts",
+      "name": "auto-runner.test.ts",
+      "type": "test",
+      "exports": [],
+      "imports": [],
+      "approxTokens": 600
+    },
+    {
+      "id": "tests/bridges.test.ts",
+      "name": "bridges.test.ts",
+      "type": "test",
+      "exports": [],
+      "imports": [
+        "src/core/bridges.js",
+        "src/utils/fs-helpers.js"
+      ],
+      "approxTokens": 339
+    },
+    {
+      "id": "tests/code-reviewer.test.ts",
+      "name": "code-reviewer.test.ts",
+      "type": "test",
+      "exports": [
+        "doAlpha",
+        "doBeta",
+        "funcA",
+        "funcB",
+        "shortFunc",
+        "longMonolithicFunc"
+      ],
+      "imports": [],
+      "approxTokens": 826
+    },
+    {
+      "id": "tests/config.test.ts",
+      "name": "config.test.ts",
+      "type": "test",
+      "exports": [],
+      "imports": [
+        "src/core/config.js"
+      ],
+      "approxTokens": 152
+    },
+    {
+      "id": "tests/ears-validator.test.ts",
+      "name": "ears-validator.test.ts",
+      "type": "test",
+      "exports": [],
+      "imports": [
+        "src/core/ears-validator.js"
+      ],
+      "approxTokens": 684
+    },
+    {
+      "id": "tests/project-graph.test.ts",
+      "name": "project-graph.test.ts",
+      "type": "test",
+      "exports": [],
+      "imports": [
+        "src/core/project-graph.js",
+        "src/utils/fs-helpers.js"
+      ],
+      "approxTokens": 365
+    },
+    {
+      "id": "tests/reverse-engine.test.ts",
+      "name": "reverse-engine.test.ts",
+      "type": "test",
+      "exports": [],
+      "imports": [
+        "src/core/reverse-engine.js"
+      ],
+      "approxTokens": 311
+    },
+    {
+      "id": "vitest.config.ts",
+      "name": "vitest.config.ts",
+      "type": "test",
+      "exports": [],
+      "imports": [],
+      "approxTokens": 45
+    }
+  ],
+  "edges": [
+    {
+      "from": "card-validator/src/api/handlers.ts",
+      "to": "card-validator/src/api/http-utils.js"
+    },
+    {
+      "from": "card-validator/src/api/handlers.ts",
+      "to": "card-validator/src/validator.js"
+    },
+    {
+      "from": "card-validator/src/api/handlers.ts",
+      "to": "card-validator/src/luhn.js"
+    },
+    {
+      "from": "card-validator/src/api/handlers.ts",
+      "to": "card-validator/src/sanitizer.js"
+    },
+    {
+      "from": "card-validator/src/api/handlers.ts",
+      "to": "card-validator/src/brands.js"
+    },
+    {
+      "from": "card-validator/src/api/handlers.ts",
+      "to": "card-validator/src/types.js"
+    },
+    {
+      "from": "card-validator/src/api/router.ts",
+      "to": "card-validator/src/api/handlers.js"
+    },
+    {
+      "from": "card-validator/src/api/router.ts",
+      "to": "card-validator/src/api/http-utils.js"
+    },
+    {
+      "from": "card-validator/src/bin/server.ts",
+      "to": "card-validator/src/server.js"
+    },
+    {
+      "from": "card-validator/src/brands.ts",
+      "to": "card-validator/src/types.js"
+    },
+    {
+      "from": "card-validator/src/cvv.ts",
+      "to": "card-validator/src/types.js"
+    },
+    {
+      "from": "card-validator/src/server.ts",
+      "to": "card-validator/src/api/router.js"
+    },
+    {
+      "from": "card-validator/src/validator.ts",
+      "to": "card-validator/src/types.js"
+    },
+    {
+      "from": "card-validator/src/validator.ts",
+      "to": "card-validator/src/sanitizer.js"
+    },
+    {
+      "from": "card-validator/src/validator.ts",
+      "to": "card-validator/src/luhn.js"
+    },
+    {
+      "from": "card-validator/src/validator.ts",
+      "to": "card-validator/src/brands.js"
+    },
+    {
+      "from": "card-validator/src/validator.ts",
+      "to": "card-validator/src/expiration.js"
+    },
+    {
+      "from": "card-validator/src/validator.ts",
+      "to": "card-validator/src/cvv.js"
+    },
+    {
+      "from": "card-validator/tests/api.test.ts",
+      "to": "card-validator/src/server.js"
+    },
+    {
+      "from": "card-validator/tests/brands.test.ts",
+      "to": "card-validator/src/brands.js"
+    },
+    {
+      "from": "card-validator/tests/cvv.test.ts",
+      "to": "card-validator/src/cvv.js"
+    },
+    {
+      "from": "card-validator/tests/expiration.test.ts",
+      "to": "card-validator/src/expiration.js"
+    },
+    {
+      "from": "card-validator/tests/http-utils.test.ts",
+      "to": "card-validator/src/api/http-utils.js"
+    },
+    {
+      "from": "card-validator/tests/luhn.test.ts",
+      "to": "card-validator/src/luhn.js"
+    },
+    {
+      "from": "card-validator/tests/sanitizer.test.ts",
+      "to": "card-validator/src/sanitizer.js"
+    },
+    {
+      "from": "card-validator/tests/validator.test.ts",
+      "to": "card-validator/src/validator.js"
+    },
+    {
+      "from": "src/cli.ts",
+      "to": "src/core/config.js"
+    },
+    {
+      "from": "src/cli.ts",
+      "to": "src/core/ears-validator.js"
+    },
+    {
+      "from": "src/cli.ts",
+      "to": "src/core/reverse-engine.js"
+    },
+    {
+      "from": "src/cli.ts",
+      "to": "src/core/bridges.js"
+    },
+    {
+      "from": "src/cli.ts",
+      "to": "src/core/auto-runner.js"
+    },
+    {
+      "from": "src/cli.ts",
+      "to": "src/core/clarifier.js"
+    },
+    {
+      "from": "src/cli.ts",
+      "to": "src/core/project-graph.js"
+    },
+    {
+      "from": "src/cli.ts",
+      "to": "src/core/code-reviewer.js"
+    },
+    {
+      "from": "src/cli.ts",
+      "to": "src/utils/fs-helpers.js"
+    },
+    {
+      "from": "src/cli.ts",
+      "to": "src/utils/logger.js"
+    },
+    {
+      "from": "src/core/auto-runner.ts",
+      "to": "src/utils/git-client.js"
+    },
+    {
+      "from": "src/core/auto-runner.ts",
+      "to": "src/utils/logger.js"
+    },
+    {
+      "from": "src/core/bridges.ts",
+      "to": "src/utils/fs-helpers.js"
+    },
+    {
+      "from": "src/core/clarifier.ts",
+      "to": "src/core/ears-validator.js"
+    },
+    {
+      "from": "src/core/clarifier.ts",
+      "to": "src/core/config.js"
+    },
+    {
+      "from": "src/core/code-reviewer.ts",
+      "to": "src/utils/fs-helpers.js"
+    },
+    {
+      "from": "src/core/ears-validator.ts",
+      "to": "src/core/config.js"
+    },
+    {
+      "from": "src/core/project-graph.ts",
+      "to": "src/utils/fs-helpers.js"
+    },
+    {
+      "from": "src/core/reverse-engine.ts",
+      "to": "src/utils/fs-helpers.js"
+    },
+    {
+      "from": "tests/bridges.test.ts",
+      "to": "src/core/bridges.js"
+    },
+    {
+      "from": "tests/bridges.test.ts",
+      "to": "src/utils/fs-helpers.js"
+    },
+    {
+      "from": "tests/config.test.ts",
+      "to": "src/core/config.js"
+    },
+    {
+      "from": "tests/ears-validator.test.ts",
+      "to": "src/core/ears-validator.js"
+    },
+    {
+      "from": "tests/project-graph.test.ts",
+      "to": "src/core/project-graph.js"
+    },
+    {
+      "from": "tests/project-graph.test.ts",
+      "to": "src/utils/fs-helpers.js"
+    },
+    {
+      "from": "tests/reverse-engine.test.ts",
+      "to": "src/core/reverse-engine.js"
+    }
+  ],
+  "stats": {
+    "totalFiles": 42,
+    "totalExports": 59,
+    "rawTokensEstimate": 27723,
+    "graphTokensEstimate": 1286,
+    "tokenReductionPercent": 95
+  }
+}

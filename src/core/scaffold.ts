@@ -297,6 +297,37 @@ export function generateStandardConstitution(projectName: string, severity: Seve
 /**
  * Orquestador central de inicialización / andamiaje de proyectos SDD.
  */
+async function writeBaseTemplates(projectRoot: string, createdFiles: string[]): Promise<void> {
+  const templatesMap: Record<string, string> = {
+    'spec.template.md': BUILTIN_TEMPLATES.spec,
+    'plan.template.md': BUILTIN_TEMPLATES.plan,
+    'tasks.template.md': BUILTIN_TEMPLATES.tasks,
+    'ears-guide.md': BUILTIN_TEMPLATES.earsGuide,
+  };
+
+  for (const [filename, content] of Object.entries(templatesMap)) {
+    const filePath = path.join(projectRoot, '.sdd', 'templates', filename);
+    await writeFileUtf8(filePath, content);
+    createdFiles.push(filePath);
+  }
+}
+
+async function writeBuiltinSkills(
+  projectRoot: string,
+  createdDirs: string[],
+  createdFiles: string[]
+): Promise<void> {
+  for (const [skillName, content] of Object.entries(BUILTIN_SKILLS)) {
+    const skillDir = path.join(projectRoot, '.agents', 'skills', skillName);
+    await ensureDir(skillDir);
+    createdDirs.push(skillDir);
+
+    const skillPath = path.join(skillDir, 'SKILL.md');
+    await writeFileUtf8(skillPath, content);
+    createdFiles.push(skillPath);
+  }
+}
+
 export async function scaffoldProject(options: ScaffoldOptions): Promise<ScaffoldResult> {
   const { projectRoot, mode, severity, bridges, includeSkills } = options;
   const projectName = options.projectName || path.basename(projectRoot);
@@ -317,31 +348,11 @@ export async function scaffoldProject(options: ScaffoldOptions): Promise<Scaffol
     createdDirs.push(dir);
   }
 
-  // 2. Escribir plantillas en .sdd/templates/
-  const templatesMap: Record<string, string> = {
-    'spec.template.md': BUILTIN_TEMPLATES.spec,
-    'plan.template.md': BUILTIN_TEMPLATES.plan,
-    'tasks.template.md': BUILTIN_TEMPLATES.tasks,
-    'ears-guide.md': BUILTIN_TEMPLATES.earsGuide,
-  };
+  // 2. Escribir plantillas y skills
+  await writeBaseTemplates(projectRoot, createdFiles);
 
-  for (const [filename, content] of Object.entries(templatesMap)) {
-    const filePath = path.join(projectRoot, '.sdd', 'templates', filename);
-    await writeFileUtf8(filePath, content);
-    createdFiles.push(filePath);
-  }
-
-  // 3. Escribir skills en .agents/skills/ si fue solicitado
   if (includeSkills) {
-    for (const [skillName, content] of Object.entries(BUILTIN_SKILLS)) {
-      const skillDir = path.join(projectRoot, '.agents', 'skills', skillName);
-      await ensureDir(skillDir);
-      createdDirs.push(skillDir);
-
-      const skillPath = path.join(skillDir, 'SKILL.md');
-      await writeFileUtf8(skillPath, content);
-      createdFiles.push(skillPath);
-    }
+    await writeBuiltinSkills(projectRoot, createdDirs, createdFiles);
   }
 
   // 4. Guardar config.json

@@ -399,7 +399,7 @@
         "src/core/reverse-engine.js",
         "src/utils/fs-helpers.js"
       ],
-      "approxTokens": 4299
+      "approxTokens": 4366
     },
     {
       "id": "src/index.ts",
@@ -779,7 +779,7 @@
   "stats": {
     "totalFiles": 45,
     "totalExports": 71,
-    "rawTokensEstimate": 38136,
+    "rawTokensEstimate": 38203,
     "graphTokensEstimate": 1428,
     "tokenReductionPercent": 96
   }

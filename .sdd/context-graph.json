@@ -399,7 +399,7 @@
         "src/core/reverse-engine.js",
         "src/utils/fs-helpers.js"
       ],
-      "approxTokens": 4306
+      "approxTokens": 4299
     },
     {
       "id": "src/index.ts",
@@ -531,7 +531,7 @@
         "src/core/scaffold.js",
         "src/utils/fs-helpers.js"
       ],
-      "approxTokens": 962
+      "approxTokens": 961
     },
     {
       "id": "vitest.config.ts",
@@ -779,7 +779,7 @@
   "stats": {
     "totalFiles": 45,
     "totalExports": 71,
-    "rawTokensEstimate": 38144,
+    "rawTokensEstimate": 38136,
     "graphTokensEstimate": 1428,
     "tokenReductionPercent": 96
   }

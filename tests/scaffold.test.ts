@@ -40,7 +40,7 @@ describe('Scaffold Module (sdd init)', () => {
     expect(await fileExists(path.join(tempDir, '.sdd', 'templates', 'ears-guide.md'))).toBe(true);
 
     // Comprobar configuración
-    expect(await fileExists(path.join(tempDir, '.sdd', 'sdd.config.json'))).toBe(true);
+    expect(await fileExists(path.join(tempDir, '.sdd', 'config.json'))).toBe(true);
 
     // Comprobar constitución
     const agentsMd = path.join(tempDir, 'AGENTS.md');

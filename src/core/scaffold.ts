@@ -1,5 +1,5 @@
 import path from 'node:path';
-import { SeverityLevel, saveConfig } from './config.js';
+import { SeverityLevel, saveConfig, DEFAULT_CONFIG } from './config.js';
 import { SupportedBridge, syncBridges } from './bridges.js';
 import { scanProject, generateReverseConstitution, generateReverseBaselineSpec } from './reverse-engine.js';
 import { ensureDir, fileExists, writeFileUtf8 } from '../utils/fs-helpers.js';
@@ -344,17 +344,16 @@ export async function scaffoldProject(options: ScaffoldOptions): Promise<Scaffol
     }
   }
 
-  // 4. Guardar sdd.config.json
+  // 4. Guardar config.json
   const config = {
+    ...DEFAULT_CONFIG,
     projectName,
     severity,
-    specsDir: '.sdd/specs',
-    plansDir: '.sdd/plans',
-    tasksDir: '.sdd/tasks',
+    projectType: mode,
     bridges,
   };
   await saveConfig(config, projectRoot);
-  createdFiles.push(path.join(projectRoot, '.sdd', 'sdd.config.json'));
+  createdFiles.push(path.join(projectRoot, '.sdd', 'config.json'));
 
   // 5. Manejar modo Greenfield vs Brownfield
   const agentsPath = path.join(projectRoot, 'AGENTS.md');

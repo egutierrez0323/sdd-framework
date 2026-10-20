@@ -7,7 +7,6 @@ import { parseSpecMarkdown, EarsRequirement } from './ears-validator.js';
 import { parseTasksMarkdown, MicroTask } from './auto-runner.js';
 import { fileExists, readFileUtf8, listFilesRecursive } from '../utils/fs-helpers.js';
 import { generateDashboardHtml } from './ui-html.js';
-import { Logger } from '../utils/logger.js';
 
 export interface SpecData {
   id: string;
@@ -55,9 +54,6 @@ export interface SddDashboardData {
   };
 }
 
-/**
- * Busca un puerto disponible comenzando en startPort.
- */
 export async function findAvailablePort(startPort: number = 3333): Promise<number> {
   return new Promise((resolve) => {
     const server = net.createServer();
@@ -71,9 +67,6 @@ export async function findAvailablePort(startPort: number = 3333): Promise<numbe
   });
 }
 
-/**
- * Abre la URL en el navegador predeterminado del sistema operativo.
- */
 export function openInBrowser(url: string): void {
   const plat = process.platform;
   let cmd = '';
@@ -91,40 +84,7 @@ export function openInBrowser(url: string): void {
   }
 }
 
-/**
- * Extrae metadatos de un archivo spec.md
- */
-function parseSpecMetadata(content: string, filename: string): SpecData {
-  const lines = content.split(/\r?\n/);
-  const firstLine = lines[0] || '';
-  const titleMatch = firstLine.match(/^#\s+(SPEC-[A-Za-z0-9-_]+):\s*(.+)$/i);
-
-  const id = titleMatch ? titleMatch[1] : path.basename(filename, '.md');
-  const title = titleMatch ? titleMatch[2].trim() : path.basename(filename, '.md');
-
-  const statusMatch = content.match(/[-*]\s+\*\*Estado:\*\*\s*([A-Za-z_]+)/i);
-  const status = statusMatch ? statusMatch[1].toUpperCase() : 'DRAFT';
-
-  const dateMatch = content.match(/[-*]\s+\*\*Fecha(?: de Creación)?:\*\*\s*([0-9-_/]+)/i);
-  const date = dateMatch ? dateMatch[1] : undefined;
-
-  const sevMatch = content.match(/[-*]\s+\*\*Nivel de Severidad:\*\*\s*(L[1-3])/i);
-  const severity = sevMatch ? sevMatch[1] : undefined;
-
-  const authorMatch = content.match(/[-*]\s+\*\*Autor(?: \/ Responsable)?:\*\*\s*(.+)$/im);
-  const author = authorMatch ? authorMatch[1].trim() : undefined;
-
-  // Extraer sección 1: Contexto y Justificación
-  let context = '';
-  const contextMatch = content.match(/## 1\.\s+Contexto y Justificación[^\n]*\n([\s\S]*?)(?=\n---|\n## 2|$)/i);
-  if (contextMatch) {
-    context = contextMatch[1].replace(/<!--[\s\S]*?-->/g, '').trim();
-  }
-
-  // Requerimientos
-  const requirements = parseSpecMarkdown(content);
-
-  // Decisiones de clarificación
+function extractDecisions(content: string): Array<{ id: string; category: string; decision: string }> {
   const decisions: Array<{ id: string; category: string; decision: string }> = [];
   const decisionRegex = /###\s+\[(CLARIFY-[0-9]+)\]\s+([^\n]+)\n[\s\S]*?-\s+\*\*Decisión Vinculante:\*\*\s*([^\n]+)/gi;
   let match;
@@ -135,15 +95,39 @@ function parseSpecMetadata(content: string, filename: string): SpecData {
       decision: match[3].trim(),
     });
   }
+  return decisions;
+}
+
+function parseSpecMetadata(content: string, filename: string): SpecData {
+  const lines = content.split(/\r?\n/);
+  const titleMatch = (lines[0] || '').match(/^#\s+(SPEC-[A-Za-z0-9-_]+):\s*(.+)$/i);
+  const id = titleMatch ? titleMatch[1] : path.basename(filename, '.md');
+  const title = titleMatch ? titleMatch[2].trim() : path.basename(filename, '.md');
+
+  const statusMatch = content.match(/[-*]\s+\*\*Estado:\*\*\s*([A-Za-z_]+)/i);
+  const status = statusMatch ? statusMatch[1].toUpperCase() : 'DRAFT';
+
+  const dateMatch = content.match(/[-*]\s+\*\*Fecha(?: de Creación)?:\*\*\s*([0-9-_/]+)/i);
+  const sevMatch = content.match(/[-*]\s+\*\*Nivel de Severidad:\*\*\s*(L[1-3])/i);
+  const authorMatch = content.match(/[-*]\s+\*\*Autor(?: \/ Responsable)?:\*\*\s*(.+)$/im);
+
+  let context = '';
+  const contextMatch = content.match(/## 1\.\s+Contexto y Justificación[^\n]*\n([\s\S]*?)(?=\n---|\n## 2|$)/i);
+  if (contextMatch) {
+    context = contextMatch[1].replace(/<!--[\s\S]*?-->/g, '').trim();
+  }
+
+  const requirements = parseSpecMarkdown(content);
+  const decisions = extractDecisions(content);
 
   return {
     id,
     filename,
     title,
     status,
-    date,
-    severity,
-    author,
+    date: dateMatch ? dateMatch[1] : undefined,
+    severity: sevMatch ? sevMatch[1] : undefined,
+    author: authorMatch ? authorMatch[1].trim() : undefined,
     context,
     requirementsCount: requirements.length,
     requirements,
@@ -151,13 +135,7 @@ function parseSpecMetadata(content: string, filename: string): SpecData {
   };
 }
 
-/**
- * Recopila todos los datos del proyecto SDD para alimentar el visualizador.
- */
-export async function collectSddProjectData(projectRoot: string): Promise<SddDashboardData> {
-  const config = await loadConfig(projectRoot);
-
-  // 1. Recopilar Specs
+async function collectSpecs(projectRoot: string): Promise<{ specs: SpecData[]; earsBreakdown: Record<string, number> }> {
   const specsDir = path.join(projectRoot, '.sdd', 'specs');
   const specFiles = (await fileExists(specsDir))
     ? (await listFilesRecursive(specsDir, '.md')).filter(
@@ -185,7 +163,10 @@ export async function collectSddProjectData(projectRoot: string): Promise<SddDas
     }
   }
 
-  // 2. Recopilar Tasks
+  return { specs, earsBreakdown };
+}
+
+async function collectTasks(projectRoot: string): Promise<{ tasks: TaskListData[]; totalMicroTasks: number; completedMicroTasks: number }> {
   const tasksDir = path.join(projectRoot, '.sdd', 'tasks');
   const taskFiles = (await fileExists(tasksDir)) ? await listFilesRecursive(tasksDir, '.md') : [];
   const tasks: TaskListData[] = [];
@@ -198,8 +179,6 @@ export async function collectSddProjectData(projectRoot: string): Promise<SddDas
     const parsedTasks = parseTasksMarkdown(content);
     const firstLine = content.split(/\r?\n/)[0] || '';
     const titleMatch = firstLine.match(/^#\s+(TASKS-[A-Za-z0-9-_]+):\s*(.+)$/i);
-    const id = titleMatch ? titleMatch[1] : path.basename(file, '.md');
-    const title = titleMatch ? titleMatch[2].trim() : path.basename(file, '.md');
 
     const doneCount = parsedTasks.filter((t) => t.status === 'DONE').length;
     const blockedCount = parsedTasks.filter((t) => t.status === 'BLOCKED').length;
@@ -210,9 +189,9 @@ export async function collectSddProjectData(projectRoot: string): Promise<SddDas
     completedMicroTasks += doneCount;
 
     tasks.push({
-      id,
+      id: titleMatch ? titleMatch[1] : path.basename(file, '.md'),
       filename: file,
-      title,
+      title: titleMatch ? titleMatch[2].trim() : path.basename(file, '.md'),
       totalTasks: parsedTasks.length,
       completedTasks: doneCount,
       pendingTasks: pendingCount,
@@ -222,7 +201,10 @@ export async function collectSddProjectData(projectRoot: string): Promise<SddDas
     });
   }
 
-  // 3. Recopilar Plans
+  return { tasks, totalMicroTasks, completedMicroTasks };
+}
+
+async function collectPlans(projectRoot: string): Promise<Array<{ id: string; filename: string; title: string; content: string }>> {
   const plansDir = path.join(projectRoot, '.sdd', 'plans');
   const planFiles = (await fileExists(plansDir)) ? await listFilesRecursive(plansDir, '.md') : [];
   const plans: Array<{ id: string; filename: string; title: string; content: string }> = [];
@@ -239,24 +221,25 @@ export async function collectSddProjectData(projectRoot: string): Promise<SddDas
     });
   }
 
-  // 4. Grafo y Constitución
-  let graphMermaid = '';
-  const graphFile = path.join(projectRoot, '.sdd', 'architecture-graph.md');
-  if (await fileExists(graphFile)) {
-    graphMermaid = await readFileUtf8(graphFile);
-  }
+  return plans;
+}
 
-  let constitution = '';
+export async function collectSddProjectData(projectRoot: string): Promise<SddDashboardData> {
+  const config = await loadConfig(projectRoot);
+  const { specs, earsBreakdown } = await collectSpecs(projectRoot);
+  const { tasks, totalMicroTasks, completedMicroTasks } = await collectTasks(projectRoot);
+  const plans = await collectPlans(projectRoot);
+
+  const graphFile = path.join(projectRoot, '.sdd', 'architecture-graph.md');
+  const graphMermaid = (await fileExists(graphFile)) ? await readFileUtf8(graphFile) : '';
+
   const agentsFile = path.join(projectRoot, 'AGENTS.md');
-  if (await fileExists(agentsFile)) {
-    constitution = await readFileUtf8(agentsFile);
-  }
+  const constitution = (await fileExists(agentsFile)) ? await readFileUtf8(agentsFile) : '';
 
   const approvedSpecs = specs.filter((s) => s.status === 'APPROVED').length;
   const draftSpecs = specs.filter((s) => s.status !== 'APPROVED').length;
   const totalRequirements = specs.reduce((acc, s) => acc + s.requirementsCount, 0);
-  const overallProgress =
-    totalMicroTasks > 0 ? Math.round((completedMicroTasks / totalMicroTasks) * 100) : 0;
+  const overallProgress = totalMicroTasks > 0 ? Math.round((completedMicroTasks / totalMicroTasks) * 100) : 0;
 
   return {
     projectName: config.projectName || path.basename(projectRoot),
@@ -279,9 +262,6 @@ export async function collectSddProjectData(projectRoot: string): Promise<SddDas
   };
 }
 
-/**
- * Inicia el servidor HTTP del Dashboard Visualizador.
- */
 export async function startUiServer(options: {
   projectRoot: string;
   port?: number;

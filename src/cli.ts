@@ -57,6 +57,50 @@ Comandos disponibles:
 `);
 }
 
+async function askProjectMode(rl: readline.Interface, hasCode: boolean): Promise<'greenfield' | 'brownfield'> {
+  console.log(`\n◇ [1/4] TIPO DE PROYECTO:`);
+  if (hasCode) {
+    console.log(`  ℹ Se detectó código previo en el repositorio.`);
+    console.log(`  [1] Greenfield (Empezar como nuevo)`);
+    console.log(`  [2] (Recomendado) Brownfield (Proyecto existente: ingeniería inversa y línea base)`);
+  } else {
+    console.log(`  [1] (Recomendado) Greenfield (Proyecto nuevo)`);
+    console.log(`  [2] Brownfield (Proyecto existente)`);
+  }
+  const choice = (await rl.question(`  👉 Selecciona [1-2] (default: ${hasCode ? '2' : '1'}): `)).trim();
+  return choice === '2' ? 'brownfield' : choice === '1' ? 'greenfield' : hasCode ? 'brownfield' : 'greenfield';
+}
+
+async function askSeverity(rl: readline.Interface, defaultSev: SeverityLevel): Promise<SeverityLevel> {
+  console.log(`\n◇ [2/4] NIVEL DE SEVERIDAD DEL ÁRBITRO:`);
+  console.log(`  [1] L1 - Pragmatic (Velocity: alertas no bloqueantes)`);
+  console.log(`  [2] (Recomendado) L2 - Standard (Producción: EARS estricto)`);
+  console.log(`  [3] L3 - Draconian (Misión Crítica: tolerancia cero)`);
+  const choice = (await rl.question(`  👉 Selecciona la severidad [1-3] (default: 2): `)).trim();
+  if (choice === '1') return 'L1';
+  if (choice === '3') return 'L3';
+  return defaultSev || 'L2';
+}
+
+async function askBridgesAndSkills(rl: readline.Interface): Promise<{ bridges: SupportedBridge[]; includeSkills: boolean }> {
+  console.log(`\n◇ [3/4] ASISTENTES Y EDITORES DE IA:`);
+  console.log(`  [1] Cursor (.cursorrules)`);
+  console.log(`  [2] Claude Code (CLAUDE.md)`);
+  console.log(`  [3] Antigravity / Gemini CLI (AGENTS.md)`);
+  console.log(`  [4] (Recomendado) Todos los anteriores`);
+  const bChoice = (await rl.question(`  👉 Selecciona puentes [1-4] (default: 4): `)).trim();
+  let bridges: SupportedBridge[] = ['cursor', 'claude', 'antigravity'];
+  if (bChoice === '1') bridges = ['cursor'];
+  else if (bChoice === '2') bridges = ['claude'];
+  else if (bChoice === '3') bridges = ['antigravity'];
+
+  console.log(`\n◇ [4/4] ARSENAL DE SKILLS AVANZADAS (.agents/skills/):`);
+  console.log(`  [1] (Recomendado) Sí, instalar arsenal completo`);
+  console.log(`  [2] No, solo estructura mínima`);
+  const sChoice = (await rl.question(`  👉 Opción [1-2] (default: 1): `)).trim();
+  return { bridges, includeSkills: sChoice !== '2' };
+}
+
 async function promptInitInteractively(root: string, defaultSeverity: SeverityLevel): Promise<ScaffoldOptions> {
   const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
   try {
@@ -66,47 +110,9 @@ async function promptInitInteractively(root: string, defaultSeverity: SeverityLe
       (await fileExists(path.join(root, 'Cargo.toml'))) ||
       (await fileExists(path.join(root, 'go.mod')));
 
-    console.log(`\n◇ [1/4] TIPO DE PROYECTO:`);
-    if (hasExistingCode) {
-      console.log(`  ℹ Se detectó código o configuración previa en el repositorio.`);
-      console.log(`  [1] Greenfield (Empezar como nuevo desde cero)`);
-      console.log(`  [2] (Recomendado) Brownfield (Proyecto existente: ingeniería inversa y línea base SPEC-000)`);
-    } else {
-      console.log(`  [1] (Recomendado) Greenfield (Proyecto nuevo desde cero)`);
-      console.log(`  [2] Brownfield (Proyecto existente: ingeniería inversa y línea base SPEC-000)`);
-    }
-    const defaultModeChoice = hasExistingCode ? '2' : '1';
-    const modeChoice = (await rl.question(`  👉 Selecciona una opción [1-2] (default: ${defaultModeChoice}): `)).trim();
-    const mode: 'greenfield' | 'brownfield' =
-      modeChoice === '2' ? 'brownfield' : modeChoice === '1' ? 'greenfield' : hasExistingCode ? 'brownfield' : 'greenfield';
-
-    console.log(`\n◇ [2/4] NIVEL DE SEVERIDAD DEL ÁRBITRO:`);
-    console.log(`  [1] L1 - Pragmatic (Velocity: alertas no bloqueantes, ideal para prototipos rápidos)`);
-    console.log(`  [2] (Recomendado) L2 - Standard (Producción: EARS estricto, 100% tareas verificables)`);
-    console.log(`  [3] L3 - Draconian (Misión Crítica: tolerancia cero a ambigüedad, modelado de fallos)`);
-    const sevChoice = (await rl.question(`  👉 Selecciona la severidad [1-3] (default: 2): `)).trim();
-    let severity: SeverityLevel = defaultSeverity;
-    if (sevChoice === '1') severity = 'L1';
-    else if (sevChoice === '3') severity = 'L3';
-    else severity = 'L2';
-
-    console.log(`\n◇ [3/4] ASISTENTES Y EDITORES DE IA (PUENTES):`);
-    console.log(`  [1] Cursor (.cursorrules)`);
-    console.log(`  [2] Claude Code (CLAUDE.md)`);
-    console.log(`  [3] Antigravity / Gemini CLI (AGENTS.md)`);
-    console.log(`  [4] (Recomendado) Todos los anteriores`);
-    const bridgeChoice = (await rl.question(`  👉 Selecciona puentes [1-4] (default: 4): `)).trim();
-    let bridges: SupportedBridge[] = ['cursor', 'claude', 'antigravity'];
-    if (bridgeChoice === '1') bridges = ['cursor'];
-    else if (bridgeChoice === '2') bridges = ['claude'];
-    else if (bridgeChoice === '3') bridges = ['antigravity'];
-
-    console.log(`\n◇ [4/4] ARSENAL DE SKILLS AVANZADAS (.agents/skills/):`);
-    console.log(`  Incluye: grill-me, clean-code, project-graph y sdd-methodology`);
-    console.log(`  [1] (Recomendado) Sí, instalar arsenal completo`);
-    console.log(`  [2] No, solo estructura mínima`);
-    const skillsChoice = (await rl.question(`  👉 Selecciona opción [1-2] (default: 1): `)).trim();
-    const includeSkills = skillsChoice !== '2';
+    const mode = await askProjectMode(rl, hasExistingCode);
+    const severity = await askSeverity(rl, defaultSeverity);
+    const { bridges, includeSkills } = await askBridgesAndSkills(rl);
 
     return {
       projectRoot: root,

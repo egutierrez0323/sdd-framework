@@ -71,9 +71,10 @@ export async function loadConfig(projectRoot: string = process.cwd()): Promise<S
         ...DEFAULT_CONFIG.autonomous,
         ...(parsed.autonomous || {}),
       },
+      projectName: parsed.projectName || path.basename(projectRoot),
     };
   } catch {
-    return { ...DEFAULT_CONFIG };
+    return { ...DEFAULT_CONFIG, projectName: path.basename(projectRoot) };
   }
 }
 

@@ -335,7 +335,7 @@
         "DEFAULT_CONFIG"
       ],
       "imports": [],
-      "approxTokens": 545
+      "approxTokens": 572
     },
     {
       "id": "src/core/ears-validator.ts",
@@ -842,7 +842,7 @@
   "stats": {
     "totalFiles": 48,
     "totalExports": 77,
-    "rawTokensEstimate": 49019,
+    "rawTokensEstimate": 49046,
     "graphTokensEstimate": 1533,
     "tokenReductionPercent": 97
   }

@@ -17,6 +17,7 @@ import {
 import { generateProjectGraph, saveProjectGraphArtifacts } from './core/project-graph.js';
 import { reviewProject, formatReviewReport } from './core/code-reviewer.js';
 import { scaffoldProject, ScaffoldOptions } from './core/scaffold.js';
+import { startUiServer } from './core/ui-server.js';
 import { ensureDir, fileExists, readFileUtf8, writeFileUtf8, listFilesRecursive } from './utils/fs-helpers.js';
 import { Logger } from './utils/logger.js';
 
@@ -46,6 +47,9 @@ Comandos disponibles:
   review [ruta]            Audita código limpio, detecta duplicación (DRY) y complejidad
 
   run <archivo-tasks>      Ejecuta el bucle autónomo verificable sobre una lista de micro-tareas
+
+  ui, view                 Lanza el visualizador web interactivo de specs, tareas y arquitectura
+                           Opciones: --port <puerto>, --no-open
 
   sync                     Sincroniza AGENTS.md con Cursor (.cursorrules), Claude (CLAUDE.md), etc.
 
@@ -544,6 +548,33 @@ async function handleReview() {
   }
 }
 
+async function handleUi() {
+  const root = process.cwd();
+  Logger.banner('SDD FRAMEWORK :: VISUALIZADOR WEB INTERACTIVO');
+
+  let port: number | undefined;
+  const portIndex = args.indexOf('--port');
+  if (portIndex !== -1 && args[portIndex + 1]) {
+    const candidate = parseInt(args[portIndex + 1], 10);
+    if (!isNaN(candidate)) port = candidate;
+  }
+
+  const openBrowser = !args.includes('--no-open');
+
+  Logger.info('Iniciando servidor local del visualizador...');
+  const { url } = await startUiServer({
+    projectRoot: root,
+    port,
+    openBrowser,
+  });
+
+  Logger.success(`Servidor del visualizador activo en: ${url}`);
+  if (openBrowser) {
+    Logger.info('Abriendo navegador predeterminado...');
+  }
+  console.log('\n💡 Dashboard interactivo disponible. Presiona Ctrl+C para detener el servidor.\n');
+}
+
 async function main() {
   switch (command) {
     case 'init':
@@ -572,6 +603,11 @@ async function main() {
       break;
     case 'run':
       await handleRun();
+      break;
+    case 'ui':
+    case 'view':
+    case 'dashboard':
+      await handleUi();
       break;
     case 'sync':
       await handleSync();

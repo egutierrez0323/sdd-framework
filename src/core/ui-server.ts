@@ -1,0 +1,328 @@
+import http from 'node:http';
+import net from 'node:net';
+import path from 'node:path';
+import { exec } from 'node:child_process';
+import { loadConfig, SeverityLevel } from './config.js';
+import { parseSpecMarkdown, EarsRequirement } from './ears-validator.js';
+import { parseTasksMarkdown, MicroTask } from './auto-runner.js';
+import { fileExists, readFileUtf8, listFilesRecursive } from '../utils/fs-helpers.js';
+import { generateDashboardHtml } from './ui-html.js';
+import { Logger } from '../utils/logger.js';
+
+export interface SpecData {
+  id: string;
+  filename: string;
+  title: string;
+  status: string;
+  date?: string;
+  severity?: string;
+  author?: string;
+  context?: string;
+  requirementsCount: number;
+  requirements: EarsRequirement[];
+  decisions: Array<{ id: string; category: string; decision: string }>;
+}
+
+export interface TaskListData {
+  id: string;
+  filename: string;
+  title: string;
+  totalTasks: number;
+  completedTasks: number;
+  pendingTasks: number;
+  blockedTasks: number;
+  progressPercent: number;
+  tasks: MicroTask[];
+}
+
+export interface SddDashboardData {
+  projectName: string;
+  severity: SeverityLevel;
+  specs: SpecData[];
+  plans: Array<{ id: string; filename: string; title: string; content: string }>;
+  tasks: TaskListData[];
+  graphMermaid: string;
+  constitution: string;
+  stats: {
+    totalSpecs: number;
+    approvedSpecs: number;
+    draftSpecs: number;
+    totalRequirements: number;
+    earsBreakdown: Record<string, number>;
+    totalMicroTasks: number;
+    completedMicroTasks: number;
+    overallProgress: number;
+  };
+}
+
+/**
+ * Busca un puerto disponible comenzando en startPort.
+ */
+export async function findAvailablePort(startPort: number = 3333): Promise<number> {
+  return new Promise((resolve) => {
+    const server = net.createServer();
+    server.listen(startPort, () => {
+      const port = (server.address() as net.AddressInfo).port;
+      server.close(() => resolve(port));
+    });
+    server.on('error', () => {
+      resolve(findAvailablePort(startPort + 1));
+    });
+  });
+}
+
+/**
+ * Abre la URL en el navegador predeterminado del sistema operativo.
+ */
+export function openInBrowser(url: string): void {
+  const plat = process.platform;
+  let cmd = '';
+  if (plat === 'win32') {
+    cmd = `start "" "${url}"`;
+  } else if (plat === 'darwin') {
+    cmd = `open "${url}"`;
+  } else {
+    cmd = `xdg-open "${url}"`;
+  }
+  try {
+    exec(cmd);
+  } catch {
+    // Si no puede abrirse automáticamente, el enlace en terminal es suficiente
+  }
+}
+
+/**
+ * Extrae metadatos de un archivo spec.md
+ */
+function parseSpecMetadata(content: string, filename: string): SpecData {
+  const lines = content.split(/\r?\n/);
+  const firstLine = lines[0] || '';
+  const titleMatch = firstLine.match(/^#\s+(SPEC-[A-Za-z0-9-_]+):\s*(.+)$/i);
+
+  const id = titleMatch ? titleMatch[1] : path.basename(filename, '.md');
+  const title = titleMatch ? titleMatch[2].trim() : path.basename(filename, '.md');
+
+  const statusMatch = content.match(/[-*]\s+\*\*Estado:\*\*\s*([A-Za-z_]+)/i);
+  const status = statusMatch ? statusMatch[1].toUpperCase() : 'DRAFT';
+
+  const dateMatch = content.match(/[-*]\s+\*\*Fecha(?: de Creación)?:\*\*\s*([0-9-_/]+)/i);
+  const date = dateMatch ? dateMatch[1] : undefined;
+
+  const sevMatch = content.match(/[-*]\s+\*\*Nivel de Severidad:\*\*\s*(L[1-3])/i);
+  const severity = sevMatch ? sevMatch[1] : undefined;
+
+  const authorMatch = content.match(/[-*]\s+\*\*Autor(?: \/ Responsable)?:\*\*\s*(.+)$/im);
+  const author = authorMatch ? authorMatch[1].trim() : undefined;
+
+  // Extraer sección 1: Contexto y Justificación
+  let context = '';
+  const contextMatch = content.match(/## 1\.\s+Contexto y Justificación[^\n]*\n([\s\S]*?)(?=\n---|\n## 2|$)/i);
+  if (contextMatch) {
+    context = contextMatch[1].replace(/<!--[\s\S]*?-->/g, '').trim();
+  }
+
+  // Requerimientos
+  const requirements = parseSpecMarkdown(content);
+
+  // Decisiones de clarificación
+  const decisions: Array<{ id: string; category: string; decision: string }> = [];
+  const decisionRegex = /###\s+\[(CLARIFY-[0-9]+)\]\s+([^\n]+)\n[\s\S]*?-\s+\*\*Decisión Vinculante:\*\*\s*([^\n]+)/gi;
+  let match;
+  while ((match = decisionRegex.exec(content)) !== null) {
+    decisions.push({
+      id: match[1],
+      category: match[2].trim(),
+      decision: match[3].trim(),
+    });
+  }
+
+  return {
+    id,
+    filename,
+    title,
+    status,
+    date,
+    severity,
+    author,
+    context,
+    requirementsCount: requirements.length,
+    requirements,
+    decisions,
+  };
+}
+
+/**
+ * Recopila todos los datos del proyecto SDD para alimentar el visualizador.
+ */
+export async function collectSddProjectData(projectRoot: string): Promise<SddDashboardData> {
+  const config = await loadConfig(projectRoot);
+
+  // 1. Recopilar Specs
+  const specsDir = path.join(projectRoot, '.sdd', 'specs');
+  const specFiles = (await fileExists(specsDir))
+    ? (await listFilesRecursive(specsDir, '.md')).filter(
+        (f) => !f.endsWith('-clarification.md') && !f.endsWith('-grill-session.md')
+      )
+    : [];
+
+  const specs: SpecData[] = [];
+  const earsBreakdown: Record<string, number> = {
+    Ubiquitous: 0,
+    'Event-driven': 0,
+    'State-driven': 0,
+    'Unwanted Behavior': 0,
+    Optional: 0,
+  };
+
+  for (const file of specFiles) {
+    const content = await readFileUtf8(file);
+    const spec = parseSpecMetadata(content, file);
+    specs.push(spec);
+
+    for (const req of spec.requirements) {
+      const type = req.type || 'Ubiquitous';
+      earsBreakdown[type] = (earsBreakdown[type] || 0) + 1;
+    }
+  }
+
+  // 2. Recopilar Tasks
+  const tasksDir = path.join(projectRoot, '.sdd', 'tasks');
+  const taskFiles = (await fileExists(tasksDir)) ? await listFilesRecursive(tasksDir, '.md') : [];
+  const tasks: TaskListData[] = [];
+
+  let totalMicroTasks = 0;
+  let completedMicroTasks = 0;
+
+  for (const file of taskFiles) {
+    const content = await readFileUtf8(file);
+    const parsedTasks = parseTasksMarkdown(content);
+    const firstLine = content.split(/\r?\n/)[0] || '';
+    const titleMatch = firstLine.match(/^#\s+(TASKS-[A-Za-z0-9-_]+):\s*(.+)$/i);
+    const id = titleMatch ? titleMatch[1] : path.basename(file, '.md');
+    const title = titleMatch ? titleMatch[2].trim() : path.basename(file, '.md');
+
+    const doneCount = parsedTasks.filter((t) => t.status === 'DONE').length;
+    const blockedCount = parsedTasks.filter((t) => t.status === 'BLOCKED').length;
+    const pendingCount = parsedTasks.filter((t) => t.status === 'PENDING').length;
+    const percent = parsedTasks.length > 0 ? Math.round((doneCount / parsedTasks.length) * 100) : 0;
+
+    totalMicroTasks += parsedTasks.length;
+    completedMicroTasks += doneCount;
+
+    tasks.push({
+      id,
+      filename: file,
+      title,
+      totalTasks: parsedTasks.length,
+      completedTasks: doneCount,
+      pendingTasks: pendingCount,
+      blockedTasks: blockedCount,
+      progressPercent: percent,
+      tasks: parsedTasks,
+    });
+  }
+
+  // 3. Recopilar Plans
+  const plansDir = path.join(projectRoot, '.sdd', 'plans');
+  const planFiles = (await fileExists(plansDir)) ? await listFilesRecursive(plansDir, '.md') : [];
+  const plans: Array<{ id: string; filename: string; title: string; content: string }> = [];
+
+  for (const file of planFiles) {
+    const content = await readFileUtf8(file);
+    const firstLine = content.split(/\r?\n/)[0] || '';
+    const titleMatch = firstLine.match(/^#\s+(PLAN-[A-Za-z0-9-_]+):\s*(.+)$/i);
+    plans.push({
+      id: titleMatch ? titleMatch[1] : path.basename(file, '.md'),
+      filename: file,
+      title: titleMatch ? titleMatch[2].trim() : path.basename(file, '.md'),
+      content,
+    });
+  }
+
+  // 4. Grafo y Constitución
+  let graphMermaid = '';
+  const graphFile = path.join(projectRoot, '.sdd', 'architecture-graph.md');
+  if (await fileExists(graphFile)) {
+    graphMermaid = await readFileUtf8(graphFile);
+  }
+
+  let constitution = '';
+  const agentsFile = path.join(projectRoot, 'AGENTS.md');
+  if (await fileExists(agentsFile)) {
+    constitution = await readFileUtf8(agentsFile);
+  }
+
+  const approvedSpecs = specs.filter((s) => s.status === 'APPROVED').length;
+  const draftSpecs = specs.filter((s) => s.status !== 'APPROVED').length;
+  const totalRequirements = specs.reduce((acc, s) => acc + s.requirementsCount, 0);
+  const overallProgress =
+    totalMicroTasks > 0 ? Math.round((completedMicroTasks / totalMicroTasks) * 100) : 0;
+
+  return {
+    projectName: config.projectName || path.basename(projectRoot),
+    severity: config.severity,
+    specs,
+    plans,
+    tasks,
+    graphMermaid,
+    constitution,
+    stats: {
+      totalSpecs: specs.length,
+      approvedSpecs,
+      draftSpecs,
+      totalRequirements,
+      earsBreakdown,
+      totalMicroTasks,
+      completedMicroTasks,
+      overallProgress,
+    },
+  };
+}
+
+/**
+ * Inicia el servidor HTTP del Dashboard Visualizador.
+ */
+export async function startUiServer(options: {
+  projectRoot: string;
+  port?: number;
+  openBrowser?: boolean;
+}): Promise<{ server: http.Server; url: string; port: number }> {
+  const { projectRoot, openBrowser = true } = options;
+  const port = options.port || (await findAvailablePort(3333));
+  const htmlContent = generateDashboardHtml();
+
+  const server = http.createServer(async (req, res) => {
+    const url = req.url || '/';
+
+    if (url === '/' || url === '/index.html') {
+      res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
+      res.end(htmlContent);
+      return;
+    }
+
+    if (url === '/api/data') {
+      try {
+        const data = await collectSddProjectData(projectRoot);
+        res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
+        res.end(JSON.stringify(data));
+      } catch (err: any) {
+        res.writeHead(500, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ error: err.message }));
+      }
+      return;
+    }
+
+    res.writeHead(404, { 'Content-Type': 'text/plain' });
+    res.end('Not Found');
+  });
+
+  return new Promise((resolve) => {
+    server.listen(port, () => {
+      const url = `http://localhost:${port}`;
+      if (openBrowser) {
+        openInBrowser(url);
+      }
+      resolve({ server, url, port });
+    });
+  });
+}

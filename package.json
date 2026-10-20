@@ -6,15 +6,30 @@
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "bin": {
-    "sdd": "./dist/cli.js"
+    "sdd": "./dist/cli.js",
+    "sdd-framework": "./dist/cli.js"
   },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
   "scripts": {
     "build": "tsc",
     "watch": "tsc -w",
     "test": "vitest run",
     "test:watch": "vitest",
     "lint": "tsc --noEmit",
-    "review": "node dist/cli.js review src"
+    "review": "node dist/cli.js review src",
+    "ui": "node dist/cli.js ui"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/egutierrez0323/sdd-framework.git"
+  },
+  "homepage": "https://github.com/egutierrez0323/sdd-framework#readme",
+  "bugs": {
+    "url": "https://github.com/egutierrez0323/sdd-framework/issues"
   },
   "keywords": [
     "spec-driven-development",
@@ -23,9 +38,12 @@
     "ai-agent",
     "code-generation",
     "auditor",
-    "quality"
+    "quality",
+    "vibe-coding",
+    "cursor",
+    "claude-code"
   ],
-  "author": "Antigravity & User",
+  "author": "egutierrez0323",
   "license": "MIT",
   "devDependencies": {
     "@types/node": "^22.10.1",

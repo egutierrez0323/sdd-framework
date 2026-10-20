@@ -6,7 +6,14 @@ import { validateSpec } from './core/ears-validator.js';
 import { scanProject, generateReverseConstitution, generateReverseBaselineSpec } from './core/reverse-engine.js';
 import { syncBridges, SupportedBridge } from './core/bridges.js';
 import { executeAutonomousPlan } from './core/auto-runner.js';
-import { generateClarificationSession, formatClarificationMarkdown } from './core/clarifier.js';
+import readline from 'node:readline/promises';
+import {
+  generateClarificationSession,
+  formatClarificationMarkdown,
+  runAutoGrillSession,
+  auditArchitectDecision,
+  injectDecisionsIntoSpec,
+} from './core/clarifier.js';
 import { generateProjectGraph, saveProjectGraphArtifacts } from './core/project-graph.js';
 import { reviewProject, formatReviewReport } from './core/code-reviewer.js';
 import { ensureDir, fileExists, readFileUtf8, writeFileUtf8, listFilesRecursive } from './utils/fs-helpers.js';
@@ -349,20 +356,100 @@ async function handleGraph() {
 
 async function handleGrill() {
   const { filePath, content, severity } = await resolveSpecFile(args[1], 'grill');
-  const questions = generateClarificationSession(content, severity);
 
   Logger.banner('MODO GRILL-ME: INTERROGATORIO SOCRÁTICO DEL ÁRBITRO');
-  Logger.arbiter('INQUISITOR', 'Desafiando supuestos arquitectónicos y casos límite...');
+  Logger.arbiter('INQUISITOR', 'Ejecutando Auto-Grill de la IA (inspección de código y filtrado de ruido)...');
 
-  for (let i = 0; i < questions.length; i++) {
-    const q = questions[i];
-    console.log(`\n🔥 [PREGUNTA ${i + 1}/${questions.length}] Categoría: ${q.category}`);
-    console.log(`   ${q.question}`);
-    console.log(`   👉 Respuesta Recomendada: ${q.recommendation}`);
+  const autoGrill = runAutoGrillSession(content, severity);
+  if (autoGrill.autoResolved.length > 0) {
+    Logger.info(`[Auto-Grill IA] ${autoGrill.autoResolved.length} puntos resueltos internamente según el contexto del código.`);
+    for (const ar of autoGrill.autoResolved) {
+      console.log(`   ✔ [${ar.id}] ${ar.category}: ${ar.autoResolutionReason}`);
+    }
+  }
+
+  const questions = autoGrill.escalatedToHuman;
+  Logger.arbiter('INQUISITOR', `Dilemas de arquitectura escalados al líder humano: ${questions.length}`);
+
+  const isInteractive = Boolean(process.stdin.isTTY);
+  const decisionsMap: Record<string, string> = {};
+  const recordedDecisions: Array<{ questionId: string; category: string; decision: string }> = [];
+
+  if (isInteractive && questions.length > 0) {
+    const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
+    try {
+      for (let i = 0; i < questions.length; i++) {
+        const q = questions[i];
+        let answered = false;
+
+        while (!answered) {
+          console.log(`\n🔥 [PREGUNTA ${i + 1}/${questions.length}] Categoría: ${q.category}`);
+          console.log(`   ${q.question}`);
+          console.log('\n   Opciones:');
+          q.options.forEach((opt, idx) => {
+            console.log(`   [${idx + 1}] ${opt}`);
+          });
+          console.log(`   [0] Escribir decisión personalizada`);
+
+          const answer = (await rl.question(`\n   👉 Selecciona una opción (1-${q.options.length}) o escribe tu decisión: `)).trim();
+          let decisionText = '';
+          const num = parseInt(answer, 10);
+          if (!isNaN(num) && num >= 1 && num <= q.options.length) {
+            decisionText = q.options[num - 1];
+          } else if (num === 0) {
+            decisionText = (await rl.question('   ✍  Escribe tu decisión arquitectónica: ')).trim();
+          } else if (answer.length > 0) {
+            decisionText = answer;
+          } else {
+            // Default: recomendada
+            decisionText = q.options[0];
+          }
+
+          // Auditoría Anti-Complacencia (Devil's Advocate)
+          const violations = auditArchitectDecision(decisionText);
+          if (violations.length > 0) {
+            console.log('\n⚖ [ÁRBITRO SDD :: ALERTA ANTI-COMPLACENCIA / DEVIL\'S ADVOCATE]');
+            for (const v of violations) {
+              Logger.warn(`[${v.severity}] ${v.issue}`);
+              console.log(`   Violación: ${v.violatedInvariant}`);
+              Logger.info(`   💡 Recomendación: ${v.recommendation}`);
+            }
+            const confirm = (await rl.question('\n   ¿Deseas mantener esta decisión a pesar de la advertencia o cambiarla? (m=mantener / C=cambiar): ')).trim().toLowerCase();
+            if (confirm !== 'm' && confirm !== 'mantener') {
+              console.log('   🔄 Rectificando respuesta...');
+              continue;
+            }
+          }
+
+          decisionsMap[q.id] = decisionText;
+          recordedDecisions.push({ questionId: q.id, category: q.category, decision: decisionText });
+          answered = true;
+          Logger.success(`Registrada decisión para [${q.id}]`);
+        }
+      }
+    } finally {
+      rl.close();
+    }
+
+    // Aplicar decisiones al archivo de la spec
+    const updatedSpec = injectDecisionsIntoSpec(content, recordedDecisions);
+    await writeFileUtf8(filePath, updatedSpec);
+    Logger.success(`Especificación actualizada con decisiones vinculantes y aprobada: ${filePath}`);
+  } else {
+    // Modo no interactivo (CI/pipes)
+    for (let i = 0; i < questions.length; i++) {
+      const q = questions[i];
+      console.log(`\n🔥 [PREGUNTA ${i + 1}/${questions.length}] Categoría: ${q.category}`);
+      console.log(`   ${q.question}`);
+      console.log(`   👉 Respuesta Recomendada: ${q.recommendation}`);
+      if (q.options) {
+        q.options.forEach((opt, idx) => console.log(`      [${idx + 1}] ${opt}`));
+      }
+    }
   }
 
   const outPath = filePath.replace(/\.md$/, '-grill-session.md');
-  await writeFileUtf8(outPath, formatClarificationMarkdown(path.basename(filePath), questions));
+  await writeFileUtf8(outPath, formatClarificationMarkdown(path.basename(filePath), questions, decisionsMap));
   Logger.success(`\nSesión Grill-Me documentada en: ${outPath}`);
 }
 

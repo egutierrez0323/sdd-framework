@@ -245,13 +245,12 @@
         "src/core/reverse-engine.js",
         "src/core/bridges.js",
         "src/core/auto-runner.js",
-        "src/core/clarifier.js",
         "src/core/project-graph.js",
         "src/core/code-reviewer.js",
         "src/utils/fs-helpers.js",
         "src/utils/logger.js"
       ],
-      "approxTokens": 3688
+      "approxTokens": 4620
     },
     {
       "id": "src/core/auto-runner.ts",
@@ -290,14 +289,20 @@
       "type": "module",
       "exports": [
         "ClarificationQuestion",
+        "InvariantViolation",
+        "AutoGrillSession",
+        "CodebaseContext",
         "generateClarificationSession",
-        "formatClarificationMarkdown"
+        "runAutoGrillSession",
+        "auditArchitectDecision",
+        "formatClarificationMarkdown",
+        "injectDecisionsIntoSpec"
       ],
       "imports": [
         "src/core/ears-validator.js",
         "src/core/config.js"
       ],
-      "approxTokens": 774
+      "approxTokens": 3083
     },
     {
       "id": "src/core/code-reviewer.ts",
@@ -431,6 +436,14 @@
         "src/utils/fs-helpers.js"
       ],
       "approxTokens": 339
+    },
+    {
+      "id": "tests/clarifier.test.ts",
+      "name": "clarifier.test.ts",
+      "type": "test",
+      "exports": [],
+      "imports": [],
+      "approxTokens": 865
     },
     {
       "id": "tests/code-reviewer.test.ts",
@@ -624,10 +637,6 @@
     },
     {
       "from": "src/cli.ts",
-      "to": "src/core/clarifier.js"
-    },
-    {
-      "from": "src/cli.ts",
       "to": "src/core/project-graph.js"
     },
     {
@@ -708,10 +717,10 @@
     }
   ],
   "stats": {
-    "totalFiles": 42,
-    "totalExports": 59,
-    "rawTokensEstimate": 27723,
-    "graphTokensEstimate": 1286,
-    "tokenReductionPercent": 95
+    "totalFiles": 43,
+    "totalExports": 65,
+    "rawTokensEstimate": 31829,
+    "graphTokensEstimate": 1328,
+    "tokenReductionPercent": 96
   }
 }

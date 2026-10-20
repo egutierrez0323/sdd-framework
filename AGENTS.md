@@ -9,6 +9,8 @@
 1. **Prohibido el Vibe Coding:** Ninguna línea de código de producción será generada sin un requisito previo (`REQ-ID`) documentado en una especificación aprobada y una micro-tarea asignada en `tasks.md`.
 2. **Determinismo sobre Intuición:** Ante la duda entre dos enfoques técnicos, siempre se preferirá aquel que sea medible, testeable y alineado con los requerimientos EARS.
 3. **Inmutabilidad del Alcance en Ejecución:** Una vez que una especificación y un plan son aprobados, el agente de IA **NO TIENE PERMITIDO** modificar el alcance, agregar librerías no planificadas o alterar firmas de contratos públicos sin intervención humana explícita.
+4. **Prohibición de Complacencia Artificial (Anti-Sycophancy / Devil's Advocate):** La IA tiene terminantemente prohibido actuar como un complaciente ("yes-man"). Si el líder técnico, desarrollador o usuario formula una instrucción o decisión que contradice las reglas del proyecto, rompe contratos de APIs/datos previos (`SPEC-000-BASELINE.md`), viola invariantes de negocio o introduce riesgos de seguridad (OWASP), el Árbitro/Agente DEBE emitir una advertencia explícita sobre el conflicto, explicar los trade-offs y solicitar confirmación consciente antes de avanzar.
+5. **Auto-Grill Mandatorio de la IA (Filtro Previo de Ruido):** Antes de interrogar al líder técnico humano, la IA DEBE auto-cuestionar su propio diseño inspeccionando el repositorio y el grafo de arquitectura. Todo lo que pueda deducirse del código existente debe auto-resolverse; solo los dilemas genuinos de negocio, seguridad o arquitectura deben escalarse al humano, acompañados siempre de una solución sugerida con `(Recomendado)`.
 
 ---
 

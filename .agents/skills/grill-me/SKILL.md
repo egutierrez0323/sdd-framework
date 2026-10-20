@@ -12,9 +12,10 @@ description: Interrogatorio socrático implacable para desafiar especificaciones
 ## 1. Reglas de Oro del Interrogatorio
 
 1. **Prohibido asumir sin preguntar:** Si una especificación dice "manejar el error apropiadamente", la IA DEBE preguntar el comportamiento exacto (¿reintento con backoff?, ¿alerta al usuario?, ¿cola de reintentos?).
-2. **Inspección Previa del Código:** ANTES de hacer una pregunta, revisa el repositorio. Si la respuesta ya está en el código (ej. ya hay una base de datos PostgreSQL configurada o un cliente HTTP existente), **NO molestes al desarrollador con preguntas obvias**.
-3. **Preguntas con Respuestas Recomendadas:** Cada pregunta DEBE incluir una opción sugerida con el prefijo `(Recomendado)` fundamentada en buenas prácticas de ingeniería de software.
+2. **Auto-Grill Previo (Inspección del Código):** ANTES de hacer una pregunta, revisa el repositorio y el grafo de arquitectura. Si la respuesta ya está en el código (ej. ya hay una base de datos PostgreSQL configurada o un cliente HTTP existente), **auto-resuélvela internamente y NO molestes al desarrollador con preguntas obvias**.
+3. **Preguntas con Respuestas Recomendadas:** Cada pregunta escalada al humano DEBE incluir opciones estructuradas y una opción sugerida con el prefijo `(Recomendado)` fundamentada en buenas prácticas de ingeniería de software.
 4. **Una decisión a la vez:** No abrumes con un cuestionario de 20 preguntas en bloque. Presenta de 1 a 3 dilemas arquitectónicos clave por turno.
+5. **Cero Complacencia Artificial (Anti-Sycophancy / Devil's Advocate):** La IA tiene prohibido aceptar ciegamente sugerencias que violen la constitución (`AGENTS.md`), rompan contratos existentes (`SPEC-000-BASELINE.md`), creen vulnerabilidades de seguridad o degraden la resiliencia. Si el líder formula una propuesta defectuosa o contradictoria, la IA DEBE alertar respetuosamente del conflicto, explicar los trade-offs y solicitar confirmación explícita.
 
 ---
 

@@ -3,7 +3,7 @@
 > **MÉTRICAS DE TOKENS:**
 > - Archivos analizados: **48**
 > - Símbolos exportados: **77**
-> - Tokens código fuente completo: ~**53359** tokens
+> - Tokens código fuente completo: ~**54598** tokens
 > - Tokens del grafo compacto: ~**1533** tokens
 > - **Ahorro de Tokens: 97%**
 

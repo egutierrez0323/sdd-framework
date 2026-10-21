@@ -12,6 +12,7 @@ export interface ScaffoldOptions {
   bridges: SupportedBridge[];
   includeSkills: boolean;
   locale?: 'en' | 'es';
+  graphEngine?: 'builtin' | 'graphify' | 'hybrid';
 }
 
 export interface ScaffoldResult {
@@ -20,6 +21,7 @@ export interface ScaffoldResult {
   mode: 'greenfield' | 'brownfield';
   severity: SeverityLevel;
   syncedBridges: string[];
+  graphEngine: 'builtin' | 'graphify' | 'hybrid';
 }
 
 export const BUILTIN_TEMPLATES = {
@@ -261,6 +263,27 @@ description: Metodología Spec-Driven Development (SDD), notación EARS, supervi
 - **El Arquitecto:** Valida viabilidad técnica, contratos tipados y descomposición en micro-tareas (≤ 30 min).
 - **El Auditor:** Valida que no haya alucinaciones de alcance y que todas las pruebas pasen en verde.
 `,
+
+  'graphify': `---
+name: graphify
+description: Extracción y análisis de grafos forenses de llamadas de bajo nivel intra-función para auditorías profundas y código legado.
+---
+
+# Graphify Skill: Mapeo Forense y Rastreo de Llamadas Intra-Función
+
+> **PROPÓSITO:** Inspección de código a nivel microscópico para rastrear llamadas entre funciones internas, métodos privados y dependencias profundas antes de realizar refactorizaciones críticas o depuración.
+
+---
+
+## 1. ¿Cuándo Utilizar Graphify vs Project-Graph?
+- **Usa Project-Graph (Nativo de SDD):** Para planificar, entender contratos públicos, interfaces exportadas y mantener tokens al mínimo (< 600 tokens).
+- **Usa Graphify:** Para bases de código legado masivas sin tipado o rastreo de llamadas función a función de bajo nivel.
+
+---
+
+## 2. Integración con SDD
+- SDD detecta automáticamente archivos \`graph.html\`, \`graph.json\` o \`.graphify/graph.json\` generados por Graphify y los enlaza en \`.sdd/architecture-graph.md\`.
+`,
 };
 
 export function generateStandardConstitution(projectName: string, severity: SeverityLevel): string {
@@ -364,6 +387,10 @@ export async function scaffoldProject(options: ScaffoldOptions): Promise<Scaffol
     locale: options.locale || 'en',
     projectType: mode,
     bridges,
+    graph: {
+      ...DEFAULT_CONFIG.graph,
+      engine: options.graphEngine || DEFAULT_CONFIG.graph.engine,
+    },
   };
   await saveConfig(config, projectRoot);
   createdFiles.push(path.join(projectRoot, '.sdd', 'config.json'));
@@ -401,5 +428,6 @@ export async function scaffoldProject(options: ScaffoldOptions): Promise<Scaffol
     mode,
     severity,
     syncedBridges: syncReport.synced,
+    graphEngine: options.graphEngine || DEFAULT_CONFIG.graph.engine,
   };
 }

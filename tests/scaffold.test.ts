@@ -54,6 +54,7 @@ describe('Scaffold Module (sdd init)', () => {
     expect(await fileExists(path.join(tempDir, '.agents', 'skills', 'grill-me', 'SKILL.md'))).toBe(true);
     expect(await fileExists(path.join(tempDir, '.agents', 'skills', 'clean-code', 'SKILL.md'))).toBe(true);
     expect(await fileExists(path.join(tempDir, '.agents', 'skills', 'project-graph', 'SKILL.md'))).toBe(true);
+    expect(await fileExists(path.join(tempDir, '.agents', 'skills', 'graphify', 'SKILL.md'))).toBe(true);
     expect(await fileExists(path.join(tempDir, '.agents', 'skills', 'sdd-methodology', 'SKILL.md'))).toBe(true);
 
     // Comprobar puentes
@@ -91,5 +92,22 @@ describe('Scaffold Module (sdd init)', () => {
 
     // Comprobar que no instaló skills porque includeSkills fue false
     expect(await fileExists(path.join(tempDir, '.agents', 'skills'))).toBe(false);
+  });
+
+  it('should persist chosen graphEngine in config.json and return it in result', async () => {
+    const result = await scaffoldProject({
+      projectRoot: tempDir,
+      mode: 'greenfield',
+      severity: 'L2',
+      bridges: ['cursor'],
+      includeSkills: true,
+      graphEngine: 'graphify',
+    });
+
+    expect(result.graphEngine).toBe('graphify');
+
+    const configRaw = await readFileUtf8(path.join(tempDir, '.sdd', 'config.json'));
+    const config = JSON.parse(configRaw);
+    expect(config.graph.engine).toBe('graphify');
   });
 });

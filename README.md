@@ -47,8 +47,9 @@ npx sdd-framework init
 The interactive wizard configures:
 - Project mode (Greenfield vs. Brownfield with reverse scan).
 - Auditor severity level (`L1`, `L2`, or `L3`).
+- Graph engine (`builtin` / `project-graph`, `graphify`, or `hybrid`) with contextual guidance.
 - Agent bridges (`.cursorrules`, `CLAUDE.md`, `AGENTS.md`).
-- Core templates and skill definitions.
+- Core templates and skill definitions (`grill-me`, `clean-code`, `project-graph`, `graphify`, `sdd-methodology`).
 
 ---
 
@@ -76,7 +77,7 @@ npx sdd-framework ui
 
 | Command | Arguments | Description |
 | :--- | :--- | :--- |
-| `sdd init` | `[--severity L1\|L2\|L3] [--greenfield\|--brownfield] [--yes]` | Initializes `.sdd/` directory, configuration, templates, and agent bridges. |
+| `sdd init` | `[--severity L1\|L2\|L3] [--graph-engine builtin\|graphify\|hybrid] [--greenfield\|--brownfield] [--yes]` | Initializes `.sdd/` directory, configuration, templates, skills, and agent bridges. |
 | `sdd ui` | `[--port <number>] [--no-open]` | Starts local web visualizer for specifications, micro-tasks, and project graph. |
 | `sdd new-spec` | `<name>` | Scaffolds a new specification from the official EARS template in `.sdd/specs/`. |
 | `sdd grill` | `<spec-file>` | Starts interactive Socratic interrogation session to detect edge cases and failure modes. |

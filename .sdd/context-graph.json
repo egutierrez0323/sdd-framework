@@ -252,7 +252,7 @@
         "src/utils/fs-helpers.js",
         "src/utils/logger.js"
       ],
-      "approxTokens": 6209
+      "approxTokens": 6938
     },
     {
       "id": "src/core/auto-runner.ts",
@@ -400,7 +400,7 @@
         "src/core/reverse-engine.js",
         "src/utils/fs-helpers.js"
       ],
-      "approxTokens": 4381
+      "approxTokens": 4700
     },
     {
       "id": "src/core/ui-html.ts",
@@ -438,7 +438,7 @@
       "type": "module",
       "exports": [],
       "imports": [],
-      "approxTokens": 96
+      "approxTokens": 125
     },
     {
       "id": "src/utils/fs-helpers.ts",
@@ -562,7 +562,7 @@
         "src/core/scaffold.js",
         "src/utils/fs-helpers.js"
       ],
-      "approxTokens": 961
+      "approxTokens": 1123
     },
     {
       "id": "tests/ui-server.test.ts",
@@ -842,7 +842,7 @@
   "stats": {
     "totalFiles": 48,
     "totalExports": 77,
-    "rawTokensEstimate": 53359,
+    "rawTokensEstimate": 54598,
     "graphTokensEstimate": 1533,
     "tokenReductionPercent": 97
   }

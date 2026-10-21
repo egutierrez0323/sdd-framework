@@ -30,7 +30,7 @@ async function printHelp() {
 
 Comandos disponibles:
   init                     Inicializa la estructura SDD (.sdd/, AGENTS.md, plantillas, skills)
-                           Opciones: --severity L1|L2|L3, --greenfield, --brownfield, --yes, --no-skills
+                           Opciones: --severity L1|L2|L3, --graph-engine builtin|graphify|hybrid, --greenfield, --brownfield, --yes, --no-skills
 
   reverse                  Ingeniería inversa en proyecto brownfield (genera AGENTS.md y SPEC-000)
 
@@ -80,7 +80,7 @@ async function askProjectMode(rl: readline.Interface, hasCode: boolean): Promise
 }
 
 async function askSeverity(rl: readline.Interface, defaultSev: SeverityLevel): Promise<SeverityLevel> {
-  console.log(`\n◇ [3/5] NIVEL DE SEVERIDAD DEL ÁRBITRO:`);
+  console.log(`\n◇ [3/6] NIVEL DE SEVERIDAD DEL ÁRBITRO:`);
   console.log(`  [1] L1 - Pragmatic (Velocity: alertas no bloqueantes)`);
   console.log(`  [2] (Recomendado) L2 - Standard (Producción: EARS estricto)`);
   console.log(`  [3] L3 - Draconian (Misión Crítica: tolerancia cero)`);
@@ -90,8 +90,36 @@ async function askSeverity(rl: readline.Interface, defaultSev: SeverityLevel): P
   return defaultSev || 'L2';
 }
 
+async function askGraphEngine(rl: readline.Interface, locale: 'en' | 'es'): Promise<'builtin' | 'graphify' | 'hybrid'> {
+  if (locale === 'es') {
+    console.log(`\n◇ [4/6] MOTOR DE GRAFOS Y ANÁLISIS DE CÓDIGO (GRAPH ENGINE):`);
+    console.log(`  Leyenda y recomendaciones de uso:`);
+    console.log(`  • [1] Project-Graph Nativo: Recomendado para desarrollo diario y control de tokens.`);
+    console.log(`        Macroscópico (< 50ms, módulos y contratos). Ahorra 80-95% tokens sin dependencias externas.`);
+    console.log(`  • [2] Graphify: Recomendado para proyectos legados gigantes o refactorizaciones forenses críticas.`);
+    console.log(`        Microscópico intra-función (árbol de llamadas privadas de bajo nivel).`);
+    console.log(`  • [3] (Recomendado) Híbrido: Macro-grafo nativo para el día a día + detección y enlace automático de Graphify.`);
+    const choice = (await rl.question(`  › Selecciona el motor de grafos [1-3] (default: 3): `)).trim();
+    if (choice === '1') return 'builtin';
+    if (choice === '2') return 'graphify';
+    return 'hybrid';
+  } else {
+    console.log(`\n◇ [4/6] GRAPH ENGINE & CODE ANALYSIS:`);
+    console.log(`  Legend & Guidance:`);
+    console.log(`  • [1] Builtin Project-Graph: Recommended for daily agile development & strict token budget.`);
+    console.log(`        Macroscopic (< 50ms, modules & contracts). Saves 80-95% prompt tokens with zero dependencies.`);
+    console.log(`  • [2] Graphify: Recommended for massive legacy codebases or critical forensic refactoring.`);
+    console.log(`        Microscopic intra-function call trees (private helpers and low-level call traces).`);
+    console.log(`  • [3] (Recommended) Hybrid: Builtin macro-graph for agile daily work + auto-detection of Graphify.`);
+    const choice = (await rl.question(`  › Select graph engine [1-3] (default: 3): `)).trim();
+    if (choice === '1') return 'builtin';
+    if (choice === '2') return 'graphify';
+    return 'hybrid';
+  }
+}
+
 async function askBridgesAndSkills(rl: readline.Interface): Promise<{ bridges: SupportedBridge[]; includeSkills: boolean }> {
-  console.log(`\n◇ [4/5] ASISTENTES Y EDITORES DE IA:`);
+  console.log(`\n◇ [5/6] ASISTENTES Y EDITORES DE IA:`);
   console.log(`  [1] Cursor (.cursorrules)`);
   console.log(`  [2] Claude Code (CLAUDE.md)`);
   console.log(`  [3] Antigravity / Gemini CLI (AGENTS.md)`);
@@ -102,8 +130,8 @@ async function askBridgesAndSkills(rl: readline.Interface): Promise<{ bridges: S
   else if (bChoice === '2') bridges = ['claude'];
   else if (bChoice === '3') bridges = ['antigravity'];
 
-  console.log(`\n◇ [5/5] ARSENAL DE SKILLS AVANZADAS (.agents/skills/):`);
-  console.log(`  [1] (Recomendado) Sí, instalar arsenal completo`);
+  console.log(`\n◇ [6/6] ARSENAL DE SKILLS AVANZADAS (.agents/skills/):`);
+  console.log(`  [1] (Recomendado) Sí, instalar arsenal completo (grill-me, clean-code, project-graph, graphify, sdd-methodology)`);
   console.log(`  [2] No, solo estructura mínima`);
   const sChoice = (await rl.question(`  › Opción [1-2] (default: 1): `)).trim();
   return { bridges, includeSkills: sChoice !== '2' };
@@ -115,7 +143,8 @@ function createScaffoldOptions(
   severity: SeverityLevel,
   locale: 'en' | 'es',
   bridges: SupportedBridge[],
-  includeSkills: boolean
+  includeSkills: boolean,
+  graphEngine: 'builtin' | 'graphify' | 'hybrid' = 'hybrid'
 ): ScaffoldOptions {
   return {
     projectRoot,
@@ -125,6 +154,7 @@ function createScaffoldOptions(
     locale,
     bridges,
     includeSkills,
+    graphEngine,
   };
 }
 
@@ -140,15 +170,22 @@ async function promptInitInteractively(root: string, defaultSeverity: SeverityLe
     const locale = await askLanguage(rl, defaultLocale);
     const mode = await askProjectMode(rl, hasExistingCode);
     const severity = await askSeverity(rl, defaultSeverity);
+    const graphEngine = await askGraphEngine(rl, locale);
     const { bridges, includeSkills } = await askBridgesAndSkills(rl);
 
-    return createScaffoldOptions(root, mode, severity, locale, bridges, includeSkills);
+    return createScaffoldOptions(root, mode, severity, locale, bridges, includeSkills, graphEngine);
   } finally {
     rl.close();
   }
 }
 
-function parseInitCliArgs(): { severity: SeverityLevel; locale: 'en' | 'es'; isNonInteractive: boolean; mode: 'greenfield' | 'brownfield' } {
+function parseInitCliArgs(): {
+  severity: SeverityLevel;
+  locale: 'en' | 'es';
+  isNonInteractive: boolean;
+  mode: 'greenfield' | 'brownfield';
+  graphEngine: 'builtin' | 'graphify' | 'hybrid';
+} {
   let severity: SeverityLevel = 'L2';
   const sevIndex = args.indexOf('--severity');
   if (sevIndex !== -1 && args[sevIndex + 1]) {
@@ -163,12 +200,21 @@ function parseInitCliArgs(): { severity: SeverityLevel; locale: 'en' | 'es'; isN
     if (['en', 'es'].includes(candidate)) locale = candidate as 'en' | 'es';
   }
 
+  let graphEngine: 'builtin' | 'graphify' | 'hybrid' = 'hybrid';
+  const graphIndex = args.indexOf('--graph-engine') !== -1 ? args.indexOf('--graph-engine') : args.indexOf('--graph');
+  if (graphIndex !== -1 && args[graphIndex + 1]) {
+    const candidate = args[graphIndex + 1].toLowerCase();
+    if (['builtin', 'graphify', 'hybrid'].includes(candidate)) {
+      graphEngine = candidate as 'builtin' | 'graphify' | 'hybrid';
+    }
+  }
+
   const isYes = args.includes('--yes') || args.includes('-y');
   const isBrownfield = args.includes('--brownfield');
   const isGreenfield = args.includes('--greenfield');
   const isNonInteractive = !process.stdin.isTTY || isYes || isBrownfield || isGreenfield;
 
-  return { severity, locale, isNonInteractive, mode: isBrownfield ? 'brownfield' : 'greenfield' };
+  return { severity, locale, isNonInteractive, mode: isBrownfield ? 'brownfield' : 'greenfield', graphEngine };
 }
 
 function printInitSuccess(result: any, includeSkills: boolean): void {
@@ -178,8 +224,9 @@ function printInitSuccess(result: any, includeSkills: boolean): void {
   console.log(`   • .sdd/templates/ (spec, plan, tasks, ears-guide)`);
   console.log(`   • Constitución en AGENTS.md`);
   if (includeSkills) {
-    console.log(`   • .agents/skills/ (grill-me, clean-code, project-graph, sdd-methodology)`);
+    console.log(`   • .agents/skills/ (grill-me, clean-code, project-graph, graphify, sdd-methodology)`);
   }
+  console.log(`   • Motor de grafos configurado: [${result.graphEngine || 'hybrid'}]`);
   console.log(`   • Puentes sincronizados: ${result.syncedBridges.join(', ')}`);
   console.log(`\nSiguientes pasos:`);
   console.log(`   1. Crear tu primera especificación: npx sdd new-spec mi-funcionalidad`);
@@ -191,7 +238,7 @@ async function handleInit() {
   const root = process.cwd();
   Logger.banner('SDD FRAMEWORK :: ASISTENTE DE INICIALIZACIÓN (INIT)');
 
-  const { severity, locale, isNonInteractive, mode } = parseInitCliArgs();
+  const { severity, locale, isNonInteractive, mode, graphEngine } = parseInitCliArgs();
   const options = !isNonInteractive
     ? await promptInitInteractively(root, severity, locale)
     : createScaffoldOptions(
@@ -200,10 +247,11 @@ async function handleInit() {
         severity,
         locale,
         ['cursor', 'claude', 'antigravity'] as SupportedBridge[],
-        !args.includes('--no-skills')
+        !args.includes('--no-skills'),
+        graphEngine
       );
 
-  Logger.info(`Configurando entorno SDD en modo [${options.mode.toUpperCase()}] con severidad [${options.severity}]...`);
+  Logger.info(`Configurando entorno SDD en modo [${options.mode.toUpperCase()}] con severidad [${options.severity}] y motor de grafos [${options.graphEngine}]...`);
   const result = await scaffoldProject(options);
   printInitSuccess(result, options.includeSkills);
 }

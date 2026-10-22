@@ -15,7 +15,7 @@
         "card-validator/src/brands.js",
         "card-validator/src/types.js"
       ],
-      "approxTokens": 396
+      "approxTokens": 407
     },
     {
       "id": "card-validator/src/api/http-utils.ts",
@@ -28,7 +28,7 @@
         "createErrorResponse"
       ],
       "imports": [],
-      "approxTokens": 505
+      "approxTokens": 524
     },
     {
       "id": "card-validator/src/api/router.ts",
@@ -39,7 +39,7 @@
         "card-validator/src/api/handlers.js",
         "card-validator/src/api/http-utils.js"
       ],
-      "approxTokens": 475
+      "approxTokens": 489
     },
     {
       "id": "card-validator/src/bin/server.ts",
@@ -49,7 +49,7 @@
       "imports": [
         "card-validator/src/server.js"
       ],
-      "approxTokens": 128
+      "approxTokens": 132
     },
     {
       "id": "card-validator/src/brands.ts",
@@ -61,7 +61,7 @@
       "imports": [
         "card-validator/src/types.js"
       ],
-      "approxTokens": 417
+      "approxTokens": 434
     },
     {
       "id": "card-validator/src/cvv.ts",
@@ -73,7 +73,7 @@
       "imports": [
         "card-validator/src/types.js"
       ],
-      "approxTokens": 191
+      "approxTokens": 197
     },
     {
       "id": "card-validator/src/expiration.ts",
@@ -83,7 +83,7 @@
         "validateExpiration"
       ],
       "imports": [],
-      "approxTokens": 279
+      "approxTokens": 290
     },
     {
       "id": "card-validator/src/index.ts",
@@ -91,7 +91,7 @@
       "type": "module",
       "exports": [],
       "imports": [],
-      "approxTokens": 59
+      "approxTokens": 61
     },
     {
       "id": "card-validator/src/luhn.ts",
@@ -101,7 +101,7 @@
         "validateLuhn"
       ],
       "imports": [],
-      "approxTokens": 260
+      "approxTokens": 271
     },
     {
       "id": "card-validator/src/sanitizer.ts",
@@ -111,7 +111,7 @@
         "sanitizeCardNumber"
       ],
       "imports": [],
-      "approxTokens": 107
+      "approxTokens": 110
     },
     {
       "id": "card-validator/src/server.ts",
@@ -123,7 +123,7 @@
       "imports": [
         "card-validator/src/api/router.js"
       ],
-      "approxTokens": 96
+      "approxTokens": 100
     },
     {
       "id": "card-validator/src/types.ts",
@@ -135,7 +135,7 @@
         "CardValidationResult"
       ],
       "imports": [],
-      "approxTokens": 92
+      "approxTokens": 97
     },
     {
       "id": "card-validator/src/validator.ts",
@@ -152,7 +152,7 @@
         "card-validator/src/expiration.js",
         "card-validator/src/cvv.js"
       ],
-      "approxTokens": 716
+      "approxTokens": 738
     },
     {
       "id": "card-validator/tests/api.test.ts",
@@ -162,7 +162,7 @@
       "imports": [
         "card-validator/src/server.js"
       ],
-      "approxTokens": 873
+      "approxTokens": 899
     },
     {
       "id": "card-validator/tests/brands.test.ts",
@@ -172,7 +172,7 @@
       "imports": [
         "card-validator/src/brands.js"
       ],
-      "approxTokens": 344
+      "approxTokens": 353
     },
     {
       "id": "card-validator/tests/cvv.test.ts",
@@ -182,7 +182,7 @@
       "imports": [
         "card-validator/src/cvv.js"
       ],
-      "approxTokens": 367
+      "approxTokens": 376
     },
     {
       "id": "card-validator/tests/expiration.test.ts",
@@ -192,7 +192,7 @@
       "imports": [
         "card-validator/src/expiration.js"
       ],
-      "approxTokens": 440
+      "approxTokens": 450
     },
     {
       "id": "card-validator/tests/http-utils.test.ts",
@@ -202,7 +202,7 @@
       "imports": [
         "card-validator/src/api/http-utils.js"
       ],
-      "approxTokens": 331
+      "approxTokens": 339
     },
     {
       "id": "card-validator/tests/luhn.test.ts",
@@ -212,7 +212,7 @@
       "imports": [
         "card-validator/src/luhn.js"
       ],
-      "approxTokens": 325
+      "approxTokens": 332
     },
     {
       "id": "card-validator/tests/sanitizer.test.ts",
@@ -222,7 +222,7 @@
       "imports": [
         "card-validator/src/sanitizer.js"
       ],
-      "approxTokens": 220
+      "approxTokens": 226
     },
     {
       "id": "card-validator/tests/validator.test.ts",
@@ -232,7 +232,7 @@
       "imports": [
         "card-validator/src/validator.js"
       ],
-      "approxTokens": 648
+      "approxTokens": 667
     },
     {
       "id": "src/cli.ts",
@@ -244,15 +244,17 @@
         "src/core/ears-validator.js",
         "src/core/reverse-engine.js",
         "src/core/bridges.js",
+        "src/core/file-plan.js",
         "src/core/auto-runner.js",
         "src/core/project-graph.js",
         "src/core/code-reviewer.js",
         "src/core/scaffold.js",
         "src/core/ui-server.js",
         "src/utils/fs-helpers.js",
+        "src/utils/prompt.js",
         "src/utils/logger.js"
       ],
-      "approxTokens": 6938
+      "approxTokens": 7004
     },
     {
       "id": "src/core/auto-runner.ts",
@@ -270,7 +272,25 @@
         "src/utils/git-client.js",
         "src/utils/logger.js"
       ],
-      "approxTokens": 1514
+      "approxTokens": 1567
+    },
+    {
+      "id": "src/core/bridge-migration.ts",
+      "name": "bridge-migration.ts",
+      "type": "module",
+      "exports": [
+        "LEGACY_BANNERS",
+        "LEGACY_CONSTITUTION_HEADER",
+        "isLegacyConstitution",
+        "LegacyBridgeKind",
+        "LegacyBridgeResolution",
+        "classifyLegacyBridge",
+        "resolveLegacyBridge"
+      ],
+      "imports": [
+        "src/core/managed-block.js"
+      ],
+      "approxTokens": 630
     },
     {
       "id": "src/core/bridges.ts",
@@ -278,12 +298,20 @@
       "type": "module",
       "exports": [
         "SupportedBridge",
-        "SyncReport"
+        "BridgeTarget",
+        "SyncReport",
+        "ConstitutionSource",
+        "CONSTITUTION_PATH",
+        "bridgeRelPath"
       ],
       "imports": [
-        "src/utils/fs-helpers.js"
+        "src/utils/fs-helpers.js",
+        "src/utils/text-file.js",
+        "src/core/managed-block.js",
+        "src/core/file-plan.js",
+        "src/core/bridge-migration.js"
       ],
-      "approxTokens": 680
+      "approxTokens": 2428
     },
     {
       "id": "src/core/clarifier.ts",
@@ -304,7 +332,7 @@
         "src/core/ears-validator.js",
         "src/core/config.js"
       ],
-      "approxTokens": 3133
+      "approxTokens": 3214
     },
     {
       "id": "src/core/code-reviewer.ts",
@@ -323,7 +351,7 @@
       "imports": [
         "src/utils/fs-helpers.js"
       ],
-      "approxTokens": 3383
+      "approxTokens": 3490
     },
     {
       "id": "src/core/config.ts",
@@ -332,10 +360,12 @@
       "exports": [
         "SeverityLevel",
         "SddConfig",
-        "DEFAULT_CONFIG"
+        "DEFAULT_CONFIG",
+        "DeepPartial",
+        "mergeConfig"
       ],
       "imports": [],
-      "approxTokens": 582
+      "approxTokens": 1046
     },
     {
       "id": "src/core/ears-validator.ts",
@@ -352,7 +382,45 @@
       "imports": [
         "src/core/config.js"
       ],
-      "approxTokens": 2073
+      "approxTokens": 2140
+    },
+    {
+      "id": "src/core/file-plan.ts",
+      "name": "file-plan.ts",
+      "type": "module",
+      "exports": [
+        "FileError",
+        "FileChange",
+        "FilePlan",
+        "ApplyReport",
+        "ExecuteOptions",
+        "ExecuteResult",
+        "createBackupStamp",
+        "renderFilePlan"
+      ],
+      "imports": [
+        "src/utils/fs-helpers.js",
+        "src/utils/line-diff.js",
+        "src/utils/prompt.js"
+      ],
+      "approxTokens": 1988
+    },
+    {
+      "id": "src/core/managed-block.ts",
+      "name": "managed-block.ts",
+      "type": "module",
+      "exports": [
+        "BLOCK_BEGIN",
+        "BLOCK_END",
+        "BlockScan",
+        "ManagedBlockError",
+        "scanManagedBlock",
+        "upsertManagedBlock"
+      ],
+      "imports": [
+        "src/utils/text-file.js"
+      ],
+      "approxTokens": 807
     },
     {
       "id": "src/core/project-graph.ts",
@@ -366,7 +434,7 @@
       "imports": [
         "src/utils/fs-helpers.js"
       ],
-      "approxTokens": 1625
+      "approxTokens": 1673
     },
     {
       "id": "src/core/reverse-engine.ts",
@@ -380,7 +448,7 @@
       "imports": [
         "src/utils/fs-helpers.js"
       ],
-      "approxTokens": 1638
+      "approxTokens": 1680
     },
     {
       "id": "src/core/scaffold.ts",
@@ -397,10 +465,12 @@
       "imports": [
         "src/core/config.js",
         "src/core/bridges.js",
+        "src/core/file-plan.js",
         "src/core/reverse-engine.js",
-        "src/utils/fs-helpers.js"
+        "src/utils/fs-helpers.js",
+        "src/utils/text-file.js"
       ],
-      "approxTokens": 4700
+      "approxTokens": 5759
     },
     {
       "id": "src/core/ui-html.ts",
@@ -411,7 +481,7 @@
         "generateDashboardHtml"
       ],
       "imports": [],
-      "approxTokens": 11163
+      "approxTokens": 11470
     },
     {
       "id": "src/core/ui-server.ts",
@@ -427,10 +497,11 @@
         "src/core/config.js",
         "src/core/ears-validator.js",
         "src/core/auto-runner.js",
+        "src/core/bridges.js",
         "src/utils/fs-helpers.js",
         "src/core/ui-html.js"
       ],
-      "approxTokens": 2599
+      "approxTokens": 2825
     },
     {
       "id": "src/index.ts",
@@ -438,7 +509,7 @@
       "type": "module",
       "exports": [],
       "imports": [],
-      "approxTokens": 125
+      "approxTokens": 188
     },
     {
       "id": "src/utils/fs-helpers.ts",
@@ -446,7 +517,7 @@
       "type": "utility",
       "exports": [],
       "imports": [],
-      "approxTokens": 352
+      "approxTokens": 364
     },
     {
       "id": "src/utils/git-client.ts",
@@ -457,7 +528,17 @@
         "GitClient"
       ],
       "imports": [],
-      "approxTokens": 393
+      "approxTokens": 408
+    },
+    {
+      "id": "src/utils/line-diff.ts",
+      "name": "line-diff.ts",
+      "type": "utility",
+      "exports": [
+        "unifiedDiff"
+      ],
+      "imports": [],
+      "approxTokens": 531
     },
     {
       "id": "src/utils/logger.ts",
@@ -468,7 +549,35 @@
         "Logger"
       ],
       "imports": [],
-      "approxTokens": 400
+      "approxTokens": 413
+    },
+    {
+      "id": "src/utils/prompt.ts",
+      "name": "prompt.ts",
+      "type": "utility",
+      "exports": [
+        "CliIO",
+        "createProcessIO",
+        "isAffirmative"
+      ],
+      "imports": [],
+      "approxTokens": 203
+    },
+    {
+      "id": "src/utils/text-file.ts",
+      "name": "text-file.ts",
+      "type": "utility",
+      "exports": [
+        "Eol",
+        "TextContent",
+        "InvalidEncodingError",
+        "decodeText",
+        "encodeText",
+        "detectEol",
+        "toEol"
+      ],
+      "imports": [],
+      "approxTokens": 392
     },
     {
       "id": "tests/auto-runner.test.ts",
@@ -476,7 +585,19 @@
       "type": "test",
       "exports": [],
       "imports": [],
-      "approxTokens": 612
+      "approxTokens": 629
+    },
+    {
+      "id": "tests/bridge-migration.test.ts",
+      "name": "bridge-migration.test.ts",
+      "type": "test",
+      "exports": [],
+      "imports": [
+        "src/core/bridge-migration.js",
+        "src/core/bridges.js",
+        "src/core/managed-block.js"
+      ],
+      "approxTokens": 1976
     },
     {
       "id": "tests/bridges.test.ts",
@@ -485,9 +606,10 @@
       "exports": [],
       "imports": [
         "src/core/bridges.js",
+        "src/core/managed-block.js",
         "src/utils/fs-helpers.js"
       ],
-      "approxTokens": 336
+      "approxTokens": 2071
     },
     {
       "id": "tests/clarifier.test.ts",
@@ -495,7 +617,7 @@
       "type": "test",
       "exports": [],
       "imports": [],
-      "approxTokens": 878
+      "approxTokens": 900
     },
     {
       "id": "tests/code-reviewer.test.ts",
@@ -510,7 +632,7 @@
         "longMonolithicFunc"
       ],
       "imports": [],
-      "approxTokens": 826
+      "approxTokens": 857
     },
     {
       "id": "tests/config.test.ts",
@@ -520,7 +642,7 @@
       "imports": [
         "src/core/config.js"
       ],
-      "approxTokens": 161
+      "approxTokens": 763
     },
     {
       "id": "tests/ears-validator.test.ts",
@@ -530,7 +652,36 @@
       "imports": [
         "src/core/ears-validator.js"
       ],
-      "approxTokens": 684
+      "approxTokens": 704
+    },
+    {
+      "id": "tests/file-plan.test.ts",
+      "name": "file-plan.test.ts",
+      "type": "test",
+      "exports": [],
+      "imports": [
+        "src/utils/fs-helpers.js",
+        "src/utils/prompt.js"
+      ],
+      "approxTokens": 2791
+    },
+    {
+      "id": "tests/line-diff.test.ts",
+      "name": "line-diff.test.ts",
+      "type": "test",
+      "exports": [],
+      "imports": [
+        "src/utils/line-diff.js"
+      ],
+      "approxTokens": 609
+    },
+    {
+      "id": "tests/managed-block.test.ts",
+      "name": "managed-block.test.ts",
+      "type": "test",
+      "exports": [],
+      "imports": [],
+      "approxTokens": 930
     },
     {
       "id": "tests/project-graph.test.ts",
@@ -541,7 +692,17 @@
         "src/core/project-graph.js",
         "src/utils/fs-helpers.js"
       ],
-      "approxTokens": 365
+      "approxTokens": 483
+    },
+    {
+      "id": "tests/prompt.test.ts",
+      "name": "prompt.test.ts",
+      "type": "test",
+      "exports": [],
+      "imports": [
+        "src/utils/prompt.js"
+      ],
+      "approxTokens": 162
     },
     {
       "id": "tests/reverse-engine.test.ts",
@@ -551,7 +712,7 @@
       "imports": [
         "src/core/reverse-engine.js"
       ],
-      "approxTokens": 311
+      "approxTokens": 318
     },
     {
       "id": "tests/scaffold.test.ts",
@@ -560,17 +721,29 @@
       "exports": [],
       "imports": [
         "src/core/scaffold.js",
+        "src/core/file-plan.js",
+        "src/core/managed-block.js",
         "src/utils/fs-helpers.js"
       ],
-      "approxTokens": 1123
+      "approxTokens": 3142
+    },
+    {
+      "id": "tests/text-file.test.ts",
+      "name": "text-file.test.ts",
+      "type": "test",
+      "exports": [],
+      "imports": [],
+      "approxTokens": 708
     },
     {
       "id": "tests/ui-server.test.ts",
       "name": "ui-server.test.ts",
       "type": "test",
       "exports": [],
-      "imports": [],
-      "approxTokens": 690
+      "imports": [
+        "src/core/ui-html.js"
+      ],
+      "approxTokens": 1145
     },
     {
       "id": "vitest.config.ts",
@@ -578,7 +751,7 @@
       "type": "test",
       "exports": [],
       "imports": [],
-      "approxTokens": 45
+      "approxTokens": 47
     }
   ],
   "edges": [
@@ -704,6 +877,10 @@
     },
     {
       "from": "src/cli.ts",
+      "to": "src/core/file-plan.js"
+    },
+    {
+      "from": "src/cli.ts",
       "to": "src/core/auto-runner.js"
     },
     {
@@ -728,6 +905,10 @@
     },
     {
       "from": "src/cli.ts",
+      "to": "src/utils/prompt.js"
+    },
+    {
+      "from": "src/cli.ts",
       "to": "src/utils/logger.js"
     },
     {
@@ -739,8 +920,28 @@
       "to": "src/utils/logger.js"
     },
     {
+      "from": "src/core/bridge-migration.ts",
+      "to": "src/core/managed-block.js"
+    },
+    {
       "from": "src/core/bridges.ts",
       "to": "src/utils/fs-helpers.js"
+    },
+    {
+      "from": "src/core/bridges.ts",
+      "to": "src/utils/text-file.js"
+    },
+    {
+      "from": "src/core/bridges.ts",
+      "to": "src/core/managed-block.js"
+    },
+    {
+      "from": "src/core/bridges.ts",
+      "to": "src/core/file-plan.js"
+    },
+    {
+      "from": "src/core/bridges.ts",
+      "to": "src/core/bridge-migration.js"
     },
     {
       "from": "src/core/clarifier.ts",
@@ -757,6 +958,22 @@
     {
       "from": "src/core/ears-validator.ts",
       "to": "src/core/config.js"
+    },
+    {
+      "from": "src/core/file-plan.ts",
+      "to": "src/utils/fs-helpers.js"
+    },
+    {
+      "from": "src/core/file-plan.ts",
+      "to": "src/utils/line-diff.js"
+    },
+    {
+      "from": "src/core/file-plan.ts",
+      "to": "src/utils/prompt.js"
+    },
+    {
+      "from": "src/core/managed-block.ts",
+      "to": "src/utils/text-file.js"
     },
     {
       "from": "src/core/project-graph.ts",
@@ -776,11 +993,19 @@
     },
     {
       "from": "src/core/scaffold.ts",
+      "to": "src/core/file-plan.js"
+    },
+    {
+      "from": "src/core/scaffold.ts",
       "to": "src/core/reverse-engine.js"
     },
     {
       "from": "src/core/scaffold.ts",
       "to": "src/utils/fs-helpers.js"
+    },
+    {
+      "from": "src/core/scaffold.ts",
+      "to": "src/utils/text-file.js"
     },
     {
       "from": "src/core/ui-server.ts",
@@ -796,6 +1021,10 @@
     },
     {
       "from": "src/core/ui-server.ts",
+      "to": "src/core/bridges.js"
+    },
+    {
+      "from": "src/core/ui-server.ts",
       "to": "src/utils/fs-helpers.js"
     },
     {
@@ -803,8 +1032,24 @@
       "to": "src/core/ui-html.js"
     },
     {
+      "from": "tests/bridge-migration.test.ts",
+      "to": "src/core/bridge-migration.js"
+    },
+    {
+      "from": "tests/bridge-migration.test.ts",
+      "to": "src/core/bridges.js"
+    },
+    {
+      "from": "tests/bridge-migration.test.ts",
+      "to": "src/core/managed-block.js"
+    },
+    {
       "from": "tests/bridges.test.ts",
       "to": "src/core/bridges.js"
+    },
+    {
+      "from": "tests/bridges.test.ts",
+      "to": "src/core/managed-block.js"
     },
     {
       "from": "tests/bridges.test.ts",
@@ -819,12 +1064,28 @@
       "to": "src/core/ears-validator.js"
     },
     {
+      "from": "tests/file-plan.test.ts",
+      "to": "src/utils/fs-helpers.js"
+    },
+    {
+      "from": "tests/file-plan.test.ts",
+      "to": "src/utils/prompt.js"
+    },
+    {
+      "from": "tests/line-diff.test.ts",
+      "to": "src/utils/line-diff.js"
+    },
+    {
       "from": "tests/project-graph.test.ts",
       "to": "src/core/project-graph.js"
     },
     {
       "from": "tests/project-graph.test.ts",
       "to": "src/utils/fs-helpers.js"
+    },
+    {
+      "from": "tests/prompt.test.ts",
+      "to": "src/utils/prompt.js"
     },
     {
       "from": "tests/reverse-engine.test.ts",
@@ -836,14 +1097,26 @@
     },
     {
       "from": "tests/scaffold.test.ts",
+      "to": "src/core/file-plan.js"
+    },
+    {
+      "from": "tests/scaffold.test.ts",
+      "to": "src/core/managed-block.js"
+    },
+    {
+      "from": "tests/scaffold.test.ts",
       "to": "src/utils/fs-helpers.js"
+    },
+    {
+      "from": "tests/ui-server.test.ts",
+      "to": "src/core/ui-html.js"
     }
   ],
   "stats": {
-    "totalFiles": 48,
-    "totalExports": 77,
-    "rawTokensEstimate": 54598,
-    "graphTokensEstimate": 1533,
+    "totalFiles": 60,
+    "totalExports": 115,
+    "rawTokensEstimate": 75947,
+    "graphTokensEstimate": 2020,
     "tokenReductionPercent": 97
   }
 }

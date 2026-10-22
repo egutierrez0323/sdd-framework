@@ -1,4 +1,7 @@
-import { describe, it, expect, afterAll } from 'vitest';
+import { describe, it, expect, afterAll, beforeEach, afterEach } from 'vitest';
+import fs from 'node:fs/promises';
+import os from 'node:os';
+import { generateDashboardHtml } from '../src/core/ui-html.js';
 import path from 'node:path';
 import http from 'node:http';
 import {
@@ -72,5 +75,51 @@ describe('UI Server & Dashboard Module', () => {
     expect(data.specs).toBeDefined();
     expect(data.stats).toBeDefined();
     expect(data.stats.totalSpecs).toBeGreaterThan(0);
+  });
+});
+
+describe('UI Server (constitution source for the dashboard)', () => {
+  let root: string;
+
+  beforeEach(async () => {
+    root = await fs.mkdtemp(path.join(os.tmpdir(), 'sdd-test-ui-constitution-'));
+  });
+
+  afterEach(async () => {
+    await fs.rm(root, { recursive: true, force: true });
+  });
+
+  it('should read .sdd/constitution.md even when the team has its own AGENTS.md', async () => {
+    await fs.mkdir(path.join(root, '.sdd'));
+    await fs.writeFile(path.join(root, '.sdd', 'constitution.md'), '# Constitución SDD\n');
+    await fs.writeFile(path.join(root, 'AGENTS.md'), '# AGENTS.md del equipo (espejo para Codex)\n');
+
+    const data = await collectSddProjectData(root);
+
+    expect(data.constitution).toBe('# Constitución SDD\n');
+    expect(data.constitutionPath).toBe('.sdd/constitution.md');
+  });
+
+  it('should fall back to AGENTS.md in a project that has not been migrated', async () => {
+    await fs.writeFile(path.join(root, 'AGENTS.md'), '# Constitución del Proyecto: legacy-app\n');
+
+    const data = await collectSddProjectData(root);
+
+    expect(data.constitution).toBe('# Constitución del Proyecto: legacy-app\n');
+    expect(data.constitutionPath).toBe('AGENTS.md');
+  });
+
+  it('should report no constitution when neither file exists', async () => {
+    const data = await collectSddProjectData(root);
+
+    expect(data.constitution).toBe('');
+    expect(data.constitutionPath).toBe('');
+  });
+
+  it('should not hard-code AGENTS.md as the constitution source in the dashboard', () => {
+    const html = generateDashboardHtml();
+
+    expect(html).not.toContain('(AGENTS.md)');
+    expect(html).toContain('id="constitutionSource"');
   });
 });

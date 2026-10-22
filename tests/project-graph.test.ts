@@ -2,6 +2,8 @@ import { describe, it, expect } from 'vitest';
 import { generateProjectGraph, formatMermaidGraph, saveProjectGraphArtifacts } from '../src/core/project-graph.js';
 import { fileExists, readFileUtf8 } from '../src/utils/fs-helpers.js';
 import path from 'node:path';
+import fs from 'node:fs/promises';
+import os from 'node:os';
 
 describe('Project Graph Module (Token Optimization)', () => {
   it('should generate graph with nodes and calculate token reduction', async () => {
@@ -21,13 +23,21 @@ describe('Project Graph Module (Token Optimization)', () => {
   });
 
   it('should persist context-graph.json and architecture-graph.md', async () => {
+    // Lee el código de este repositorio, pero escribe los artefactos en una carpeta temporal.
     const graph = await generateProjectGraph(process.cwd());
-    const { jsonPath, mermaidPath } = await saveProjectGraphArtifacts(graph, process.cwd());
+    const outputRoot = await fs.mkdtemp(path.join(os.tmpdir(), 'sdd-test-graph-'));
 
-    expect(await fileExists(jsonPath)).toBe(true);
-    expect(await fileExists(mermaidPath)).toBe(true);
+    try {
+      const { jsonPath, mermaidPath } = await saveProjectGraphArtifacts(graph, outputRoot);
 
-    const content = await readFileUtf8(mermaidPath);
-    expect(content).toContain('Mapa Visual de Arquitectura');
+      expect(jsonPath).toBe(path.join(outputRoot, '.sdd', 'context-graph.json'));
+      expect(await fileExists(jsonPath)).toBe(true);
+      expect(await fileExists(mermaidPath)).toBe(true);
+
+      const content = await readFileUtf8(mermaidPath);
+      expect(content).toContain('Mapa Visual de Arquitectura');
+    } finally {
+      await fs.rm(outputRoot, { recursive: true, force: true });
+    }
   });
 });

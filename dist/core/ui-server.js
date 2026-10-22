@@ -5,6 +5,7 @@ import { exec } from 'node:child_process';
 import { loadConfig } from './config.js';
 import { parseSpecMarkdown } from './ears-validator.js';
 import { parseTasksMarkdown } from './auto-runner.js';
+import { CONSTITUTION_PATH } from './bridges.js';
 import { fileExists, readFileUtf8, listFilesRecursive } from '../utils/fs-helpers.js';
 import { generateDashboardHtml } from './ui-html.js';
 export async function findAvailablePort(startPort = 3333) {
@@ -154,6 +155,18 @@ async function collectPlans(projectRoot) {
     }
     return plans;
 }
+/**
+ * La constitución vive en `.sdd/constitution.md`; `AGENTS.md` solo se usa en proyectos 1.x sin migrar,
+ * porque en la 2.0 es un archivo del equipo o solo contiene el bloque SDD.
+ */
+async function readConstitution(projectRoot) {
+    for (const relPath of [CONSTITUTION_PATH, 'AGENTS.md']) {
+        const filePath = path.join(projectRoot, relPath);
+        if (await fileExists(filePath))
+            return { text: await readFileUtf8(filePath), relPath };
+    }
+    return { text: '', relPath: '' };
+}
 export async function collectSddProjectData(projectRoot) {
     const config = await loadConfig(projectRoot);
     const { specs, earsBreakdown } = await collectSpecs(projectRoot);
@@ -161,8 +174,7 @@ export async function collectSddProjectData(projectRoot) {
     const plans = await collectPlans(projectRoot);
     const graphFile = path.join(projectRoot, '.sdd', 'architecture-graph.md');
     const graphMermaid = (await fileExists(graphFile)) ? await readFileUtf8(graphFile) : '';
-    const agentsFile = path.join(projectRoot, 'AGENTS.md');
-    const constitution = (await fileExists(agentsFile)) ? await readFileUtf8(agentsFile) : '';
+    const { text: constitution, relPath: constitutionPath } = await readConstitution(projectRoot);
     const approvedSpecs = specs.filter((s) => s.status === 'APPROVED').length;
     const draftSpecs = specs.filter((s) => s.status !== 'APPROVED').length;
     const totalRequirements = specs.reduce((acc, s) => acc + s.requirementsCount, 0);
@@ -176,6 +188,7 @@ export async function collectSddProjectData(projectRoot) {
         tasks,
         graphMermaid,
         constitution,
+        constitutionPath,
         stats: {
             totalSpecs: specs.length,
             approvedSpecs,

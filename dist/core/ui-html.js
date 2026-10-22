@@ -546,7 +546,7 @@ export const DASHBOARD_HTML = `<!DOCTYPE html>
         <div class="card">
           <div class="card-header">
             <div>
-              <div class="card-title" data-i18n="constitutionTitle">Project Constitution (AGENTS.md)</div>
+              <div class="card-title"><span data-i18n="constitutionTitle">Project Constitution</span> <span id="constitutionSource"></span></div>
               <div class="card-meta" data-i18n="constitutionMeta">Architectural invariants, anti-sycophancy and quality gates</div>
             </div>
             <div class="doc-toolbar no-print">
@@ -595,7 +595,7 @@ export const DASHBOARD_HTML = `<!DOCTYPE html>
         noTasks: 'No tasks registered in .sdd/tasks/.',
         graphTitle: 'Architecture Graph',
         graphMeta: 'Indexed structure for context optimization and token savings',
-        constitutionTitle: 'Project Constitution (AGENTS.md)',
+        constitutionTitle: 'Project Constitution',
         constitutionMeta: 'Architectural invariants, anti-sycophancy and quality gates',
         documentMode: 'Document',
         rawMode: 'Markdown',
@@ -610,7 +610,7 @@ export const DASHBOARD_HTML = `<!DOCTYPE html>
         when: 'WHEN:',
         then: 'THEN:',
         noGraph: 'No graph generated yet. Run \\'sdd graph\\' to create it.',
-        noConstitution: 'AGENTS.md not found.'
+        noConstitution: 'No constitution found (.sdd/constitution.md or AGENTS.md). Run sdd init.'
       },
       es: {
         refresh: 'Actualizar',
@@ -638,7 +638,7 @@ export const DASHBOARD_HTML = `<!DOCTYPE html>
         noTasks: 'No hay tareas registradas en .sdd/tasks/.',
         graphTitle: 'Grafo de Arquitectura',
         graphMeta: 'Estructura indexada para optimización de contexto y ahorro de tokens',
-        constitutionTitle: 'Constitución del Proyecto (AGENTS.md)',
+        constitutionTitle: 'Constitución del Proyecto',
         constitutionMeta: 'Invariantes arquitectónicas, anti-complacencia y compuertas de calidad',
         documentMode: 'Documento',
         rawMode: 'Markdown',
@@ -653,7 +653,7 @@ export const DASHBOARD_HTML = `<!DOCTYPE html>
         when: 'CUANDO:',
         then: 'ENTONCES:',
         noGraph: 'No se generó grafo aún. Ejecuta \\'sdd graph\\' para crearlo.',
-        noConstitution: 'No se encontró AGENTS.md.'
+        noConstitution: 'No se encontró la constitución (.sdd/constitution.md ni AGENTS.md). Ejecuta sdd init.'
       }
     };
 
@@ -887,6 +887,7 @@ export const DASHBOARD_HTML = `<!DOCTYPE html>
       const constMd = data.constitution || t.noConstitution;
       document.getElementById('constitutionRendered').innerHTML = renderMarkdownToHtml(constMd);
       document.getElementById('constitutionRawPre').textContent = constMd;
+      document.getElementById('constitutionSource').textContent = data.constitutionPath ? '(' + data.constitutionPath + ')' : '';
       if (!selectedSpecId && data.specs.length > 0) {
         selectedSpecId = data.specs[0].id;
       }

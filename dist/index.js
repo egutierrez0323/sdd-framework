@@ -3,6 +3,9 @@ export * from './core/ears-validator.js';
 export * from './core/reverse-engine.js';
 export * from './core/auto-runner.js';
 export * from './core/bridges.js';
+export * from './core/bridge-migration.js';
+export * from './core/managed-block.js';
+export * from './core/file-plan.js';
 export * from './core/clarifier.js';
 export * from './core/project-graph.js';
 export * from './core/scaffold.js';
@@ -10,5 +13,8 @@ export * from './core/code-reviewer.js';
 export * from './core/ui-server.js';
 export * from './utils/logger.js';
 export * from './utils/fs-helpers.js';
+export * from './utils/text-file.js';
+export * from './utils/line-diff.js';
+export * from './utils/prompt.js';
 export * from './utils/git-client.js';
 //# sourceMappingURL=index.js.map

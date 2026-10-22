@@ -48,8 +48,68 @@ The interactive wizard configures:
 - Project mode (Greenfield vs. Brownfield with reverse scan).
 - Auditor severity level (`L1`, `L2`, or `L3`).
 - Graph engine (`builtin` / `project-graph`, `graphify`, or `hybrid`) with contextual guidance.
-- Agent bridges (`.cursorrules`, `CLAUDE.md`, `AGENTS.md`).
+- Agent bridges (`AGENTS.md`, `CLAUDE.md`, `.cursorrules`, …): SDD only adds or updates a delimited block in them (see below).
 - Core templates and skill definitions (`grill-me`, `clean-code`, `project-graph`, `graphify`, `sdd-methodology`).
+
+---
+
+## Using SDD in Existing Projects (Uso en proyectos existentes)
+
+SDD never replaces your own agent instructions. Preview every change before anything is written:
+
+```bash
+sdd init --dry-run   # lists the files it would create or modify, with a unified diff of each modification
+```
+
+### Files that `init` creates (only when they do not exist yet)
+
+| Path | Content |
+| :--- | :--- |
+| `.sdd/constitution.md` | The SDD constitution: the single source for every agent bridge. |
+| `.sdd/config.json` | Project configuration. If it already exists, it is merged instead of overwritten (see below). |
+| `.sdd/templates/*.md` | Spec, plan, tasks and EARS templates. Templates you already have are kept as they are. |
+| `.sdd/specs/`, `.sdd/plans/`, `.sdd/tasks/` | Empty working folders. |
+| `.sdd/specs/SPEC-000-BASELINE.md` | Baseline contract, only in brownfield mode. |
+| `.agents/skills/<name>/SKILL.md` | Built-in skills, unless `--no-skills` is passed. |
+
+### Files that `init`, `sync` and `reverse` modify, and how
+
+`AGENTS.md`, `CLAUDE.md`, `.cursorrules`, `.github/copilot-instructions.md` and `.agents/rules/sdd-rules.md` receive a **managed block**. Everything outside the block is left byte for byte as it was:
+
+```markdown
+# Your team's CLAUDE.md          ← untouched
+
+<!-- SDD:BEGIN -->
+@.sdd/constitution.md
+<!-- SDD:END -->
+```
+
+- The block is appended at the end of the file the first time. Later runs rewrite only the text between `<!-- SDD:BEGIN -->` and `<!-- SDD:END -->`.
+- `CLAUDE.md` imports the constitution (`@.sdd/constitution.md`). The other bridges receive its full text, because those agents do not follow file references reliably.
+- **Do not edit inside the block:** the next `sdd sync` overwrites it. Edit `.sdd/constitution.md` and run `sdd sync` instead.
+- The original BOM and line endings (CRLF or LF) are preserved.
+- A file that is not valid UTF-8, or whose markers are broken (a `BEGIN` without `END`, two blocks), is left untouched and reported with its line; the command exits with code 1.
+- `.sdd/config.json` is merged: existing values are kept, new keys get their defaults, and only options passed explicitly on the command line (for example `--severity L3`) replace existing values. An invalid JSON file is never overwritten.
+- Built-in skills are updated when their content differs from the bundled version, after a backup.
+
+### Backups, confirmation and flags
+
+- Before inserting the block in an existing file for the first time, SDD copies the original to `.sdd/backups/<YYYYMMDD-HHMMSS>/<path>`. Add `.sdd/backups/` to your `.gitignore`: the originals are already in your git history. SDD never edits `.gitignore` itself.
+- In an interactive terminal, SDD lists the existing files it will modify and asks for confirmation. `--yes` skips the question. Without a terminal (for example, when an AI agent runs it), SDD applies the plan without asking, because inserting the block never deletes content and the original is backed up.
+- `--dry-run` writes nothing and exits with the code the real run would return.
+
+### Upgrading from SDD 1.x
+
+`sdd sync` migrates a 1.x project in one run, with backups:
+
+- A bridge that starts with the 1.x banner and is an exact copy of `AGENTS.md` is reduced to the block.
+- A bridge that was edited after the copy keeps its text, receives the block at the end, and is reported with a warning.
+- A 1.x constitution in `AGENTS.md` (`# Constitución del Proyecto: …`) is moved byte for byte to `.sdd/constitution.md`, and `AGENTS.md` keeps only the block.
+
+### Commands that touch git
+
+- `init`, `sync`, `reverse`, `new-spec`, `audit`, `grill`, `graph`, `review` and `ui` never run git.
+- ⚠️ **`sdd run` still runs git in this version:** after each passing task it runs `git add -A` and `git commit`, and after three failed attempts it runs `git reset --hard HEAD` and `git clean -fd`, discarding every uncommitted change and untracked file in the repository. **Do not use `sdd run` in a repository with uncommitted work.** This is being fixed in [SPEC-006](.sdd/specs/SPEC-006-SAFE-RUN.md): no commits and no rollback unless you ask for them.
 
 ---
 
@@ -77,16 +137,16 @@ npx sdd-framework ui
 
 | Command | Arguments | Description |
 | :--- | :--- | :--- |
-| `sdd init` | `[--severity L1\|L2\|L3] [--graph-engine builtin\|graphify\|hybrid] [--greenfield\|--brownfield] [--yes]` | Initializes `.sdd/` directory, configuration, templates, skills, and agent bridges. |
+| `sdd init` | `[--severity L1\|L2\|L3] [--lang es\|en] [--graph-engine builtin\|graphify\|hybrid] [--greenfield\|--brownfield] [--no-skills] [--dry-run] [--yes]` | Initializes `.sdd/` (constitution, configuration, templates), skills, and the SDD block in the agent bridges. |
 | `sdd ui` | `[--port <number>] [--no-open]` | Starts local web visualizer for specifications, micro-tasks, and project graph. |
 | `sdd new-spec` | `<name>` | Scaffolds a new specification from the official EARS template in `.sdd/specs/`. |
 | `sdd grill` | `<spec-file>` | Starts interactive Socratic interrogation session to detect edge cases and failure modes. |
 | `sdd audit` | `[path]` | Validates specifications against formal EARS grammar and configured severity constraints. |
-| `sdd reverse` | — | Performs reverse engineering scan on brownfield codebases to generate `SPEC-000-BASELINE.md`. |
+| `sdd reverse` | `[--dry-run] [--yes]` | Scans a brownfield codebase and creates `SPEC-000-BASELINE.md` and a reverse constitution if they are missing. |
 | `sdd graph` | — | Generates compact AST and dependency graph (`.sdd/architecture-graph.md`) to minimize prompt token usage. |
 | `sdd review` | `[path]` | Audits code health, detects duplication (DRY), and flags functions exceeding cyclomatic limits. |
-| `sdd run` | `<tasks-file>` | Executes autonomous task verification loop with automated rollback upon repeated test failure. |
-| `sdd sync` | — | Synchronizes `AGENTS.md` rules with Cursor (`.cursorrules`), Claude Code (`CLAUDE.md`), and Copilot. |
+| `sdd run` | `<tasks-file>` | Runs each task's verification command. ⚠️ Commits and rolls back with git in this version (see *Commands that touch git*). |
+| `sdd sync` | `[--dry-run] [--yes]` | Updates the SDD block in `AGENTS.md`, `CLAUDE.md`, `.cursorrules`, Copilot and Antigravity from `.sdd/constitution.md`. |
 
 ---
 

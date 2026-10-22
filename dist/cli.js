@@ -2,16 +2,18 @@
 import path from 'node:path';
 import { loadConfig } from './core/config.js';
 import { validateSpec } from './core/ears-validator.js';
-import { scanProject, generateReverseConstitution, generateReverseBaselineSpec } from './core/reverse-engine.js';
-import { syncBridges } from './core/bridges.js';
+import { scanProject } from './core/reverse-engine.js';
+import { planBridgeSync } from './core/bridges.js';
+import { executeFilePlan } from './core/file-plan.js';
 import { executeAutonomousPlan } from './core/auto-runner.js';
 import readline from 'node:readline/promises';
 import { generateClarificationSession, formatClarificationMarkdown, runAutoGrillSession, auditArchitectDecision, injectDecisionsIntoSpec, } from './core/clarifier.js';
 import { generateProjectGraph, saveProjectGraphArtifacts } from './core/project-graph.js';
 import { reviewProject, formatReviewReport } from './core/code-reviewer.js';
-import { scaffoldProject } from './core/scaffold.js';
+import { planScaffold, planReverse, ensureScaffoldDirs } from './core/scaffold.js';
 import { startUiServer } from './core/ui-server.js';
-import { ensureDir, fileExists, readFileUtf8, writeFileUtf8, listFilesRecursive } from './utils/fs-helpers.js';
+import { fileExists, readFileUtf8, writeFileUtf8, listFilesRecursive } from './utils/fs-helpers.js';
+import { createProcessIO } from './utils/prompt.js';
 import { Logger } from './utils/logger.js';
 const args = process.argv.slice(2);
 const command = args[0]?.toLowerCase();
@@ -20,10 +22,12 @@ async function printHelp() {
     console.log(`Uso: sdd <comando> [opciones]
 
 Comandos disponibles:
-  init                     Inicializa la estructura SDD (.sdd/, AGENTS.md, plantillas, skills)
-                           Opciones: --severity L1|L2|L3, --graph-engine builtin|graphify|hybrid, --greenfield, --brownfield, --yes, --no-skills
+  init                     Inicializa la estructura SDD (.sdd/, constitución, plantillas, skills y bloque SDD en los puentes)
+                           Opciones: --severity L1|L2|L3, --lang es|en, --graph-engine builtin|graphify|hybrid,
+                                     --greenfield, --brownfield, --no-skills, --dry-run, --yes
 
-  reverse                  Ingeniería inversa en proyecto brownfield (genera AGENTS.md y SPEC-000)
+  reverse                  Ingeniería inversa en proyecto brownfield (constitución inversa y SPEC-000 si faltan)
+                           Opciones: --dry-run, --yes
 
   new-spec <nombre>        Crea una nueva especificación EARS desde la plantilla oficial
 
@@ -42,10 +46,28 @@ Comandos disponibles:
   ui, view                 Lanza el visualizador web interactivo de specs, tareas y arquitectura
                            Opciones: --port <puerto>, --no-open
 
-  sync                     Sincroniza AGENTS.md con Cursor (.cursorrules), Claude (CLAUDE.md), etc.
+  sync                     Actualiza el bloque SDD de AGENTS.md, CLAUDE.md, .cursorrules, etc. desde .sdd/constitution.md
+                           Solo cambia el texto entre <!-- SDD:BEGIN --> y <!-- SDD:END -->.
+                           Opciones: --dry-run, --yes
 
   help                     Muestra este mensaje de ayuda
+
+  --dry-run muestra los archivos que se crearían o modificarían, con su diff, sin escribir nada.
+  --yes     aplica sin pedir confirmación (sin terminal interactiva tampoco se pregunta).
 `);
+}
+function parsePlanFlags() {
+    return { dryRun: args.includes('--dry-run'), yes: args.includes('--yes') || args.includes('-y') };
+}
+/**
+ * Muestra el plan y, según `--dry-run`, `--yes` y la terminal, lo simula, lo confirma o lo aplica.
+ * Devuelve true si se aplicó; el código de salida queda en `process.exitCode`.
+ */
+async function runFilePlan(plan, root) {
+    const { dryRun, yes } = parsePlanFlags();
+    const result = await executeFilePlan(plan, { root, dryRun, yes, io: createProcessIO(), log: (message) => console.log(message) });
+    process.exitCode = result.exitCode;
+    return !dryRun && !result.cancelled;
 }
 async function askLanguage(rl, defaultLocale = 'en') {
     console.log(`\n◇ [1/5] IDIOMA PRINCIPAL / PRIMARY LANGUAGE:`);
@@ -132,18 +154,6 @@ async function askBridgesAndSkills(rl) {
     const sChoice = (await rl.question(`  › Opción [1-2] (default: 1): `)).trim();
     return { bridges, includeSkills: sChoice !== '2' };
 }
-function createScaffoldOptions(projectRoot, mode, severity, locale, bridges, includeSkills, graphEngine = 'hybrid') {
-    return {
-        projectRoot,
-        projectName: path.basename(projectRoot),
-        mode,
-        severity,
-        locale,
-        bridges,
-        includeSkills,
-        graphEngine,
-    };
-}
 async function promptInitInteractively(root, defaultSeverity, defaultLocale) {
     const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
     try {
@@ -151,57 +161,62 @@ async function promptInitInteractively(root, defaultSeverity, defaultLocale) {
             (await fileExists(path.join(root, 'pyproject.toml'))) ||
             (await fileExists(path.join(root, 'Cargo.toml'))) ||
             (await fileExists(path.join(root, 'go.mod')));
-        const locale = await askLanguage(rl, defaultLocale);
+        const locale = await askLanguage(rl, defaultLocale ?? 'en');
         const mode = await askProjectMode(rl, hasExistingCode);
-        const severity = await askSeverity(rl, defaultSeverity);
+        const severity = await askSeverity(rl, defaultSeverity ?? 'L2');
         const graphEngine = await askGraphEngine(rl, locale);
         const { bridges, includeSkills } = await askBridgesAndSkills(rl);
-        return createScaffoldOptions(root, mode, severity, locale, bridges, includeSkills, graphEngine);
+        return { projectRoot: root, mode, severity, locale, bridges, includeSkills, graphEngine };
     }
     finally {
         rl.close();
     }
 }
+function readOption(names, allowed, normalize) {
+    const index = args.findIndex((arg) => names.includes(arg));
+    const candidate = index !== -1 ? args[index + 1] : undefined;
+    if (!candidate)
+        return undefined;
+    const value = normalize(candidate);
+    return allowed.includes(value) ? value : undefined;
+}
+/**
+ * Solo devuelve los valores pasados explícitamente: lo que no se pasa se conserva de `.sdd/config.json`
+ * o, en un proyecto nuevo, toma su valor por defecto (REQ-BRIDGE-12).
+ */
 function parseInitCliArgs() {
-    let severity = 'L2';
-    const sevIndex = args.indexOf('--severity');
-    if (sevIndex !== -1 && args[sevIndex + 1]) {
-        const candidate = args[sevIndex + 1].toUpperCase();
-        if (['L1', 'L2', 'L3'].includes(candidate))
-            severity = candidate;
-    }
-    let locale = 'en';
-    const langIndex = args.indexOf('--lang') !== -1 ? args.indexOf('--lang') : args.indexOf('--locale');
-    if (langIndex !== -1 && args[langIndex + 1]) {
-        const candidate = args[langIndex + 1].toLowerCase();
-        if (['en', 'es'].includes(candidate))
-            locale = candidate;
-    }
-    let graphEngine = 'hybrid';
-    const graphIndex = args.indexOf('--graph-engine') !== -1 ? args.indexOf('--graph-engine') : args.indexOf('--graph');
-    if (graphIndex !== -1 && args[graphIndex + 1]) {
-        const candidate = args[graphIndex + 1].toLowerCase();
-        if (['builtin', 'graphify', 'hybrid'].includes(candidate)) {
-            graphEngine = candidate;
-        }
-    }
-    const isYes = args.includes('--yes') || args.includes('-y');
     const isBrownfield = args.includes('--brownfield');
     const isGreenfield = args.includes('--greenfield');
-    const isNonInteractive = !process.stdin.isTTY || isYes || isBrownfield || isGreenfield;
-    return { severity, locale, isNonInteractive, mode: isBrownfield ? 'brownfield' : 'greenfield', graphEngine };
+    return {
+        severity: readOption(['--severity'], ['L1', 'L2', 'L3'], (value) => value.toUpperCase()),
+        locale: readOption(['--lang', '--locale'], ['en', 'es'], (value) => value.toLowerCase()),
+        graphEngine: readOption(['--graph-engine', '--graph'], ['builtin', 'graphify', 'hybrid'], (value) => value.toLowerCase()),
+        mode: isBrownfield ? 'brownfield' : isGreenfield ? 'greenfield' : undefined,
+        isNonInteractive: !process.stdin.isTTY || parsePlanFlags().yes || isBrownfield || isGreenfield,
+    };
 }
-function printInitSuccess(result, includeSkills) {
-    Logger.success(`\n✔ Proyecto inicializado con éxito en modo SDD (${result.mode})`);
-    console.log(`\nEstructura generada:`);
-    console.log(`   • .sdd/ (specs, plans, tasks, templates)`);
-    console.log(`   • .sdd/templates/ (spec, plan, tasks, ears-guide)`);
-    console.log(`   • Constitución en AGENTS.md`);
+function nonInteractiveInitOptions(root, cli) {
+    return {
+        projectRoot: root,
+        mode: cli.mode ?? 'greenfield',
+        severity: cli.severity,
+        locale: cli.locale,
+        graphEngine: cli.graphEngine,
+        // Mismos puentes que la 1.x en modo no interactivo; elegirlos con --bridges llega con el PR 4.
+        bridges: ['cursor', 'claude', 'antigravity'],
+        includeSkills: !args.includes('--no-skills'),
+    };
+}
+function printInitSuccess(config, includeSkills) {
+    Logger.success(`\n✔ Proyecto inicializado con éxito en modo SDD (${config.projectType})`);
+    console.log(`\nEstructura:`);
+    console.log(`   • .sdd/ (specs, plans, tasks, templates, config.json)`);
+    console.log(`   • Constitución en .sdd/constitution.md`);
+    console.log(`   • Bloque SDD (<!-- SDD:BEGIN --> … <!-- SDD:END -->) en AGENTS.md y en: ${config.bridges.join(', ')}`);
     if (includeSkills) {
         console.log(`   • .agents/skills/ (grill-me, clean-code, project-graph, graphify, sdd-methodology)`);
     }
-    console.log(`   • Motor de grafos configurado: [${result.graphEngine || 'hybrid'}]`);
-    console.log(`   • Puentes sincronizados: ${result.syncedBridges.join(', ')}`);
+    console.log(`   • Motor de grafos configurado: [${config.graph.engine}]`);
     console.log(`\nSiguientes pasos:`);
     console.log(`   1. Crear tu primera especificación: npx sdd new-spec mi-funcionalidad`);
     console.log(`   2. Someter la especificación al Árbitro: npx sdd grill .sdd/specs/SPEC-MI-FUNCIONALIDAD.md`);
@@ -210,13 +225,15 @@ function printInitSuccess(result, includeSkills) {
 async function handleInit() {
     const root = process.cwd();
     Logger.banner('SDD FRAMEWORK :: ASISTENTE DE INICIALIZACIÓN (INIT)');
-    const { severity, locale, isNonInteractive, mode, graphEngine } = parseInitCliArgs();
-    const options = !isNonInteractive
-        ? await promptInitInteractively(root, severity, locale)
-        : createScaffoldOptions(root, mode, severity, locale, ['cursor', 'claude', 'antigravity'], !args.includes('--no-skills'), graphEngine);
-    Logger.info(`Configurando entorno SDD en modo [${options.mode.toUpperCase()}] con severidad [${options.severity}] y motor de grafos [${options.graphEngine}]...`);
-    const result = await scaffoldProject(options);
-    printInitSuccess(result, options.includeSkills);
+    const cli = parseInitCliArgs();
+    const options = cli.isNonInteractive
+        ? nonInteractiveInitOptions(root, cli)
+        : await promptInitInteractively(root, cli.severity, cli.locale);
+    Logger.info(`Calculando los cambios de SDD en modo [${options.mode.toUpperCase()}]...`);
+    if (!(await runFilePlan(await planScaffold(options), root)))
+        return;
+    await ensureScaffoldDirs(root);
+    printInitSuccess(await loadConfig(root), options.includeSkills);
 }
 async function handleReverse() {
     const root = process.cwd();
@@ -226,26 +243,10 @@ async function handleReverse() {
     Logger.info(`Ecosistema detectado: ${scan.ecosystem.toUpperCase()}`);
     Logger.info(`Lenguajes: ${scan.detectedLanguages.join(', ') || 'No detectados'}`);
     Logger.info(`Comando de test detectado: ${scan.testRunner || 'npm test'}`);
-    await ensureDir(path.join(root, '.sdd', 'specs'));
-    await ensureDir(path.join(root, '.sdd', 'plans'));
-    await ensureDir(path.join(root, '.sdd', 'tasks'));
-    const agentsPath = path.join(root, 'AGENTS.md');
-    if (!(await fileExists(agentsPath))) {
-        const constitution = generateReverseConstitution(scan);
-        await writeFileUtf8(agentsPath, constitution);
-        Logger.success('Generada constitución adaptada en AGENTS.md');
-    }
-    else {
-        Logger.warn('AGENTS.md ya existe. Se conservó la versión actual.');
-    }
-    const baselineSpecPath = path.join(root, '.sdd', 'specs', 'SPEC-000-BASELINE.md');
-    if (!(await fileExists(baselineSpecPath))) {
-        const baselineSpec = generateReverseBaselineSpec(scan);
-        await writeFileUtf8(baselineSpecPath, baselineSpec);
-        Logger.success('Generada especificación de línea base: SPEC-000-BASELINE.md');
-    }
-    await syncBridges(root);
-    Logger.success('Ingeniería inversa completada con éxito.');
+    if (!(await runFilePlan(await planReverse(root), root)))
+        return;
+    await ensureScaffoldDirs(root);
+    Logger.success('Ingeniería inversa completada.');
 }
 async function handleNewSpec() {
     const specName = args[1];
@@ -402,13 +403,17 @@ async function handleSync() {
     const root = process.cwd();
     const config = await loadConfig(root);
     Logger.banner('SINCRONIZACIÓN DE PUENTES AGENTICOS');
-    const report = await syncBridges(root, config.bridges);
-    for (const b of report.synced) {
-        Logger.success(`Puente sincronizado: [${b}] -> ${report.details[b]}`);
+    let plan;
+    try {
+        plan = await planBridgeSync(root, config.bridges);
     }
-    for (const s of report.skipped) {
-        Logger.warn(`Puente omitido: [${s}]`);
+    catch (err) {
+        // Sin constitución o con marcadores dentro: se aborta sin tocar ningún archivo (REQ-BRIDGE-05).
+        Logger.error(err.message);
+        process.exitCode = 1;
+        return;
     }
+    await runFilePlan(plan, root);
 }
 async function handleGraph() {
     const root = process.cwd();

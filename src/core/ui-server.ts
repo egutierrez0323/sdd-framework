@@ -5,6 +5,7 @@ import { exec } from 'node:child_process';
 import { loadConfig, SeverityLevel } from './config.js';
 import { parseSpecMarkdown, EarsRequirement } from './ears-validator.js';
 import { parseTasksMarkdown, MicroTask } from './auto-runner.js';
+import { CONSTITUTION_PATH } from './bridges.js';
 import { fileExists, readFileUtf8, listFilesRecursive } from '../utils/fs-helpers.js';
 import { generateDashboardHtml } from './ui-html.js';
 
@@ -43,6 +44,7 @@ export interface SddDashboardData {
   tasks: TaskListData[];
   graphMermaid: string;
   constitution: string;
+  constitutionPath: string;
   stats: {
     totalSpecs: number;
     approvedSpecs: number;
@@ -225,6 +227,18 @@ async function collectPlans(projectRoot: string): Promise<Array<{ id: string; fi
   return plans;
 }
 
+/**
+ * La constitución vive en `.sdd/constitution.md`; `AGENTS.md` solo se usa en proyectos 1.x sin migrar,
+ * porque en la 2.0 es un archivo del equipo o solo contiene el bloque SDD.
+ */
+async function readConstitution(projectRoot: string): Promise<{ text: string; relPath: string }> {
+  for (const relPath of [CONSTITUTION_PATH, 'AGENTS.md']) {
+    const filePath = path.join(projectRoot, relPath);
+    if (await fileExists(filePath)) return { text: await readFileUtf8(filePath), relPath };
+  }
+  return { text: '', relPath: '' };
+}
+
 export async function collectSddProjectData(projectRoot: string): Promise<SddDashboardData> {
   const config = await loadConfig(projectRoot);
   const { specs, earsBreakdown } = await collectSpecs(projectRoot);
@@ -234,8 +248,7 @@ export async function collectSddProjectData(projectRoot: string): Promise<SddDas
   const graphFile = path.join(projectRoot, '.sdd', 'architecture-graph.md');
   const graphMermaid = (await fileExists(graphFile)) ? await readFileUtf8(graphFile) : '';
 
-  const agentsFile = path.join(projectRoot, 'AGENTS.md');
-  const constitution = (await fileExists(agentsFile)) ? await readFileUtf8(agentsFile) : '';
+  const { text: constitution, relPath: constitutionPath } = await readConstitution(projectRoot);
 
   const approvedSpecs = specs.filter((s) => s.status === 'APPROVED').length;
   const draftSpecs = specs.filter((s) => s.status !== 'APPROVED').length;
@@ -251,6 +264,7 @@ export async function collectSddProjectData(projectRoot: string): Promise<SddDas
     tasks,
     graphMermaid,
     constitution,
+    constitutionPath,
     stats: {
       totalSpecs: specs.length,
       approvedSpecs,

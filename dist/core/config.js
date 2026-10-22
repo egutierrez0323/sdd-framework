@@ -24,37 +24,67 @@ export const DEFAULT_CONFIG = {
         branchPrefix: 'sdd/',
     },
 };
-export async function loadConfig(projectRoot = process.cwd()) {
-    const configPath = path.join(projectRoot, '.sdd', 'config.json');
+function isPlainObject(value) {
+    return typeof value === 'object' && value !== null && !Array.isArray(value);
+}
+/**
+ * Fusiona objetos anidados sin mutarlos; los arrays se sustituyen y los valores `undefined` se ignoran.
+ */
+function deepMerge(base, override) {
+    const result = { ...base };
+    for (const [key, value] of Object.entries(override ?? {})) {
+        if (value === undefined)
+            continue;
+        const current = result[key];
+        result[key] = isPlainObject(value) && isPlainObject(current) ? deepMerge(current, value) : value;
+    }
+    return result;
+}
+/**
+ * Prioridad: valores por defecto < configuración existente < valores pasados explícitamente.
+ * Conserva las claves que el equipo haya añadido por su cuenta.
+ */
+export function mergeConfig(existing, explicit) {
+    const withExisting = deepMerge(DEFAULT_CONFIG, existing);
+    return deepMerge(withExisting, explicit);
+}
+function configPathOf(projectRoot) {
+    return path.join(projectRoot, '.sdd', 'config.json');
+}
+/**
+ * Lee `.sdd/config.json` tolerando el BOM de los editores de Windows. Devuelve null si no existe y
+ * lanza un error claro si no es JSON válido, para que nadie lo sobrescriba creyendo que está vacío.
+ */
+export async function readConfigFile(projectRoot) {
+    let raw;
     try {
-        const raw = await fs.readFile(configPath, 'utf-8');
-        const parsed = JSON.parse(raw);
-        return {
-            ...DEFAULT_CONFIG,
-            ...parsed,
-            paths: {
-                ...DEFAULT_CONFIG.paths,
-                ...(parsed.paths || {}),
-            },
-            graph: {
-                ...DEFAULT_CONFIG.graph,
-                ...(parsed.graph || {}),
-            },
-            autonomous: {
-                ...DEFAULT_CONFIG.autonomous,
-                ...(parsed.autonomous || {}),
-            },
-            projectName: parsed.projectName || path.basename(projectRoot),
-        };
+        raw = await fs.readFile(configPathOf(projectRoot), 'utf-8');
+    }
+    catch (err) {
+        if (err.code === 'ENOENT')
+            return null;
+        throw err;
+    }
+    try {
+        return JSON.parse(raw.replace(/^﻿/, ''));
     }
     catch {
-        return { ...DEFAULT_CONFIG, projectName: path.basename(projectRoot) };
+        throw new Error('.sdd/config.json no es JSON válido; corrígelo antes de continuar (no se sobrescribirá).');
     }
 }
+export async function loadConfig(projectRoot = process.cwd()) {
+    let existing = null;
+    try {
+        existing = await readConfigFile(projectRoot);
+    }
+    catch {
+        // Configuración ilegible: se trabaja con los valores por defecto, igual que sin archivo.
+    }
+    const config = mergeConfig(existing, {});
+    return { ...config, projectName: existing?.projectName || path.basename(projectRoot) };
+}
 export async function saveConfig(config, projectRoot = process.cwd()) {
-    const dirPath = path.join(projectRoot, '.sdd');
-    await fs.mkdir(dirPath, { recursive: true });
-    const configPath = path.join(dirPath, 'config.json');
-    await fs.writeFile(configPath, JSON.stringify(config, null, 2), 'utf-8');
+    await fs.mkdir(path.join(projectRoot, '.sdd'), { recursive: true });
+    await fs.writeFile(configPathOf(projectRoot), JSON.stringify(config, null, 2), 'utf-8');
 }
 //# sourceMappingURL=config.js.map

@@ -1,15 +1,22 @@
+import fs from 'node:fs/promises';
 import path from 'node:path';
-import { SeverityLevel, saveConfig, DEFAULT_CONFIG } from './config.js';
-import { SupportedBridge, syncBridges } from './bridges.js';
+import { SeverityLevel, SddConfig, loadConfig, mergeConfig, readConfigFile } from './config.js';
+import { SupportedBridge, CONSTITUTION_PATH, planBridgeSync, resolveConstitution, bridgeRelPath } from './bridges.js';
+import { ApplyReport, FileChange, FilePlan, applyFilePlan, createBackupStamp } from './file-plan.js';
 import { scanProject, generateReverseConstitution, generateReverseBaselineSpec } from './reverse-engine.js';
-import { ensureDir, fileExists, writeFileUtf8 } from '../utils/fs-helpers.js';
+import { ensureDir, fileExists } from '../utils/fs-helpers.js';
+import { decodeText, encodeText, toEol, InvalidEncodingError } from '../utils/text-file.js';
 
+/**
+ * `severity`, `bridges`, `locale` y `graphEngine` son opcionales: si no se pasan, se conserva el valor
+ * de `.sdd/config.json` o, en un proyecto nuevo, el valor por defecto.
+ */
 export interface ScaffoldOptions {
   projectRoot: string;
   projectName?: string;
   mode: 'greenfield' | 'brownfield';
-  severity: SeverityLevel;
-  bridges: SupportedBridge[];
+  severity?: SeverityLevel;
+  bridges?: SupportedBridge[];
   includeSkills: boolean;
   locale?: 'en' | 'es';
   graphEngine?: 'builtin' | 'graphify' | 'hybrid';
@@ -17,7 +24,10 @@ export interface ScaffoldOptions {
 
 export interface ScaffoldResult {
   createdFiles: string[];
+  modifiedFiles: string[];
   createdDirs: string[];
+  backups: string[];
+  failed: Array<{ relPath: string; message: string; line?: number }>;
   mode: 'greenfield' | 'brownfield';
   severity: SeverityLevel;
   syncedBridges: string[];
@@ -318,116 +328,172 @@ export function generateStandardConstitution(projectName: string, severity: Seve
 `;
 }
 
+const SCAFFOLD_DIRS = ['.sdd/specs', '.sdd/plans', '.sdd/tasks', '.sdd/templates'];
+const CONFIG_PATH = '.sdd/config.json';
+const BASELINE_SPEC_PATH = '.sdd/specs/SPEC-000-BASELINE.md';
+
+const TEMPLATE_FILES: Record<string, string> = {
+  'spec.template.md': BUILTIN_TEMPLATES.spec,
+  'plan.template.md': BUILTIN_TEMPLATES.plan,
+  'tasks.template.md': BUILTIN_TEMPLATES.tasks,
+  'ears-guide.md': BUILTIN_TEMPLATES.earsGuide,
+};
+
+function utf8(text: string): Buffer {
+  return Buffer.from(text, 'utf-8');
+}
+
+async function planCreateIfMissing(root: string, relPath: string, content: () => string): Promise<FileChange[]> {
+  if (await fileExists(path.join(root, relPath))) return [];
+  return [{ kind: 'create', relPath, after: utf8(content()) }];
+}
+
 /**
- * Orquestador central de inicialización / andamiaje de proyectos SDD.
+ * Archivos que SDD genera enteros (skills, config.json): se crean o se actualizan conservando
+ * el BOM y el fin de línea del archivo existente.
  */
-async function writeBaseTemplates(projectRoot: string, createdFiles: string[]): Promise<void> {
-  const templatesMap: Record<string, string> = {
-    'spec.template.md': BUILTIN_TEMPLATES.spec,
-    'plan.template.md': BUILTIN_TEMPLATES.plan,
-    'tasks.template.md': BUILTIN_TEMPLATES.tasks,
-    'ears-guide.md': BUILTIN_TEMPLATES.earsGuide,
-  };
+async function planGeneratedFile(root: string, relPath: string, generated: string, backup: boolean): Promise<FileChange[]> {
+  const filePath = path.join(root, relPath);
+  if (!(await fileExists(filePath))) return [{ kind: 'create', relPath, after: utf8(generated) }];
 
-  for (const [filename, content] of Object.entries(templatesMap)) {
-    const filePath = path.join(projectRoot, '.sdd', 'templates', filename);
-    await writeFileUtf8(filePath, content);
-    createdFiles.push(filePath);
+  const before = await fs.readFile(filePath);
+  try {
+    const content = decodeText(before, relPath);
+    const after = encodeText({ ...content, text: toEol(generated, content.eol) });
+    return after.equals(before) ? [] : [{ kind: 'modify', relPath, before, after, backup }];
+  } catch (err) {
+    if (err instanceof InvalidEncodingError) return [{ kind: 'error', relPath, message: err.message }];
+    throw err;
   }
 }
 
-async function writeBuiltinSkills(
-  projectRoot: string,
-  createdDirs: string[],
-  createdFiles: string[]
-): Promise<void> {
+async function planTemplates(root: string): Promise<FileChange[]> {
+  const changes: FileChange[] = [];
+  for (const [filename, content] of Object.entries(TEMPLATE_FILES)) {
+    // Una plantilla que el equipo ya tiene (quizá editada) se conserva (REQ-BRIDGE-12).
+    changes.push(...(await planCreateIfMissing(root, `.sdd/templates/${filename}`, () => content)));
+  }
+  return changes;
+}
+
+async function planSkills(root: string): Promise<FileChange[]> {
+  const changes: FileChange[] = [];
   for (const [skillName, content] of Object.entries(BUILTIN_SKILLS)) {
-    const skillDir = path.join(projectRoot, '.agents', 'skills', skillName);
-    await ensureDir(skillDir);
-    createdDirs.push(skillDir);
-
-    const skillPath = path.join(skillDir, 'SKILL.md');
-    await writeFileUtf8(skillPath, content);
-    createdFiles.push(skillPath);
+    changes.push(...(await planGeneratedFile(root, `.agents/skills/${skillName}/SKILL.md`, content, true)));
   }
+  return changes;
 }
 
-export async function scaffoldProject(options: ScaffoldOptions): Promise<ScaffoldResult> {
-  const { projectRoot, mode, severity, bridges, includeSkills } = options;
-  const projectName = options.projectName || path.basename(projectRoot);
+/**
+ * Fusiona la configuración existente con la de este `init`: solo los valores pasados explícitamente
+ * sustituyen a los que ya había, y se añaden las claves nuevas con su valor por defecto (REQ-BRIDGE-12).
+ */
+async function resolveScaffoldConfig(options: ScaffoldOptions): Promise<SddConfig> {
+  const existing = await readConfigFile(options.projectRoot);
+  return mergeConfig(existing, {
+    projectName: options.projectName ?? existing?.projectName ?? path.basename(options.projectRoot),
+    severity: options.severity,
+    locale: options.locale,
+    projectType: options.mode,
+    bridges: options.bridges,
+    graph: { engine: options.graphEngine },
+  });
+}
 
-  const createdFiles: string[] = [];
-  const createdDirs: string[] = [];
+interface ConstitutionPlan {
+  changes: FileChange[];
+  pendingText?: string;
+}
 
-  // 1. Crear directorios base de SDD
-  const dirsToCreate = [
-    path.join(projectRoot, '.sdd', 'specs'),
-    path.join(projectRoot, '.sdd', 'plans'),
-    path.join(projectRoot, '.sdd', 'tasks'),
-    path.join(projectRoot, '.sdd', 'templates'),
+/**
+ * La constitución va a `.sdd/constitution.md` y solo se genera si no hay ninguna: ni ese archivo
+ * ni una constitución 1.x en `AGENTS.md`, que migra el plan de puentes (REQ-BRIDGE-01, REQ-BRIDGE-11).
+ */
+async function planConstitution(root: string, mode: ScaffoldOptions['mode'], config: SddConfig): Promise<ConstitutionPlan> {
+  const scan = mode === 'brownfield' ? await scanProject(root) : null;
+  const baseline = scan ? await planCreateIfMissing(root, BASELINE_SPEC_PATH, () => generateReverseBaselineSpec(scan)) : [];
+  if ((await resolveConstitution(root)) !== null) return { changes: baseline };
+
+  const text = scan ? generateReverseConstitution(scan) : generateStandardConstitution(config.projectName, config.severity);
+  return { changes: [...baseline, { kind: 'create', relPath: CONSTITUTION_PATH, after: utf8(text) }], pendingText: text };
+}
+
+async function buildScaffoldPlan(options: ScaffoldOptions): Promise<{ plan: FilePlan; config: SddConfig }> {
+  const root = options.projectRoot;
+  const config = await resolveScaffoldConfig(options);
+  const constitution = await planConstitution(root, options.mode, config);
+  const bridges = await planBridgeSync(root, config.bridges, constitution.pendingText);
+
+  const changes: FileChange[] = [
+    ...(await planTemplates(root)),
+    ...(options.includeSkills ? await planSkills(root) : []),
+    ...(await planGeneratedFile(root, CONFIG_PATH, JSON.stringify(config, null, 2), false)),
+    ...constitution.changes,
+    ...bridges.changes,
   ];
+  return { plan: { changes, warnings: bridges.warnings }, config };
+}
 
-  for (const dir of dirsToCreate) {
-    await ensureDir(dir);
-    createdDirs.push(dir);
-  }
+/**
+ * Calcula, sin escribir nada, todo lo que haría `sdd init`: es la base de `--dry-run` (REQ-BRIDGE-08).
+ */
+export async function planScaffold(options: ScaffoldOptions): Promise<FilePlan> {
+  return (await buildScaffoldPlan(options)).plan;
+}
 
-  // 2. Escribir plantillas y skills
-  await writeBaseTemplates(projectRoot, createdFiles);
+/**
+ * Plan de `sdd reverse`: línea base y constitución inversa (solo si faltan) y los puentes de `config.bridges`.
+ */
+export async function planReverse(projectRoot: string): Promise<FilePlan> {
+  const config = await loadConfig(projectRoot);
+  const constitution = await planConstitution(projectRoot, 'brownfield', config);
+  const bridges = await planBridgeSync(projectRoot, config.bridges, constitution.pendingText);
+  return { changes: [...constitution.changes, ...bridges.changes], warnings: bridges.warnings };
+}
 
-  if (includeSkills) {
-    await writeBuiltinSkills(projectRoot, createdDirs, createdFiles);
-  }
+function scaffoldDirsOf(projectRoot: string): string[] {
+  return SCAFFOLD_DIRS.map((dir) => path.join(projectRoot, dir));
+}
 
-  // 4. Guardar config.json
-  const config = {
-    ...DEFAULT_CONFIG,
-    projectName,
-    severity,
-    locale: options.locale || 'en',
-    projectType: mode,
-    bridges,
-    graph: {
-      ...DEFAULT_CONFIG.graph,
-      engine: options.graphEngine || DEFAULT_CONFIG.graph.engine,
-    },
-  };
-  await saveConfig(config, projectRoot);
-  createdFiles.push(path.join(projectRoot, '.sdd', 'config.json'));
+/**
+ * Las carpetas vacías no forman parte del plan de archivos: se crean después de aplicarlo.
+ */
+export async function ensureScaffoldDirs(projectRoot: string): Promise<string[]> {
+  const dirs = scaffoldDirsOf(projectRoot);
+  for (const dir of dirs) await ensureDir(dir);
+  return dirs;
+}
 
-  // 5. Manejar modo Greenfield vs Brownfield
-  const agentsPath = path.join(projectRoot, 'AGENTS.md');
-  if (mode === 'brownfield') {
-    const scan = await scanProject(projectRoot);
-    if (!(await fileExists(agentsPath))) {
-      const constitution = generateReverseConstitution(scan);
-      await writeFileUtf8(agentsPath, constitution);
-      createdFiles.push(agentsPath);
-    }
-    const baselineSpecPath = path.join(projectRoot, '.sdd', 'specs', 'SPEC-000-BASELINE.md');
-    if (!(await fileExists(baselineSpecPath))) {
-      const baselineSpec = generateReverseBaselineSpec(scan);
-      await writeFileUtf8(baselineSpecPath, baselineSpec);
-      createdFiles.push(baselineSpecPath);
-    }
-  } else {
-    // Greenfield
-    if (!(await fileExists(agentsPath))) {
-      const constitution = generateStandardConstitution(projectName, severity);
-      await writeFileUtf8(agentsPath, constitution);
-      createdFiles.push(agentsPath);
-    }
-  }
-
-  // 6. Sincronizar puentes agenticos
-  const syncReport = await syncBridges(projectRoot, bridges);
+function summarizeScaffold(options: ScaffoldOptions, config: SddConfig, plan: FilePlan, report: ApplyReport): ScaffoldResult {
+  const written = new Set(report.written);
+  const failedPaths = new Set(report.errors.map((error) => error.relPath));
+  const pathsOf = (kind: FileChange['kind']) =>
+    plan.changes
+      .filter((change) => change.kind === kind && written.has(change.relPath))
+      .map((change) => path.join(options.projectRoot, change.relPath));
 
   return {
-    createdFiles,
-    createdDirs,
-    mode,
-    severity,
-    syncedBridges: syncReport.synced,
-    graphEngine: options.graphEngine || DEFAULT_CONFIG.graph.engine,
+    createdFiles: pathsOf('create'),
+    modifiedFiles: pathsOf('modify'),
+    createdDirs: scaffoldDirsOf(options.projectRoot),
+    backups: report.backups,
+    failed: report.errors.map(({ relPath, message, line }) => ({ relPath, message, line })),
+    mode: options.mode,
+    severity: config.severity,
+    syncedBridges: config.bridges.filter((bridge) => {
+      const relPath = bridgeRelPath(bridge);
+      return relPath !== undefined && !failedPaths.has(relPath);
+    }),
+    graphEngine: config.graph.engine,
   };
+}
+
+/**
+ * Orquestador de `sdd init`: calcula el plan de archivos y lo aplica (con respaldos) de una vez.
+ */
+export async function scaffoldProject(options: ScaffoldOptions): Promise<ScaffoldResult> {
+  const { plan, config } = await buildScaffoldPlan(options);
+  const report = await applyFilePlan(plan, options.projectRoot, createBackupStamp());
+  await ensureScaffoldDirs(options.projectRoot);
+  return summarizeScaffold(options, config, plan, report);
 }

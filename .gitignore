@@ -3,3 +3,4 @@ node_modules/
 card-validator/dist/
 .DS_Store
 Thumbs.db
+.sdd/backups/

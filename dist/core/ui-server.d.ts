@@ -44,6 +44,7 @@ export interface SddDashboardData {
     tasks: TaskListData[];
     graphMermaid: string;
     constitution: string;
+    constitutionPath: string;
     stats: {
         totalSpecs: number;
         approvedSpecs: number;

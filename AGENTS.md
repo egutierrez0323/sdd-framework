@@ -1,3 +1,5 @@
+<!-- SDD:BEGIN -->
+<!-- Origen: .sdd/constitution.md · gestionado por SDD, no editar dentro del bloque -->
 # SDD Framework Constitution: Engineering Principles and Agent Constraints
 
 > **SCOPE & AUTHORITY:** This constitution establishes non-negotiable architectural principles, quality constraints, and execution boundaries for the SDD Framework. Any AI coding assistant or autonomous harness operating within this repository MUST strictly comply with these directives.
@@ -49,3 +51,4 @@ The framework defines three configurable audit levels:
 - **Testing:** Vitest for deterministic, fast unit and integration tests.
 - **Code Hygiene:** Clean Code standards, functions under 55 lines, Guard Clauses over nested conditionals, single responsibility per module.
 - **Documentation:** All architectural updates must be reflected in `.sdd/` and tracked in `README.md`.
+<!-- SDD:END -->
